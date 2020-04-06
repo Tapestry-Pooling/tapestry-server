@@ -1,3 +1,46 @@
+# Backend for Covid-19 testing data manager
+
+- Uses Python 3.6
+- Flask
+- Postgres 11+
+- LMDB
+
+Python libraries used for scientific computation:
+- numpy
+- scipy
+- pandas
+- scikit-learn
+- pylops
+- joblib
+
+```sh
+# Create virtual environment:
+python3 -m venv env
+# activate
+source env/bin/activate
+# install requirements with pinned versions from requirements.txt
+pip install -r requirements.txt
+```
+
+
+### setting up initially
+```sh
+pip install numpy scipy pandas scikit-learn pylops[advanced] joblib Flask psycopg2
+pip freeze > requirements.txt
+```
+
+### Development
+```sh
+export FLASK_APP=.
+export FLASK_ENV=development
+flask run
+```
+
+### Requirements:
+
+(Old)
+
+```
 We'll have some standard test sizes - such as testing 40 people using 16 tests, 60 people using 24 tests, 400 people using 64 tests, 1000 people using 96 tests. The test matrices will be known to the user - they'll likely be printed out beforehand. I am assuming there'll be only one matrix for each test x people size, else there'll be much confusion. After the technician performs the tests, they'll want to enter test results. This is a vector of size equal to number of tests, so 16, 24, 64 tests for now. Maybe also 96. How to enter it in a user-friendly manner is something you guys may have to solve. 
 
 Upon opening the app, the user should be able to see past tests done by him sorted by most recent, along with a very prominent new test button. He should be able to choose test size (16x40, 24x60, 64x400, 96x1000). The new test will enable him to enter data. 
@@ -11,44 +54,5 @@ Each new test should create a notification to people like Manoj and I who'll clo
 I am not sure, but perhaps there should be some form of one-time login as well because of sensitivity of data. For now just use device id. Particular user should be able to see only his tests.
 
 I think there is enough to make the first version of the app. Maybe we could field test the app as well in a few days..
-
-```sh
-# Create virtual environment:
-python3 -m venv env
-# activate
-source env/bin/activate
-# install requirements with pinned versions from requirements.txt
-pip install -r requirements.txt
 ```
-
-Python libraries used:
-numpy
-scipy
-pandas
-scikit-learn
-pylops
-joblib
-Flask
-
-### setting up initially
-```sh
-pip install numpy scipy pandas scikit-learn pylops[advanced] joblib Flask
-pip freeze > requirements.txt
-```
-
-### Development
-```sh
-export FLASK_APP=.
-export FLASK_ENV=development
-flask run
-```
-
-Requirements:
-
-1. users -> People who will upload test matrices
-2. tests -> matrices with number of tests and number of users (fixed size)
-    40 x 16
-    60 x 24
-    400 x 64
-    1000 x 96
 
