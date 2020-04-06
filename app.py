@@ -5,6 +5,7 @@ import os
 import psycopg2
 from psycopg2 import pool
 import secrets
+import time
 
 """
     App setup and teardown
@@ -37,23 +38,28 @@ def normalize_phone(phone):
         return '+91' + phone
     return None
 
-def parse_lmdb_data(raw_data):
+def parse_lmdb_otp_data(raw_data):
+    # otp:current time
+    return raw_data.decode('utf8').split(':')
+
+def parse_lmdb_auth_data(raw_data):
     # user_id:auth_token:timestamp
-    return raw_data.decode('ascii').split(':')
+    return raw_data.decode('utf8').split(':')
 
 def check_auth(request):
     "Checks if user is signed in from cookie"
     headers = request.headers
     auth_token = headers['X-Auth']
     mob = headers['X-Mob']
-    if auth_token is None or auth_token == '' or mob is None or mob == '':
+    reg_phone = normalize_phone(mob)
+    if auth_token is None or auth_token == '' or reg_phone is None:
         return False
     raw_data = None
     with lmdb_read_env.begin() as txn:
-        raw_data = txn.get(mob.encode('ascii'))
+        raw_data = txn.get(reg_phone.encode('utf8'))
     if raw_data is None:
         return False
-    data = parse_lmdb_data(raw_data)
+    data = parse_lmdb_auth_data(raw_data)
     saved_token = data[1]
     if saved_token == auth_token:
         g.user_id = data[0]
@@ -101,12 +107,17 @@ def insertone(query, params):
 
 @app.route('/request_otp')
 def request_otp():
-    # TODO : generate OTP, save to lmdb, add ttl of 5 min, send SMS using Exotel
+    # TODO : generate OTP, send SMS using Exotel
     payload = request.json
     phone = payload['phone']
     reg_phone = normalize_phone(phone)
     if reg_phone is None:
         return jsonify(result={"status": 500, "error" : "Invalid mobile number"})
+    otp_key = 'otp:' + reg_phone
+    curr_time = str(int(time.time()))
+    otp_value = DUMMY_OTP + ':' + curr_time
+    with lmdb_write_env.begin() as txn:
+        txn.put(otp_key.encode('utf8'), otp_value.encode('utf8'))
     return DUMMY_OTP
 
 @app.route('/validate_otp')
@@ -114,15 +125,29 @@ def validate_otp():
     payload = request.json
     phone = payload['phone']
     otp = payload['otp']
-    # TODO : check OTP for number from LMDB
     if phone is None or otp is None:
         return jsonify(result={"status": 500, "error" : "Mobile or OTP missing"})
     reg_phone = normalize_phone(phone)
     if reg_phone is None:
         return jsonify(result={"status": 500, "error" : "Invalid mobile number"})
+    otp_key = 'otp:' + reg_phone
+    raw_data = None
+    with lmdb_read_env.begin() as txn:
+        raw_data = txn.get(otp_key.encode('utf8'))
+    if raw_data is None:
+        return jsonify(result={"status": 500, "error" : "Invalid mobile number"})
+    data = parse_lmdb_otp_data(raw_data)
+    curr_time = int(time.time())
+    if data[0] != otp or curr_time - int(data[1]) > 900:
+        return jsonify(result={"status": 500, "error" : "Invalid or expired OTP"})
     token = secrets.token_urlsafe(16)
     # DB upsert
-    return 'Auth-token'
+    upsert_sql = "insert into users(phone) values (%s) on conflict(phone) do update set phone=excluded.phone returning id;"
+    user_id = insertone(upsert_sql, (reg_phone,))
+    auth_value = str(user_id) + ":" + token + ":" + str(curr_time)
+    with lmdb_write_env.begin() as txn:
+        txn.put(reg_phone.encode('utf8'), auth_value.encode('utf8'))
+    return jsonify(result={"status" : 200, "user_id" : user_id, "token" : token})
 
 @app.route('/user_login/')
 def login():
