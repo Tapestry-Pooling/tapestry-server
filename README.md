@@ -36,6 +36,20 @@ export FLASK_ENV=development
 flask run
 ```
 
+### Endpoints
+
+```sh
+APP_URL="http://127.0.0.1:5000"
+# Request OTP
+curl -XPOST -d '{"phone" : "MOBILE"}' -H "Content-Type: application/json" "$APP_URL/request_otp"
+# Validate OTP
+curl -XPOST -d '{"phone" : "MOBILE", "otp" : "OTP"}' -H "Content-Type: application/json" "$APP_URL/validate_otp"
+# Upload test data
+curl -XPOST -d '[0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]' -H "Content-Type: application/json" -H 'X-Auth: TOKEN' -H 'X-Mob: MOBILE' "$APP_URL/test_data"
+# Modify data for an existing test
+curl -XPUT -d '{"test_id": "TEST_ID", "test_data" : [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.02]}' -H "Content-Type: application/json" -H 'X-Auth: TOKEN' -H 'X-Mob: MOBILE' "$APP_URL/test_data"
+```
+
 ### Requirements:
 
 (Old)

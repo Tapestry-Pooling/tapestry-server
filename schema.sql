@@ -51,10 +51,10 @@ create table test_results_audit ( auditid bigserial primary key, test_id bigint 
 CREATE OR REPLACE FUNCTION test_results_audit_proc() RETURNS TRIGGER AS $$
     BEGIN
         IF (TG_OP = 'INSERT' or (TG_OP = 'UPDATE' and OLD.result_data <> NEW.result_data)) THEN
-            INSERT INTO test_results_audit VALUES (DEFAULT, NEW.id, NEW.result_data, TG_OP, now());
+            INSERT INTO test_results_audit VALUES (DEFAULT, NEW.test_id, NEW.result_data, TG_OP, now());
             RETURN NEW;
         ELSIF (TG_OP = 'DELETE') THEN
-            INSERT INTO test_results_audit VALUES (DEFAULT, OLD.id, OLD.result_data, TG_OP, now());
+            INSERT INTO test_results_audit VALUES (DEFAULT, OLD.test_id, OLD.result_data, TG_OP, now());
             RETURN OLD;
         END IF;
         RETURN NULL;
