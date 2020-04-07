@@ -21,6 +21,8 @@ lmdb_write_env = lmdb.open(LMDB_PATH, map_size=LMDB_SIZE)
 lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
 VECTOR_SIZES = [16, 24, 64, 96]
 DUMMY_OTP = '34567890'
+AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
+OTP_VALIDITY = 900
 # pg connection pool
 pgpool = psycopg2.pool.SimpleConnectionPool(1, 10, user = "covid", password = "covid", host = "127.0.0.1", port = "5432", database = "covid")
 
@@ -28,13 +30,17 @@ pgpool = psycopg2.pool.SimpleConnectionPool(1, 10, user = "covid", password = "c
 """
     Utils
 """
+def curr_epoch():
+    return int(time.time())
 
 def normalize_phone(phone):
+    if phone is None or phone == "" or phone.isspace():
+        return None
     if phone.startswith('+91') and len(phone) == 13:
         return phone
     if len(phone) == 11 and phone.startswith('0') and phone.isdigit():
         return '+91' + phone[1:]
-    if len(phone) == 10 and phone.isdigit():
+    if len(phone) == 10 and phone.isdigit() and not phone.startswith('0'):
         return '+91' + phone
     return None
 
@@ -61,9 +67,8 @@ def check_auth(request):
         return False
     data = parse_lmdb_auth_data(raw_data)
     saved_token = data[1]
-    if saved_token == auth_token:
-        g.user_id = data[0]
-        # TODO : timestamp validation
+    if saved_token == auth_token and curr_epoch() - int(data[2]) < AUTH_TOKEN_VALIDITY:
+        g.user_id = int(data[0])
         return True
     return False
 
@@ -88,13 +93,15 @@ def select(query, params):
     finally:
         pgpool.putconn(conn)
 
-def insertone(query, params):
+def execute_sql(query, params, one_row=False):
     try:
         conn = pgpool.getconn()
         with g.conn.cursor() as cur:
             cur.execute(query, params)
             conn.commit()
-            return cur.fetchone()
+            if one_row:
+                return cur.fetchone()
+            return cur.fetchall()
     except:
         raise
     finally:
@@ -109,27 +116,22 @@ def insertone(query, params):
 def request_otp():
     # TODO : generate OTP, send SMS using Exotel
     payload = request.json
-    phone = payload['phone']
-    reg_phone = normalize_phone(phone)
+    reg_phone = normalize_phone(payload.get('phone', None))
     if reg_phone is None:
         return jsonify(result={"status": 500, "error" : "Invalid mobile number"})
     otp_key = 'otp:' + reg_phone
-    curr_time = str(int(time.time()))
-    otp_value = DUMMY_OTP + ':' + curr_time
-    with lmdb_write_env.begin() as txn:
+    otp_value = DUMMY_OTP + ':' + str(curr_epoch())
+    with lmdb_write_env.begin(write=True) as txn:
         txn.put(otp_key.encode('utf8'), otp_value.encode('utf8'))
     return DUMMY_OTP
 
 @app.route('/validate_otp')
 def validate_otp():
     payload = request.json
-    phone = payload['phone']
     otp = payload['otp']
-    if phone is None or otp is None:
-        return jsonify(result={"status": 500, "error" : "Mobile or OTP missing"})
-    reg_phone = normalize_phone(phone)
-    if reg_phone is None:
-        return jsonify(result={"status": 500, "error" : "Invalid mobile number"})
+    reg_phone = normalize_phone(payload.get('phone', None))
+    if reg_phone is None or otp is None:
+        return jsonify(result={"status": 500, "error" : "Mobile or OTP incorrect"})
     otp_key = 'otp:' + reg_phone
     raw_data = None
     with lmdb_read_env.begin() as txn:
@@ -137,15 +139,15 @@ def validate_otp():
     if raw_data is None:
         return jsonify(result={"status": 500, "error" : "Invalid mobile number"})
     data = parse_lmdb_otp_data(raw_data)
-    curr_time = int(time.time())
+    curr_time = curr_epoch()
     if data[0] != otp or curr_time - int(data[1]) > 900:
         return jsonify(result={"status": 500, "error" : "Invalid or expired OTP"})
     token = secrets.token_urlsafe(16)
     # DB upsert
     upsert_sql = "insert into users(phone) values (%s) on conflict(phone) do update set phone=excluded.phone returning id;"
-    user_id = insertone(upsert_sql, (reg_phone,))
+    user_id = execute_sql(upsert_sql, (reg_phone,), single_row=True)[0]
     auth_value = str(user_id) + ":" + token + ":" + str(curr_time)
-    with lmdb_write_env.begin() as txn:
+    with lmdb_write_env.begin(write=True) as txn:
         txn.put(reg_phone.encode('utf8'), auth_value.encode('utf8'))
     return jsonify(result={"status" : 200, "user_id" : user_id, "token" : token})
 
@@ -173,8 +175,12 @@ def modify_test_data():
     test_data = payload['test_data']
     if test_id is None or test_data is None or len(test_data) not in VECTOR_SIZES:
         return jsonify(result={"status": 500, "error" : "Invalid test id or test data"})
-    
-    pass
+    update_sql = "update test_uploads set test_data = %s where test_id = %s and user_id = %s returning id;"
+    res = execute_sql(update_sql, (test_data, test_id, g.user_id))
+    if res:
+        updated_id = res[0][0]
+        return jsonify(result={"status" : 200, "test_id" : updated_id})
+    return jsonify(result={"status": 500, "error" : "Test id not found"})
 
 
 @app.route('/test_data', methods=['POST'])
@@ -187,10 +193,11 @@ def upload_test_data():
         return jsonify(result={"status": 500, "error" : "Invalid vector size"})
     # Insert into test_uploads
     test_uploads_sql = "insert into test_uploads (user_id, test_data) values (%s, %s) returning id;"
-    test_id = insertone(test_uploads_sql, (g.user_id, payload))
+    test_id = execute_sql(test_uploads_sql, (g.user_id, payload), single_row=True)[0]
     # TODO : Call computation function, save result. For now, saving dummy payload
+    time.sleep(0.75)
     test_results_sql = "insert into test_results (test_id, result_data ) values (%s, %s);"
-    insertone(test_results_sql, (test_id, [1 for x in range(40)]))
+    execute_sql(test_results_sql, (test_id, [1 for x in range(40)]), single_row=True)
     return jsonify(result={"status": 200})
 
 """
