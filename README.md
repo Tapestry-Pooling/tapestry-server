@@ -31,7 +31,7 @@ pip freeze > requirements.txt
 
 ### Development
 ```sh
-export FLASK_APP=.
+export FLASK_APP=app
 export FLASK_ENV=development
 flask run
 ```
