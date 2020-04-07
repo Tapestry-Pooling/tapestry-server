@@ -7,7 +7,7 @@ User=ubuntu
 Group=ubuntu
 WorkingDirectory=/home/ubuntu/covid
 Environment="PATH=/home/ubuntu/covid/env/bin"
-ExecStart=/home/ubuntu/covid/env/bin/gunicorn -w 2 --bind unix:app.sock app:app
+ExecStart=/home/ubuntu/covid/env/bin/gunicorn -w 2 -n c19 --bind unix:app.sock app:app
 KillMode=mixed
 TimeoutStopSec=5
 PrivateTmp=true

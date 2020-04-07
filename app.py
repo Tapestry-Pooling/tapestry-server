@@ -119,6 +119,10 @@ def execute_sql(query, params, one_row=False):
     Endpoints here
 """
 
+@app.route('/ping', methods=['GET'])
+def ping():
+    return "PONG"
+
 @app.route('/request_otp', methods=['POST'])
 def request_otp():
     # TODO : generate OTP, send SMS using Exotel

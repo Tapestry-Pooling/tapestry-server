@@ -23,7 +23,7 @@ END;
 $$ LANGUAGE PLPGSQL;
 
 -- tables
-create table users ( id bigint primary key default id_generator(), username text, email text, phone text unique not null);
+create table users ( id bigint primary key default id_generator(), username text, email text, phone text unique not null, lab text);
 -- create table test_templates (id serial primary key, num_users int not null, num_tests int not null);
 create table test_uploads (id bigint primary key default id_generator(), user_id bigint references users(id), updated_at timestamptz default now(), test_data real[]);
 create table test_results (test_id bigint references test_uploads(id) primary key, updated_at timestamptz default now(),result_data int[]);
