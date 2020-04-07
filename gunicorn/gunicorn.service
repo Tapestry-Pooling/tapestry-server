@@ -1,17 +1,13 @@
 [Unit]
-Description=gunicorn daemon
-Requires=gunicorn.socket
+Description=Gunicorn daemon for covid-testing-backend
 After=network.target
 
 [Service]
-Type=notify
-# the specific user that our service will run as
 User=ubuntu
 Group=ubuntu
-RuntimeDirectory=gunicorn
 WorkingDirectory=/home/ubuntu/covid
-ExecStart=/home/ubuntu/covid/env/bin/gunicorn app.wsgi
-ExecReload=/bin/kill -s HUP $MAINPID
+Environment="PATH=/home/ubuntu/covid/env/bin"
+ExecStart=/home/ubuntu/covid/env/bin/gunicorn -w 2 --bind unix:app.sock app:app
 KillMode=mixed
 TimeoutStopSec=5
 PrivateTmp=true

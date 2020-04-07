@@ -1,4 +1,4 @@
-from flask import Flask, request, json, jsonify, redirect, render_template, url_for, g
+from flask import Flask, request, json, jsonify, render_template, g
 from functools import wraps
 import lmdb
 import os
@@ -85,7 +85,7 @@ def requires_auth(func):
     def decorated(*args, **kwargs):
         "Decorator function for auth"
         if not check_auth(request):
-            return redirect(url_for('login', next=url_for(request.endpoint)))
+            return err_json("Invalid credentials")
         return func(*args, **kwargs)
     return decorated
 

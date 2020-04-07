@@ -41,7 +41,12 @@ flask run
 gunicorn -w 2 app:app
 # TODO : integrate with systemd
 ```
-
+#### Instance provisioning steps
+```sh
+sudo apt update
+sudo apt upgrade
+sudo apt install build-essential python3-dev git curl
+```
 
 ### Endpoints
 
