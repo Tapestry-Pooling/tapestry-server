@@ -36,6 +36,13 @@ export FLASK_ENV=development
 flask run
 ```
 
+### Production
+```sh
+gunicorn -w 2 app:app
+# TODO : integrate with systemd
+```
+
+
 ### Endpoints
 
 ```sh
