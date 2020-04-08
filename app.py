@@ -135,7 +135,7 @@ def request_otp():
     otp_value = DUMMY_OTP + ':' + str(curr_epoch())
     with lmdb_write_env.begin(write=True) as txn:
         txn.put(otp_key.encode('utf8'), otp_value.encode('utf8'))
-    return DUMMY_OTP
+    return "OTP Sent"
 
 @app.route('/validate_otp', methods=['POST'])
 def validate_otp():

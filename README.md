@@ -14,6 +14,10 @@ Python libraries used for scientific computation:
 - joblib
 
 ```sh
+# Clone
+git clone https://github.com/rrampage/covid-test-py.git ~/covid
+cd covid
+mkdir workdir
 # Create virtual environment:
 python3 -m venv env
 # activate
@@ -45,7 +49,7 @@ gunicorn -w 2 app:app
 ```sh
 sudo apt update
 sudo apt upgrade
-sudo apt install build-essential python3-dev git curl libffi-dev
+sudo apt install build-essential python3-dev git curl libffi-dev python3-venv python3-certbot
 # Install openresty and postgres 12
 wget -O - https://openresty.org/package/pubkey.gpg | sudo apt-key add -
 sudo add-apt-repository -y "deb http://openresty.org/package/ubuntu $(lsb_release -sc) main"
@@ -53,7 +57,10 @@ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
 sudo apt-get update
 sudo apt install openresty postgresql-12 libpq-dev
+# Getting SSL
+sudo certbot certonly --webroot -w /home/ubuntu/webroot --preferred-challenges http -d c19.zyxw365.in
 ```
+
 
 ### Endpoints
 
