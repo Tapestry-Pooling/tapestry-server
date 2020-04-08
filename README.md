@@ -65,7 +65,7 @@ sudo certbot certonly --webroot -w /home/ubuntu/webroot --preferred-challenges h
 ### Endpoints
 
 ```sh
-APP_URL="http://127.0.0.1:5000"
+APP_URL="https://c19.zyxw365.in"
 # Request OTP
 curl -XPOST -d '{"phone" : "MOBILE"}' -H "Content-Type: application/json" "$APP_URL/request_otp"
 # Validate OTP
