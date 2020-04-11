@@ -25,7 +25,6 @@ function setAuthToken(event) {
 function formPostHandler(elementName, url, success, error) {
     function sendData(form, url) {
             const XHR = new XMLHttpRequest();
-            console.log(success);
             XHR.addEventListener( "load", (success) ? success : genericSuccessHandler);
             XHR.addEventListener( "error", ( error ) ? error : genericErrorHandler );
             XHR.open( "POST", url );
@@ -39,5 +38,18 @@ function formPostHandler(elementName, url, success, error) {
             sendData(form, url);
     } );
 }
+document.getElementById("TestUpload").addEventListener("click", function(){
+        if (window.authToken && window.phone) {
+                const XHR = new XMLHttpRequest();
+                XHR.open( "POST", "/test_data" );
+                XHR.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                XHR.setRequestHeader("X-Auth", window.authToken);
+                XHR.setRequestHeader("X-Mob", window.phone);
+                XHR.send(JSON.stringify([0.1, 0.1, 0.1, 0.1, 0, 0.1, 0.2, 0.3, 0.1, 0.1, 0.1, 0.1, 0, 0.1, 0.2, 0.3]));
+        }
+        else {
+                alert("Inavlid auth Token, validate OTP first")
+        }
+      });
 window.addEventListener( "load", () => formPostHandler("reqOtp", "/request_otp", setPhone));
 window.addEventListener( "load", () => formPostHandler("valOtp", "/validate_otp", setAuthToken));
