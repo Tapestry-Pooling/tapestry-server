@@ -1,6 +1,8 @@
-from flask import Flask, request, json, jsonify, render_template, g
+import boto3
+from flask import Flask, request, json, jsonify, g
 from functools import wraps
 import lmdb
+import logging
 import os
 import psycopg2
 from psycopg2 import pool
@@ -25,8 +27,9 @@ AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
 OTP_VALIDITY = 900
 # pg connection pool
 pgpool = psycopg2.pool.SimpleConnectionPool(1, 10, user = "covid", password = "covid", host = "127.0.0.1", port = "5432", database = "covid")
-
-
+NOTIFY_EMAILS = ['ssgosh@gmail.com', 'manoj.gopalkrishnan@gmail.com']
+TEST_ARN = 'arn:aws:sns:ap-south-1:691823188847:c19-test'
+PROD_ARN = 'arn:aws:sns:ap-south-1:691823188847:C19-PROD'
 """
     Utils
 """
@@ -60,7 +63,7 @@ def parse_lmdb_auth_data(raw_data):
     return raw_data.decode('utf8').split(':')
 
 def check_auth(request):
-    "Checks if user is signed in from cookie"
+    "Checks if user is signed in using auth header"
     headers = request.headers
     auth_token = headers['X-Auth']
     mob = headers['X-Mob']
@@ -127,7 +130,7 @@ def ping():
 def request_otp():
     # TODO : generate OTP, send SMS using Exotel
     payload = request.json
-    print(payload)
+    app.logger.info(payload)
     reg_phone = normalize_phone(payload.get('phone', None))
     if reg_phone is None:
         return err_json("Invalid mobile number")
@@ -135,14 +138,14 @@ def request_otp():
     otp_value = DUMMY_OTP + ':' + str(curr_epoch())
     with lmdb_write_env.begin(write=True) as txn:
         txn.put(otp_key.encode('utf8'), otp_value.encode('utf8'))
-    return "OTP Sent"
+    return jsonify(phone=reg_phone)
 
 @app.route('/validate_otp', methods=['POST'])
 def validate_otp():
     payload = request.json
     otp = payload['otp']
     reg_phone = normalize_phone(payload.get('phone', None))
-    if reg_phone is None or otp is None:
+    if reg_phone is None or otp is None or not otp.isdigit():
         return err_json("Mobile or OTP incorrect")
     otp_key = 'otp:' + reg_phone
     raw_data = None
@@ -161,20 +164,15 @@ def validate_otp():
     auth_value = str(user_id) + ":" + token + ":" + str(curr_time)
     with lmdb_write_env.begin(write=True) as txn:
         txn.put(reg_phone.encode('utf8'), auth_value.encode('utf8'))
-    return jsonify(user_id=user_id, token=token)
-
-@app.route('/user_login/')
-def login():
-    # mobile number, OTP, return auth token
-    return render_template('login.html')
+    return jsonify(user_id=user_id, token=token, phone=reg_phone)
 
 @app.route('/dashboard/<user_id>', methods=['GET'])
 @requires_auth
 def user_dashboard(user_id):
     if g.user_id != user_id:
         return err_json("Invalid user details")
-    user_sql = """select t1.id as test_id, t1.created_at, t1.updated_at, t1.test_data, t2.result_data 
-        from test_uploads t1, test_results t2 where t1.id = t2.test_id and t1.user_id = %s;"""
+    user_sql = """select t1.id as test_id, t1.updated_at, t1.test_data, t2.result_data 
+        from test_uploads t1, test_results t2 where t1.id = t2.test_id and t1.user_id = %s order by t1.updated_at desc;"""
     result = select(user_sql, (user_id,))
     return result
 
@@ -215,6 +213,10 @@ def upload_test_data():
 """
     Main
 """
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5050, debug=False)
+    app.run(host='0.0.0.0', port=5050, debug=True)

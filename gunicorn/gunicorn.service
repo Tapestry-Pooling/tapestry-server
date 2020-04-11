@@ -7,7 +7,7 @@ User=ubuntu
 Group=ubuntu
 WorkingDirectory=/home/ubuntu/covid
 Environment="PATH=/home/ubuntu/covid/env/bin"
-ExecStart=/home/ubuntu/covid/env/bin/gunicorn -w 2 -n c19 --bind unix:app.sock --log-syslog --log-syslog-prefix c19 --log-syslog-to udp://localhost:514 app:app
+ExecStart=/home/ubuntu/covid/env/bin/gunicorn -w 2 -n c19 --bind unix:app.sock --log-syslog --log-syslog-prefix c19 --log-syslog-to udp://localhost:514 --log-level INFO app:app
 KillMode=mixed
 TimeoutStopSec=5
 PrivateTmp=true
