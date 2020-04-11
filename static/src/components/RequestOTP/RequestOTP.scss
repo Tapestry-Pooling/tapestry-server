@@ -1,0 +1,35 @@
+.request-otp {
+  text-align: left;
+  &__title {
+    margin-top: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+  }
+  &__input-group {
+    position: relative;
+    margin-top: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    &-label {
+      font-size: 14px;
+    }
+    &-phone-prepend {
+      position: absolute;
+      bottom: 9px;
+      left: 10px;
+    }
+    input {
+      margin-top: 5px;
+      width: 100%;
+      border-radius: 5px;
+      padding: 10px;
+      padding-left: 40px;
+      border: 2px solid #eee;
+      &:active, &:focus {
+        border-color: #00cc92;
+      }
+    }
+  }
+}
