@@ -21,7 +21,9 @@ LMDB_SIZE = 16 * 1024 * 1024
 LMDB_PATH = './workdir/db'
 lmdb_write_env = lmdb.open(LMDB_PATH, map_size=LMDB_SIZE)
 lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
-VECTOR_SIZES = [16, 24, 64, 96]
+VECTOR_SIZES = [16, 46, 64, 96]
+RESULT_SIZES = [40, 96, 400, 1000]
+BATCH_SIZES = [{"numTests" : VECTOR_SIZES[i], "numUsers" : RESULT_SIZES[i] } for i in range(len(VECTOR_SIZES))]
 DUMMY_OTP = '34567890'
 AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
 OTP_VALIDITY = 900
@@ -41,6 +43,7 @@ def err_json(msg):
 
 @app.errorhandler
 def error_handler(error):
+    app.logger.error("Error occured" + str(error))
     return err_json("Unhandled error!!")
 
 def normalize_phone(phone):
@@ -96,6 +99,7 @@ def select(query, params):
     try:
         conn = pgpool.getconn()
         with g.conn.cursor() as cur:
+            app.logger.info("Executing query: " + query)
             cur.execute(query, params)
             return cur.fetchall()
     except:
@@ -204,11 +208,27 @@ def upload_test_data():
     # Insert into test_uploads
     test_uploads_sql = "insert into test_uploads (user_id, test_data) values (%s, %s) returning id;"
     test_id = execute_sql(test_uploads_sql, (g.user_id, payload), one_row=True)[0]
-    # TODO : Call computation function, save result. For now, saving dummy payload
-    time.sleep(0.75)
-    test_results_sql = "insert into test_results (test_id, result_data ) values (%s, %s) returning test_id;"
-    execute_sql(test_results_sql, (test_id, [1 for x in range(40)]))
-    return jsonify(test_id=test_id)
+    try:
+        # TODO : Call computation function, save result. For now, saving dummy payload
+        time.sleep(0.75)
+        test_results_sql = "insert into test_results (test_id, result_data ) values (%s, %s) returning test_id;"
+        execute_sql(test_results_sql, (test_id, [1 for x in range(40)]))
+        # TODO : Notify success
+        return jsonify(test_id=test_id)
+    except Exception as e:
+        app.logger.error("Error occured" + str(e))
+        # TODO : Notify error
+        return err_json("Error occured while processing test upload. Don't worry! We will try again soon!")
+
+@app.route('/batch_data', methods=['GET'])
+def batch_data():
+    return jsonify(BATCH_SIZES)
+
+@app.route('/grid_data/<num_tests>/<num_users>', methods=['GET'])
+def screen_data(num_tests, num_users):
+    nt = int(num_tests)
+    nu = int(num_users)
+    return jsonify(gridData={[{"screenData": ["A1", "B2"]}]})
 
 """
     Main
