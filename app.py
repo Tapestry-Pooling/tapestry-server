@@ -33,9 +33,7 @@ lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
 # Matrices
 MLABELS = expt.get_matrix_sizes_and_labels()
 VECTOR_SIZES = [int(k.split("x")[0]) for k in MLABELS]
-RESULT_SIZES = [int(k.split("x")[1]) for k in MLABELS]
-VEC_TO_RES = {VECTOR_SIZES[i] : RESULT_SIZES[i] for i in range(len(VECTOR_SIZES))}
-BATCH_SIZES = list(MLABELS.keys())
+BATCH_SIZES = {k : f'{k.split("x")[1]} Samples ( {k.split("x")[0]} Tests)' for k in MLABELS}
 
 # App Version
 MIN_VERSION = "1.0"
@@ -64,11 +62,8 @@ def curr_epoch():
 def err_json(msg):
     return jsonify(error=msg),500
 
-def label_from_vector(l):
-    if l not in VECTOR_SIZES:
-        return None
-    r = VEC_TO_RES[l]
-    return MLABELS[str(l)+"x"+str(r)]
+def verify_batch_dimensions(b, l):
+    return int(b.split("x")[0]) == l
 
 def app_version_check(version):
     if version is None or version == "" or version.isspace() or version.count(".") != 1:
@@ -255,24 +250,28 @@ def modify_test_data():
 @requires_auth
 def upload_test_data():
     payload_json = request.json
-    payload = payload_json['test_data']
-    batch = payload_json['batch']
+    payload = payload_json.get('test_data', [])
+    batch = payload_json.get('batch', "").strip()
+    if batch == "" or batch.isspace or batch not in MLABELS:
+        return err_json("Invalid batch size : '" + batch + "'")
     # payload is a float array
     # length check on payload to see if it falls in one of the test matrices
     lp = len(payload)
-    if len(payload) not in VECTOR_SIZES:
-        return err_json("Invalid vector size")
+    if not verify_batch_dimensions(batch, lp) or lp not in VECTOR_SIZES:
+        err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
+        app.logger.error(err_msg)
+        return err_json(err_msg)
     # Insert into test_uploads
     test_uploads_sql = "insert into test_uploads (user_id, test_data) values (%s, %s) returning id;"
     test_id = execute_sql(test_uploads_sql, (g.user_id, payload), one_row=True)[0]
     try:
         # TODO : Call computation function, save result. For now, saving dummy payload
-        mlabel = label_from_vector(lp)
-        mresults = expt.get_test_results(mlabel, np.float32(payload))
+        mresults = expt.get_test_results(batch, np.float32(payload))
         app.logger.info(mresults["result_string"])
         test_results_sql = "insert into test_results (test_id, result_data ) values (%s, %s) returning test_id;"
         execute_sql(test_results_sql, (test_id, [1 for x in range(40)]))
         # TODO : Notify success
+        succ_msg = f""
         return jsonify(test_id=str(test_id))
     except Exception as e:
         app.logger.error("Error occured" + str(e))
