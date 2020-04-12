@@ -8,8 +8,14 @@ import os
 import psycopg2
 from psycopg2 import pool
 import secrets
+import sys
 import time
-import compute.get_test_results as expt
+
+EXPT_DIR="./compute/"
+sys.path.append(EXPT_DIR)
+import config
+config.root_dir=EXPT_DIR
+import get_test_results as expt
 
 """
     App setup and teardown
@@ -29,17 +35,26 @@ MLABELS = expt.get_matrix_sizes_and_labels()
 VECTOR_SIZES = [int(k.split("x")[0]) for k in MLABELS]
 RESULT_SIZES = [int(k.split("x")[1]) for k in MLABELS]
 VEC_TO_RES = {VECTOR_SIZES[i] : RESULT_SIZES[i] for i in range(len(VECTOR_SIZES))}
-BATCH_SIZES = [{"numTests" : VECTOR_SIZES[i], "numUsers" : RESULT_SIZES[i] } for i in range(len(VECTOR_SIZES))]
+BATCH_SIZES = list(MLABELS.keys())
 
+# App Version
+MIN_VERSION = "1.0"
+MIN_VERSION_INTS = tuple(int(x) for x in MIN_VERSION.split("."))
+APP_UPDATE_URL = "https://play.google.com/store/apps/details?id=com.o1"
 
 DUMMY_OTP = '3456'
 AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
 OTP_VALIDITY = 900
 # pg connection pool
 pgpool = psycopg2.pool.SimpleConnectionPool(1, 10, user = "covid", password = "covid", host = "127.0.0.1", port = "5432", database = "covid")
+
+# Alerts on test upload and failure
 NOTIFY_EMAILS = ['ssgosh@gmail.com', 'manoj.gopalkrishnan@gmail.com']
 TEST_ARN = 'arn:aws:sns:ap-south-1:691823188847:c19-test'
 PROD_ARN = 'arn:aws:sns:ap-south-1:691823188847:C19-PROD'
+SNS_CLIENT = boto3.client('sns')
+NOTIFICATIONS_ENABLED = False
+
 """
     Utils
 """
@@ -54,6 +69,12 @@ def label_from_vector(l):
         return None
     r = VEC_TO_RES[l]
     return MLABELS[str(l)+"x"+str(r)]
+
+def app_version_check(version):
+    if version is None or version == "" or version.isspace() or version.count(".") != 1:
+        return False
+    vs = tuple(int(x) for x in version.split("."))
+    return vs >= MIN_VERSION_INTS
 
 @app.errorhandler
 def error_handler(error):
@@ -144,6 +165,10 @@ def execute_sql(query, params, one_row=False):
     finally:
         pgpool.putconn(conn)
 
+def publish_message(topic, message, subject=None):
+    if not NOTIFICATIONS_ENABLED:
+        return
+    SNS_CLIENT.publish(TopicArn=topic, Message=message, Subject=subject)
 
 """
     Endpoints here
@@ -152,6 +177,12 @@ def execute_sql(query, params, one_row=False):
 @app.route('/ping', methods=['GET'])
 def ping():
     return "PONG"
+
+@app.route('/app_version_check', methods=['GET'])
+def app_version_check_endpoint(app_version):
+    app_version = request.args.get('version')
+    force = not app_version_check(app_version)
+    return jsonify(force=force, url=APP_UPDATE_URL)
 
 @app.route('/request_otp', methods=['POST'])
 def request_otp():
@@ -223,7 +254,9 @@ def modify_test_data():
 @app.route('/test_data', methods=['POST'])
 @requires_auth
 def upload_test_data():
-    payload = request.json
+    payload_json = request.json
+    payload = payload_json['test_data']
+    batch = payload_json['batch']
     # payload is a float array
     # length check on payload to see if it falls in one of the test matrices
     lp = len(payload)
@@ -236,7 +269,7 @@ def upload_test_data():
         # TODO : Call computation function, save result. For now, saving dummy payload
         mlabel = label_from_vector(lp)
         mresults = expt.get_test_results(mlabel, np.float32(payload))
-        app.logger.info(mresults)
+        app.logger.info(mresults["result_string"])
         test_results_sql = "insert into test_results (test_id, result_data ) values (%s, %s) returning test_id;"
         execute_sql(test_results_sql, (test_id, [1 for x in range(40)]))
         # TODO : Notify success
@@ -263,6 +296,7 @@ if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
+    NOTIFICATIONS_ENABLED = True
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050, debug=True)
