@@ -2,7 +2,7 @@ import Login from 'containers/Login';
 
 const routes = [
   {
-    path: '/login',
+    path: '/app/login',
     component: Login,
   },
 ];
