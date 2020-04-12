@@ -107,25 +107,25 @@ class Login extends React.Component {
     return (
       <div className="login">
         <Switch>
-          <Route exact path="/login">
+          <Route exact path="/app/login">
             <RequestOTP
               phoneNumber={phoneNumber}
               email={email}
               handleRequestOTPInput={this.handleRequestOTPInput}
             />
           </Route>
-          <Route path="/login/verify">
+          <Route path="/app/login/verify">
             <VerifyOTP
               phoneNumber={phoneNumber}
               otp={otp}
               handleVerifyOTPInput={this.handleVerifyOTPInput}
             />
           </Route>
-          <Route path="/login/success">
+          <Route path="/app/login/success">
             <div>Login Success!</div>
           </Route>
         </Switch>
-        {pathname !== '/login/success'
+        {pathname !== '/app/login/success'
           ? (
             <div className="login__cta">
               <button type="button" onClick={this.handleCtaNext} disabled={isCtaDisabled}>Next</button>
