@@ -17,7 +17,7 @@ const VerifyOTP = (props) => {
           {' '}
           {phoneNumber}
           {' '}
-          <Link to="/login">Edit</Link>
+          <Link to="/app/login">Edit</Link>
         </div>
         <span className="verify-otp__input-group-otp-hide" />
         <input type="text" value={otp} onChange={handleVerifyOTPInput} />

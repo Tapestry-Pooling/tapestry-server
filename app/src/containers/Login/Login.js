@@ -61,7 +61,7 @@ class Login extends React.Component {
               otp: '',
               email: '',
             });
-            history.replace(`/login/success?authToken=${response.data.token}`);
+            history.replace(`/app/login/success?authToken=${response.data.token}`);
           } else {
             console.log('show error!');
           }
@@ -72,7 +72,7 @@ class Login extends React.Component {
           if (response.status === 200) {
             console.log('Otp sent!');
             sessionStorage.setItem('phoneNumber', phoneNumber);
-            history.push('/login/verify');
+            history.push('/app/login/verify');
             this.checkCtaDisabled();
           } else {
             console.log('show error!');
