@@ -3,11 +3,13 @@ from flask import Flask, request, json, jsonify, g
 from functools import wraps
 import lmdb
 import logging
+import numpy as np
 import os
 import psycopg2
 from psycopg2 import pool
 import secrets
 import time
+import compute.get_test_results as expt
 
 """
     App setup and teardown
@@ -21,9 +23,15 @@ LMDB_SIZE = 16 * 1024 * 1024
 LMDB_PATH = './workdir/db'
 lmdb_write_env = lmdb.open(LMDB_PATH, map_size=LMDB_SIZE)
 lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
-VECTOR_SIZES = [16, 46, 64, 96]
-RESULT_SIZES = [40, 96, 400, 1000]
+
+# Matrices
+MLABELS = expt.get_matrix_sizes_and_labels()
+VECTOR_SIZES = [int(k.split("x")[0]) for k in MLABELS]
+RESULT_SIZES = [int(k.split("x")[1]) for k in MLABELS]
+VEC_TO_RES = {VECTOR_SIZES[i] : RESULT_SIZES[i] for i in range(len(VECTOR_SIZES))}
 BATCH_SIZES = [{"numTests" : VECTOR_SIZES[i], "numUsers" : RESULT_SIZES[i] } for i in range(len(VECTOR_SIZES))]
+
+
 DUMMY_OTP = '3456'
 AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
 OTP_VALIDITY = 900
@@ -40,6 +48,12 @@ def curr_epoch():
 
 def err_json(msg):
     return jsonify(error=msg),500
+
+def label_from_vector(l):
+    if l not in VECTOR_SIZES:
+        return None
+    r = VEC_TO_RES[l]
+    return MLABELS[str(l)+"x"+str(r)]
 
 @app.errorhandler
 def error_handler(error):
@@ -179,14 +193,14 @@ def validate_otp():
         txn.put(reg_phone.encode('utf8'), auth_value.encode('utf8'))
     return jsonify(user_id=user_id, token=token, phone=reg_phone)
 
-@app.route('/dashboard/<user_id>', methods=['GET'])
+@app.route('/dashboard/', methods=['GET'])
 @requires_auth
 def user_dashboard(user_id):
     if g.user_id != user_id:
         return err_json("Invalid user details")
     user_sql = """select t1.id as test_id, t1.updated_at, t1.test_data, t2.result_data 
         from test_uploads t1, test_results t2 where t1.id = t2.test_id and t1.user_id = %s order by t1.updated_at desc;"""
-    result = select(user_sql, (user_id,))
+    result = select(user_sql, (g.user_id,))
     return result
 
 
@@ -212,6 +226,7 @@ def upload_test_data():
     payload = request.json
     # payload is a float array
     # length check on payload to see if it falls in one of the test matrices
+    lp = len(payload)
     if len(payload) not in VECTOR_SIZES:
         return err_json("Invalid vector size")
     # Insert into test_uploads
@@ -219,11 +234,13 @@ def upload_test_data():
     test_id = execute_sql(test_uploads_sql, (g.user_id, payload), one_row=True)[0]
     try:
         # TODO : Call computation function, save result. For now, saving dummy payload
-        time.sleep(0.75)
+        mlabel = label_from_vector(lp)
+        mresults = expt.get_test_results(mlabel, np.float32(payload))
+        app.logger.info(mresults)
         test_results_sql = "insert into test_results (test_id, result_data ) values (%s, %s) returning test_id;"
         execute_sql(test_results_sql, (test_id, [1 for x in range(40)]))
         # TODO : Notify success
-        return jsonify(test_id=test_id)
+        return jsonify(test_id=str(test_id))
     except Exception as e:
         app.logger.error("Error occured" + str(e))
         # TODO : Notify error

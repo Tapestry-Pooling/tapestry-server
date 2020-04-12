@@ -51,5 +51,5 @@ document.getElementById("TestUpload").addEventListener("click", function(){
                 alert("Inavlid auth Token, validate OTP first")
         }
       });
-window.addEventListener( "load", () => formPostHandler("reqOtp", "/request_otp", setPhone));
-window.addEventListener( "load", () => formPostHandler("valOtp", "/validate_otp", setAuthToken));
+window.addEventListener( "load", () => formPostHandler("reqOtp", "/api/request_otp", setPhone));
+window.addEventListener( "load", () => formPostHandler("valOtp", "/api/validate_otp", setAuthToken));
