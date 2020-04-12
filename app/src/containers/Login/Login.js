@@ -14,6 +14,7 @@ class Login extends React.Component {
       email: '',
       otp: '',
       isCtaDisabled: true,
+      errorMessage: '',
     };
   }
 
@@ -34,6 +35,7 @@ class Login extends React.Component {
     }
     this.setState({
       [name]: value,
+      errorMessage: '',
     }, this.checkCtaDisabled);
   }
 
@@ -44,6 +46,7 @@ class Login extends React.Component {
     }
     this.setState({
       otp: value,
+      errorMessage: '',
     }, this.checkCtaDisabled);
   }
 
@@ -63,7 +66,9 @@ class Login extends React.Component {
             });
             history.replace(`/app/login/success?authToken=${response.data.token}`);
           } else {
-            console.log('show error!');
+            this.setState({
+              errorMessage: response.data.error,
+            });
           }
         });
     } else {
@@ -75,7 +80,9 @@ class Login extends React.Component {
             history.push('/app/login/verify');
             this.checkCtaDisabled();
           } else {
-            console.log('show error!');
+            this.setState({
+              errorMessage: response.data.error,
+            });
           }
         });
     }
@@ -102,6 +109,7 @@ class Login extends React.Component {
   render() {
     const {
       phoneNumber, email, otp, isCtaDisabled,
+      errorMessage,
     } = this.state;
     const { location: { pathname } } = this.props;
     return (
@@ -125,6 +133,9 @@ class Login extends React.Component {
             <div>Login Success!</div>
           </Route>
         </Switch>
+        {errorMessage
+          ? <div className="login__error">{errorMessage}</div>
+          : ''}
         {pathname !== '/app/login/success'
           ? (
             <div className="login__cta">
