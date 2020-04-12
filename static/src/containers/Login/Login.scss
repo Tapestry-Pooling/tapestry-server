@@ -12,6 +12,9 @@
       border-radius: 5px;
       border: none;
       width: 100%;
+      &[disabled] {
+        opacity: 0.65;
+      }
     }
   }
 }

@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch } from 'react-router-dom';
 import RequestOTP from 'components/RequestOTP';
-import { requestOTPAPI } from 'api/auth';
+import VerifyOTP from 'components/VerifyOTP';
+import { requestOTPAPI, verifyOTPAPI } from 'api/auth';
 import './Login.scss';
 
 class Login extends React.Component {
@@ -11,11 +12,19 @@ class Login extends React.Component {
     this.state = {
       phoneNumber: '',
       email: '',
+      otp: '',
+      isCtaDisabled: true,
     };
   }
 
   componentDidMount() {
     console.log('Test');
+    const phoneNumber = sessionStorage.getItem('phoneNumber');
+    if (phoneNumber) {
+      this.setState({
+        phoneNumber,
+      }, this.checkCtaDisabled);
+    }
   }
 
   handleRequestOTPInput = (e) => {
@@ -24,20 +33,47 @@ class Login extends React.Component {
       return;
     }
     this.setState({
-      [e.target.name]: e.target.value,
-    });
+      [name]: value,
+    }, this.checkCtaDisabled);
+  }
+
+  handleVerifyOTPInput = (e) => {
+    const { value } = e.target;
+    if (value && !/^[\d]{0,4}$/.test(value)) {
+      return;
+    }
+    this.setState({
+      otp: value,
+    }, this.checkCtaDisabled);
   }
 
   handleCtaNext = () => {
-    const { phoneNumber } = this.state;
-    const { location: { pathname } } = this.props;
+    const { phoneNumber, otp } = this.state;
+    const { location: { pathname }, history } = this.props;
     if (/verify/.test(pathname)) {
-      // TODO: Do something
+      verifyOTPAPI(phoneNumber, otp)
+        .then((response) => {
+          if (response.status === 200) {
+            console.log('Verification successful!');
+            sessionStorage.removeItem('phoneNumber');
+            this.setState({
+              phoneNumber: '',
+              otp: '',
+              email: '',
+            });
+            history.replace(`/login/success?authToken=${response.data.token}`);
+          } else {
+            console.log('show error!');
+          }
+        });
     } else {
       requestOTPAPI(phoneNumber)
         .then((response) => {
           if (response.status === 200) {
             console.log('Otp sent!');
+            sessionStorage.setItem('phoneNumber', phoneNumber);
+            history.push('/login/verify');
+            this.checkCtaDisabled();
           } else {
             console.log('show error!');
           }
@@ -45,8 +81,29 @@ class Login extends React.Component {
     }
   }
 
+  checkCtaDisabled = () => {
+    const { phoneNumber, otp } = this.state;
+    const { location: { pathname } } = this.props;
+    let flag = true;
+    if (/verify/.test(pathname)) {
+      if (otp.length === 4) {
+        flag = false;
+      }
+    } else if (phoneNumber.length === 10) {
+      flag = false;
+    } else {
+      flag = true;
+    }
+    this.setState({
+      isCtaDisabled: flag,
+    });
+  }
+
   render() {
-    const { phoneNumber, email } = this.state;
+    const {
+      phoneNumber, email, otp, isCtaDisabled,
+    } = this.state;
+    const { location: { pathname } } = this.props;
     return (
       <div className="login">
         <Switch>
@@ -58,12 +115,23 @@ class Login extends React.Component {
             />
           </Route>
           <Route path="/login/verify">
-            Verify OTP Component
+            <VerifyOTP
+              phoneNumber={phoneNumber}
+              otp={otp}
+              handleVerifyOTPInput={this.handleVerifyOTPInput}
+            />
+          </Route>
+          <Route path="/login/success">
+            <div>Login Success!</div>
           </Route>
         </Switch>
-        <div className="login__cta">
-          <button type="button" onClick={this.handleCtaNext}>Next</button>
-        </div>
+        {pathname !== '/login/success'
+          ? (
+            <div className="login__cta">
+              <button type="button" onClick={this.handleCtaNext} disabled={isCtaDisabled}>Next</button>
+            </div>
+          )
+          : ''}
       </div>
     );
   }
@@ -72,6 +140,10 @@ class Login extends React.Component {
 Login.propTypes = {
   location: PropTypes.shape({
     pathname: PropTypes.string.isRequired,
+  }).isRequired,
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+    replace: PropTypes.func.isRequired,
   }).isRequired,
 };
 
