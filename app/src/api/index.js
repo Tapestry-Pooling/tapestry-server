@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-let url = '';
+let url = '/api';
 
 if (process.env.APP_ENV !== 'production') {
-  url = 'https://c19.zyxw365.in';
+  url = 'https://c19.zyxw365.in/api';
 }
 
 export const BASE_URL = url;
