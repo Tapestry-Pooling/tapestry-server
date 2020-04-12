@@ -271,23 +271,21 @@ def upload_test_data():
     # Insert into test_uploads
     test_uploads_sql = "insert into test_uploads (user_id, test_data) values (%s, %s) returning id;"
     test_id = execute_sql(test_uploads_sql, (g.user_id, payload), one_row=True)[0]
-    try:
-        # TODO : Call computation function, save result. For now, saving dummy payload
-        mresults = expt.get_test_results(batch, np.float32(payload))
-        app.logger.info(mresults["result_string"])
-        test_results_sql = "insert into test_results (test_id, result_data ) values (%s, %s) returning test_id;"
-        execute_sql(test_results_sql, (test_id, [1 for x in range(40)]))
-        # TODO : Notify success
-        succ_msg = f""
-        return jsonify(test_id=str(test_id))
-    except Exception as e:
-        app.logger.error("Error occured" + str(e))
+    mresults = process_test_upload(batch, payload)
+    # TODO : save result. For now, saving dummy payload
+    if "error" in mresults:
         # TODO : Notify error
         return err_json("Error occured while processing test upload. Don't worry! We will try again soon!")
+    app.logger.info(mresults["result_string"])
+    test_results_sql = "insert into test_results (test_id, result_data ) values (%s, %s) returning test_id;"
+    execute_sql(test_results_sql, (test_id, [1 for x in range(40)]))
+    # TODO : Notify success
+    succ_msg = f""
+    return jsonify(test_id=str(test_id))
 
 @app.route('/batch_data', methods=['GET'])
 def batch_data():
-    return jsonify(BATCH_SIZES)
+    return jsonify(data=BATCH_SIZES)
 
 @app.route('/grid_data/<batch_size>', methods=['GET'])
 def screen_data(batch_size):
