@@ -18,7 +18,7 @@ config.root_dir=EXPT_DIR
 import get_test_results as expt
 
 """
-    App setup and teardown
+    App setup, teardown and constants
 """
 
 app = Flask(__name__)
@@ -165,6 +165,13 @@ def publish_message(topic, message, subject=None):
         return
     SNS_CLIENT.publish(TopicArn=topic, Message=message, Subject=subject)
 
+def process_test_upload(test_id, batch , vector):
+    try:
+        return expt.get_test_results(batch, np.float32(vector))
+    except Exception as e:
+        app.logger.error("Error occured" + str(e))
+        return {"error" : str(e)}
+
 """
     Endpoints here
 """
@@ -174,7 +181,7 @@ def ping():
     return "PONG"
 
 @app.route('/app_version_check', methods=['GET'])
-def app_version_check_endpoint(app_version):
+def app_version_check_endpoint():
     app_version = request.args.get('version')
     force = not app_version_check(app_version)
     return jsonify(force=force, url=APP_UPDATE_URL)
