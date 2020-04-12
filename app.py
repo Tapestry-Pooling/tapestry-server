@@ -112,8 +112,8 @@ def parse_lmdb_auth_data(raw_data):
 def check_auth(request):
     "Checks if user is signed in using auth header"
     headers = request.headers
-    auth_token = headers['X-Auth']
-    mob = headers['X-Mob']
+    auth_token = headers.get('X-Auth', "")
+    mob = headers.get('X-Mob', "")
     reg_phone = normalize_phone(mob)
     if auth_token is None or auth_token == '' or reg_phone is None:
         return False
@@ -283,10 +283,8 @@ def upload_test_data():
 def batch_data():
     return jsonify(BATCH_SIZES)
 
-@app.route('/grid_data/<num_tests>/<num_users>', methods=['GET'])
-def screen_data(num_tests, num_users):
-    nt = int(num_tests)
-    nu = int(num_users)
+@app.route('/grid_data/<batch_size>', methods=['GET'])
+def screen_data(batch_size):
     return jsonify(gridData={[{"screenData": ["A1", "B2"]}]})
 
 """

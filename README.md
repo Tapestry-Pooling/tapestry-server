@@ -24,6 +24,8 @@ python3 -m venv env
 source env/bin/activate
 # install requirements with pinned versions from requirements.txt
 pip install -r requirements.txt
+git submodule init
+git submodule update
 ```
 
 
@@ -65,7 +67,7 @@ sudo certbot certonly --webroot -w /home/ubuntu/webroot --preferred-challenges h
 ### Endpoints
 
 ```sh
-APP_URL="https://c19.zyxw365.in"
+APP_URL="https://c19.zyxw365.in/api"
 # Request OTP
 curl -XPOST -d '{"phone" : "MOBILE"}' -H "Content-Type: application/json" "$APP_URL/request_otp"
 # Validate OTP
