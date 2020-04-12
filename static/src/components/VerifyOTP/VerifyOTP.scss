@@ -1,0 +1,62 @@
+.verify-otp {
+  text-align: left;
+  &__title {
+    margin-top: 40px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+  }
+  &__input-group {
+    position: relative;
+    margin-top: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    &-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #777;
+      a {
+        text-transform: uppercase;
+        color: #00cc92;
+        text-decoration: none !important;
+        margin-left: 5px;
+      }
+    }
+    &-description {
+      margin-top: 15px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #777;
+      b {
+        font-size: 14px;
+        font-weight: 700;
+      }
+    }
+    &-otp-hide {
+      position: absolute;
+      bottom: 32px;
+      left: 190px;
+      width: 40px;
+      height: 40px;
+      background: white;
+    }
+    input {
+      color: #777;
+      margin-top: 15px;
+      padding-left: 15px;
+      letter-spacing: 40px;
+      border: 0;
+      background-image: linear-gradient(to left, #ccc 70%, rgba(255, 255, 255, 0) 0%);
+      background-position: bottom;
+      background-size: 50px 2px;
+      background-repeat: repeat-x;
+      background-position-x: 35px;
+      width: 220px;
+      height: 40px;
+      &:active, &:focus {
+        background-image: linear-gradient(to left, #00cc92 70%, rgba(255, 255, 255, 0) 0%);
+      }
+    }
+  }
+}
