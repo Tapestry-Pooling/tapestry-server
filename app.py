@@ -24,7 +24,7 @@ lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
 VECTOR_SIZES = [16, 46, 64, 96]
 RESULT_SIZES = [40, 96, 400, 1000]
 BATCH_SIZES = [{"numTests" : VECTOR_SIZES[i], "numUsers" : RESULT_SIZES[i] } for i in range(len(VECTOR_SIZES))]
-DUMMY_OTP = '34567890'
+DUMMY_OTP = '3456'
 AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
 OTP_VALIDITY = 900
 # pg connection pool
@@ -49,6 +49,7 @@ def error_handler(error):
 def normalize_phone(phone):
     if phone is None or phone == "" or phone.isspace():
         return None
+    phone = phone.strip()
     if phone.startswith('+91') and len(phone) == 13:
         return phone
     if len(phone) == 11 and phone.startswith('0') and phone.isdigit():
@@ -56,6 +57,14 @@ def normalize_phone(phone):
     if len(phone) == 10 and phone.isdigit() and not phone.startswith('0'):
         return '+91' + phone
     return None
+
+def normalize_email(email):
+    if email is None or email == "" or email.isspace() or email.count("@") != 1 or email.count(":") != 0:
+        return None
+    esp = email.split("@")
+    if esp[1] == "" or esp[1].count(".") == 0:
+        return None
+    return email.strip()
 
 def parse_lmdb_otp_data(raw_data):
     # otp:current time
