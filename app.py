@@ -280,11 +280,12 @@ def user_dashboard():
     app.logger.info(f'Pagination : {pagination}')
     pagination_clause = ' and u.id < %s'
     if pagination is None or not pagination or pagination == '' or pagination == 'false':
-        pagination = 0
         pagination_clause = ''
+        pagination = 0
     dashboard_sql = f"""select u.id as test_id, u.updated_at, r.test_id, u.test_data 
     from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s {pagination_clause} order by u.id desc limit 50;"""
-    res = select(dashboard_sql, (g.user_id, int(pagination)))
+    params = (g.user_id,) if pagination == 0 else (g.user_id, int(pagination))
+    res = select(dashboard_sql, params)
     last_pag = False
     if not res or len(res) == 0:
         return jsonify(data=[], pagination=last_pag)
