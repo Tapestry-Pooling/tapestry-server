@@ -12,6 +12,8 @@ import secrets
 import sys
 import time
 
+import grid
+
 EXPT_DIR="./compute/"
 sys.path.append(EXPT_DIR)
 import config
@@ -24,6 +26,11 @@ import get_test_results as expt
 
 app = Flask(__name__)
 app.secret_key = 'covid-19-testing-backend'
+
+# Response headers
+CONTENT_TYPE = "Content-Type"
+CONTENT_JSON = "application/json"
+
 # Using lmdb as a simple K/V store for storing auth tokens and OTP for mobile numbers. Can be replaced by redis once requirements get more complex
 # Max lmdb size
 LMDB_SIZE = 16 * 1024 * 1024
@@ -33,8 +40,10 @@ lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
 
 # Matrices
 MLABELS = expt.get_matrix_sizes_and_labels()
+MATRICES = expt.get_matrix_labels_and_matrices()
 VECTOR_SIZES = [int(k.split("x")[0]) for k in MLABELS]
 BATCH_SIZES = {k : f'{k.split("x")[1]} Samples ( {k.split("x")[0]} Tests)' for k in MLABELS}
+GRID_JSON, CELL_JSON = grid.generate_grid_and_cell_data_json(MLABELS, MATRICES)
 
 # App Version
 MIN_VERSION = "1.0"
@@ -57,6 +66,8 @@ NOTIFICATIONS_ENABLED = False
 """
     Utils
 """
+
+
 def curr_epoch():
     return int(time.time())
 
@@ -316,13 +327,11 @@ def batch_data():
 
 @app.route('/grid_data/<batch_size>', methods=['GET'])
 def screen_data(batch_size):
-    # TODO : for all matrices
-    return jsonify(gridData=[{"screenData": ["A1", "B2"]}])
+    return GRID_JSON.get(batch_size.strip(), "{}"), 200, {CONTENT_TYPE : CONTENT_JSON}
 
 @app.route('/cell_data/<batch_size>', methods=['GET'])
 def cell_data(batch_size):
-    # TODO : for all matrices
-    return jsonify(cellData=["A1", "B2"])
+    return CELL_JSON.get(batch_size.strip(), "{}"), 200, {CONTENT_TYPE : CONTENT_JSON}
 
 """
     Main
