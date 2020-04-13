@@ -45,7 +45,7 @@ DUMMY_OTP = '3456'
 AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
 OTP_VALIDITY = 900
 # pg connection pool
-pgpool = psycopg2.pool.SimpleConnectionPool(1, 10, user = "covid", password = "covid", host = "127.0.0.1", port = "5432", database = "covid")
+pgpool = psycopg2.pool.SimpleConnectionPool(1, 4, user = "covid", password = "covid", host = "127.0.0.1", port = "5432", database = "covid")
 
 # Alerts on test upload and failure
 NOTIFY_EMAILS = ['ssgosh@gmail.com', 'manoj.gopalkrishnan@gmail.com']
@@ -232,9 +232,7 @@ def validate_otp():
 
 @app.route('/dashboard/', methods=['GET'])
 @requires_auth
-def user_dashboard(user_id):
-    if g.user_id != user_id:
-        return err_json("Invalid user details")
+def user_dashboard():
     user_sql = """select t1.id as test_id, t1.updated_at, t1.test_data, t2.result_data 
         from test_uploads t1, test_results t2 where t1.id = t2.test_id and t1.user_id = %s order by t1.updated_at desc;"""
     result = select(user_sql, (g.user_id,))
@@ -286,7 +284,6 @@ def upload_test_data():
         err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
         app.logger.error(err_msg)
         return err_json(err_msg)
-    # Insert into test_uploads
     test_uploads_sql ="update test_uploads set batch_end_time = now(), test_data = %s where id = %s and user_id = %s returning id;"
     test_id = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id), one_row=True)[0]
     mresults = process_test_upload(batch, test_data)
@@ -319,7 +316,13 @@ def batch_data():
 
 @app.route('/grid_data/<batch_size>', methods=['GET'])
 def screen_data(batch_size):
-    return jsonify(gridData={[{"screenData": ["A1", "B2"]}]})
+    # TODO : for all matrices
+    return jsonify(gridData=[{"screenData": ["A1", "B2"]}])
+
+@app.route('/cell_data/<batch_size>', methods=['GET'])
+def cell_data(batch_size):
+    # TODO : for all matrices
+    return jsonify(cellData=["A1", "B2"])
 
 """
     Main

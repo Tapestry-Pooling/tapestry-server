@@ -19,15 +19,7 @@ def generate_grid_json(a):
 
 def cells_from_grid(a):
     g = generate_grid(a)["gridData"]
-    cells = []
-    cc = set()
-    for r in g:
-        h = r["screenData"]
-        for c in h:
-            if c not in cc:
-                cells.append(c)
-                cc.add(c)
-    return { "cellData" : cells }
+    return { "cellData" : sorted(set(it.chain.from_iterable((r["screenData"] for r in g))))}
 
 def cells_from_grid_json(a):
     return orjson.dumps(cells_from_grid(a))
