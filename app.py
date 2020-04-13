@@ -8,6 +8,7 @@ import orjson
 import os
 import psycopg2
 from psycopg2 import pool
+from psycopg2.extras import Json
 import secrets
 import sys
 import time
@@ -217,7 +218,7 @@ def post_process_results(test_id, batch, mresults):
     app.logger.info(mresults["result_string"])
     test_results_sql = """insert into test_results (test_id, matrix_label, result_data ) values (%s, %s, %s) on conflict(test_id) 
     do update set updated_at = now(), matrix_label=excluded.matrix_label, result_data=excluded.result_data returning test_id;"""
-    execute_sql(test_results_sql, (test_id, MLABELS[batch], orjson.dumps(mresults)))
+    execute_sql(test_results_sql, (test_id, MLABELS[batch], Json(mresults, dumps=orjson.dumps)))
     notify_test_success(test_id, batch, mresults)
     return jsonify(test_id=str(test_id), results=mresults["result_string"])
 
