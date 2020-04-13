@@ -293,29 +293,7 @@ def start_test():
     test_id = execute_sql(test_uploads_sql, (g.user_id, label, batch), one_row=True)[0]
     return jsonify(test_id=str(test_id))
 
-@app.route('/test_data', methods=['PUT'])
-@requires_auth
-def modify_test_data():
-    payload_json = request.json
-    test_id = int(payload_json['test_id'])
-    test_data = payload_json.get('test_data', [])
-    batch = payload_json.get('batch', "").strip()
-    if batch == "" or batch.isspace or batch not in MLABELS:
-        return err_json(f"Invalid batch size : {batch}")
-    lp = len(test_data)
-    if not verify_batch_dimensions(batch, lp) or lp not in VECTOR_SIZES:
-        err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
-        app.logger.error(err_msg)
-        return err_json(err_msg)
-    update_sql = "update test_uploads set updated_at = now(), test_data = %s where id = %s and user_id = %s returning id;"
-    res = execute_sql(update_sql, (test_data, test_id, g.user_id))
-    if not res and len(res) > 0 and len(res[0][0]) > 0:
-        return err_json(f"Test id not found {test_id}")
-    updated_id = res[0][0]
-    mresults = process_test_upload(batch, test_data)
-    return post_process_results(test_id, batch, test_data)
-
-@app.route('/test_data', methods=['POST'])
+@app.route('/test_data', methods=['POST', 'PUT'])
 @requires_auth
 def upload_test_data():
     payload_json = request.json
@@ -329,7 +307,7 @@ def upload_test_data():
         err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
         app.logger.error(err_msg)
         return err_json(err_msg)
-    test_uploads_sql ="update test_uploads set batch_end_time = now(), test_data = %s where id = %s and user_id = %s returning id;"
+    test_uploads_sql ="update test_uploads set batch_end_time = now(), updated_at = now(), test_data = %s where id = %s and user_id = %s returning id;"
     res = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id))
     if not res and len(res) > 0 and len(res[0][0]) > 0:
         return err_json(f"Test id not found {test_id}")
