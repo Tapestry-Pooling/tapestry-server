@@ -21,6 +21,7 @@ $$ LANGUAGE PLPGSQL;
 create table users ( id bigint primary key default id_generator(), username text, email text, phone text unique not null, lab text);
 create table test_uploads (id bigint primary key default id_generator(), user_id bigint references users(id), label text not null, 
     batch_size text not null, batch_start_time timestamptz default now(), batch_end_time timestamptz, updated_at timestamptz default now(), test_data real[]);
+ALTER TABLE test_uploads ADD UNIQUE (user_id, label);
 create table test_results (test_id bigint references test_uploads(id) primary key, matrix_label text not null, updated_at timestamptz default now(),result_data jsonb);
 
 -- audit tables for test_uploads and test_results
