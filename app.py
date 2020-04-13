@@ -212,6 +212,8 @@ def post_process_results(test_id, batch, mresults):
     if "error" in mresults:
         notify_test_failure(test_id, batch, mresults)
         return err_json("Error occured while processing test upload. Don't worry! We will try again soon!")
+    if "x" in mresults:
+        mresults["x"] = mresults["x"].tolist()
     app.logger.info(mresults["result_string"])
     test_results_sql = """insert into test_results (test_id, matrix_label, result_data ) values (%s, %s, %s) on conflict(test_id) 
     do update set updated_at = now(), matrix_label=excluded.matrix_label, result_data=excluded.result_data returning test_id;"""
@@ -313,8 +315,6 @@ def upload_test_data():
         return err_json(f"Test id not found {test_id}")
     updated_id = res[0][0]
     mresults = process_test_upload(test_id, batch, test_data)
-    for k in mresults:
-        app.logger.info(f'{k}, {type(mresults[k])}')
     return post_process_results(test_id, batch, mresults)
 
 @app.route('/batch_data', methods=['GET'])
