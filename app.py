@@ -300,6 +300,7 @@ def upload_test_data():
     test_id = int(payload_json['test_id'])
     test_data = payload_json.get('test_data', [])
     batch = payload_json.get('batch', "").strip()
+    app.logger.info(f'{batch} {MLABELS}')
     if batch == "" or batch.isspace() or batch not in MLABELS:
         return err_json(f"Invalid batch size : {batch}")
     lp = len(test_data)
