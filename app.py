@@ -181,9 +181,6 @@ def publish_message(topic, message, subject=None):
         return
     SNS_CLIENT.publish(TopicArn=topic, Message=message, Subject=subject)
 
-def validate_test_upload(batch, test_data):
-    pass
-
 def process_test_upload(test_id, batch, vector):
     try:
         return expt.get_test_results(MLABELS[batch], np.float32(vector))
@@ -294,8 +291,11 @@ def start_test():
     label = payload_json.get('label', "").strip()
     if label == "" or label.isspace() or batch == "" or batch.isspace() or batch not in MLABELS:
         return err_json(f"Empty test label or invalid batch size {batch}")
-    test_uploads_sql = "insert into test_uploads (user_id, label, batch_size) values (%s, %s, %s) returning id;"
-    test_id = execute_sql(test_uploads_sql, (g.user_id, label, batch), one_row=True)[0]
+    test_uploads_sql = "insert into test_uploads (user_id, label, batch_size) values (%s, %s, %s) on conflict(user_id, label) do nothing returning id;"
+    res = execute_sql(test_uploads_sql, (g.user_id, label, batch))
+    if not res and len(res) > 0 and len(res[0][0]) > 0:
+        return err_json(f"Label '{label}' already exists.")
+    test_id = res[0][0]
     return jsonify(test_id=str(test_id))
 
 @app.route('/test_data', methods=['POST', 'PUT'])
