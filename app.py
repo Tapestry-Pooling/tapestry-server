@@ -4,6 +4,7 @@ from functools import wraps
 import lmdb
 import logging
 import numpy as np
+import orjson
 import os
 import psycopg2
 from psycopg2 import pool
@@ -165,9 +166,12 @@ def publish_message(topic, message, subject=None):
         return
     SNS_CLIENT.publish(TopicArn=topic, Message=message, Subject=subject)
 
+def validate_test_upload(batch, test_data):
+    pass
+
 def process_test_upload(test_id, batch , vector):
     try:
-        return expt.get_test_results(batch, np.float32(vector))
+        return expt.get_test_results(MLABELS[batch], np.float32(vector))
     except Exception as e:
         app.logger.error("Error occured" + str(e))
         return {"error" : str(e)}
@@ -236,15 +240,30 @@ def user_dashboard(user_id):
     result = select(user_sql, (g.user_id,))
     return result
 
+@app.route('/start_test', methods=['POST'])
+@requires_auth
+def start_test():
+    payload_json = request.json
+    batch = payload_json.get('batch', "").strip()
+    label = payload_json.get('label', "").strip()
+    if label == "" or label is None or label.isspace or batch == "" or batch.isspace() or batch is None:
+        return err_json("Empty test label or batch size")
+    test_uploads_sql = "insert into test_uploads (user_id, label, batch_size) values (%s, %s, %s) returning id;"
+    test_id = execute_sql(test_uploads_sql, (g.user_id, label, batch), one_row=True)[0]
+    return jsonify(test_id=str(test_id))
 
 @app.route('/test_data', methods=['PUT'])
 @requires_auth
 def modify_test_data():
-    payload = request.json
-    test_id = int(payload['test_id'])
-    test_data = payload['test_data']
-    if test_id is None or test_data is None or len(test_data) not in VECTOR_SIZES:
-        return err_json("Invalid test id or test data")
+    payload_json = request.json
+    test_id = int(payload_json['test_id'])
+    test_data = payload_json.get('test_data', [])
+    batch = payload_json.get('batch', "").strip()
+    lp = len(test_data)
+    if not verify_batch_dimensions(batch, lp) or lp not in VECTOR_SIZES:
+        err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
+        app.logger.error(err_msg)
+        return err_json(err_msg)
     update_sql = "update test_uploads set test_data = %s where id = %s and user_id = %s returning id;"
     res = execute_sql(update_sql, (test_data, test_id, g.user_id))
     if res:
@@ -257,30 +276,41 @@ def modify_test_data():
 @requires_auth
 def upload_test_data():
     payload_json = request.json
-    payload = payload_json.get('test_data', [])
+    test_id = int(payload_json['test_id'])
+    test_data = payload_json.get('test_data', [])
     batch = payload_json.get('batch', "").strip()
     if batch == "" or batch.isspace or batch not in MLABELS:
         return err_json("Invalid batch size : '" + batch + "'")
-    # payload is a float array
-    # length check on payload to see if it falls in one of the test matrices
-    lp = len(payload)
+    lp = len(test_data)
     if not verify_batch_dimensions(batch, lp) or lp not in VECTOR_SIZES:
         err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
         app.logger.error(err_msg)
         return err_json(err_msg)
     # Insert into test_uploads
-    test_uploads_sql = "insert into test_uploads (user_id, test_data) values (%s, %s) returning id;"
-    test_id = execute_sql(test_uploads_sql, (g.user_id, payload), one_row=True)[0]
-    mresults = process_test_upload(batch, payload)
-    # TODO : save result. For now, saving dummy payload
+    test_uploads_sql ="update test_uploads set batch_end_time = now(), test_data = %s where id = %s and user_id = %s returning id;"
+    test_id = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id), one_row=True)[0]
+    mresults = process_test_upload(batch, test_data)
     if "error" in mresults:
-        # TODO : Notify error
+        err_msg = f"""
+        {test_id} failed at {time.ctime()}
+        Batch size: {batch}
+        Matrix used: {MLABELS[batch]}
+        Error summary:
+        {mresults["error"]}
+        """
+        publish_message(TEST_ARN, err_msg, "Test upload failure")
         return err_json("Error occured while processing test upload. Don't worry! We will try again soon!")
     app.logger.info(mresults["result_string"])
     test_results_sql = "insert into test_results (test_id, result_data ) values (%s, %s) returning test_id;"
-    execute_sql(test_results_sql, (test_id, [1 for x in range(40)]))
-    # TODO : Notify success
-    succ_msg = f""
+    execute_sql(test_results_sql, orjson.dumps(mresults))  
+    succ_msg = f"""
+    {test_id} successful at {time.ctime()}
+    Batch size: {batch}
+    Matrix used: {MLABELS[batch]}
+    Result summary:
+    {mresults["result_string"]}
+    """
+    publish_message(TEST_ARN, succ_msg, "Test upload success")
     return jsonify(test_id=str(test_id))
 
 @app.route('/batch_data', methods=['GET'])
