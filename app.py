@@ -44,6 +44,7 @@ MATRICES = expt.get_matrix_labels_and_matrices()
 VECTOR_SIZES = [int(k.split("x")[0]) for k in MLABELS]
 BATCH_SIZES = {k : f'{k.split("x")[1]} Samples ( {k.split("x")[0]} Tests)' for k in MLABELS}
 GRID_JSON, CELL_JSON = grid.generate_grid_and_cell_data_json(MLABELS, MATRICES)
+BATCH_JSON = orjson.dumps(BATCH_SIZES)
 
 # App Version
 MIN_VERSION = "1.0"
@@ -180,12 +181,43 @@ def publish_message(topic, message, subject=None):
 def validate_test_upload(batch, test_data):
     pass
 
-def process_test_upload(test_id, batch , vector):
+def process_test_upload(test_id, batch, vector):
     try:
         return expt.get_test_results(MLABELS[batch], np.float32(vector))
     except Exception as e:
         app.logger.error("Error occured" + str(e))
         return {"error" : str(e)}
+
+def notify_test_success(test_id, batch, mresults):
+    succ_msg = f"""
+    {test_id} successful at {time.ctime()}
+    Batch size: {batch}
+    Matrix used: {MLABELS[batch]}
+    Result summary:
+    {mresults["result_string"]}
+    """
+    publish_message(TEST_ARN, succ_msg, "Test upload success")
+
+def notify_test_failure(test_id, batch, mresults):
+    err_msg = f"""
+    {test_id} failed at {time.ctime()}
+    Batch size: {batch}
+    Matrix used: {MLABELS[batch]}
+    Error summary:
+    {mresults["error"]}
+    """
+    publish_message(TEST_ARN, err_msg, "Test upload failure")
+
+def post_process_results(test_id, batch, mresults):
+    if "error" in mresults:
+        notify_test_failure(test_id, batch, mresults)
+        return err_json("Error occured while processing test upload. Don't worry! We will try again soon!")
+    app.logger.info(mresults["result_string"])
+    test_results_sql = """insert into test_results (test_id, matrix_label, result_data ) values (%s, %s, %s) on conflict(test_id) 
+    do update set updated_at = now(), matrix_label=excluded.matrix_label, result_data=excluded.result_data returning test_id;"""
+    execute_sql(test_results_sql, (test_id, MLABELS[batch], orjson.dumps(mresults)))
+    notify_test_success(test_id, batch, mresults)
+    return jsonify(test_id=str(test_id), results=mresults["result_string"])
 
 """
     Endpoints here
@@ -268,18 +300,20 @@ def modify_test_data():
     test_id = int(payload_json['test_id'])
     test_data = payload_json.get('test_data', [])
     batch = payload_json.get('batch', "").strip()
+    if batch == "" or batch.isspace or batch not in MLABELS:
+        return err_json(f"Invalid batch size : {batch}")
     lp = len(test_data)
     if not verify_batch_dimensions(batch, lp) or lp not in VECTOR_SIZES:
         err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
         app.logger.error(err_msg)
         return err_json(err_msg)
-    update_sql = "update test_uploads set test_data = %s where id = %s and user_id = %s returning id;"
+    update_sql = "update test_uploads set updated_at = now(), test_data = %s where id = %s and user_id = %s returning id;"
     res = execute_sql(update_sql, (test_data, test_id, g.user_id))
-    if res:
-        updated_id = res[0][0]
-        return jsonify(test_id=updated_id)
-    return err_json("Test id not found")
-
+    if not res and len(res) > 0 and len(res[0][0]) > 0:
+        return err_json(f"Test id not found {test_id}")
+    updated_id = res[0][0]
+    mresults = process_test_upload(batch, test_data)
+    return post_process_results(test_id, batch, test_data)
 
 @app.route('/test_data', methods=['POST'])
 @requires_auth
@@ -289,41 +323,23 @@ def upload_test_data():
     test_data = payload_json.get('test_data', [])
     batch = payload_json.get('batch', "").strip()
     if batch == "" or batch.isspace or batch not in MLABELS:
-        return err_json("Invalid batch size : '" + batch + "'")
+        return err_json(f"Invalid batch size : {batch}")
     lp = len(test_data)
     if not verify_batch_dimensions(batch, lp) or lp not in VECTOR_SIZES:
         err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
         app.logger.error(err_msg)
         return err_json(err_msg)
     test_uploads_sql ="update test_uploads set batch_end_time = now(), test_data = %s where id = %s and user_id = %s returning id;"
-    test_id = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id), one_row=True)[0]
+    res = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id))
+    if not res and len(res) > 0 and len(res[0][0]) > 0:
+        return err_json(f"Test id not found {test_id}")
+    updated_id = res[0][0]
     mresults = process_test_upload(batch, test_data)
-    if "error" in mresults:
-        err_msg = f"""
-        {test_id} failed at {time.ctime()}
-        Batch size: {batch}
-        Matrix used: {MLABELS[batch]}
-        Error summary:
-        {mresults["error"]}
-        """
-        publish_message(TEST_ARN, err_msg, "Test upload failure")
-        return err_json("Error occured while processing test upload. Don't worry! We will try again soon!")
-    app.logger.info(mresults["result_string"])
-    test_results_sql = "insert into test_results (test_id, result_data ) values (%s, %s) returning test_id;"
-    execute_sql(test_results_sql, orjson.dumps(mresults))  
-    succ_msg = f"""
-    {test_id} successful at {time.ctime()}
-    Batch size: {batch}
-    Matrix used: {MLABELS[batch]}
-    Result summary:
-    {mresults["result_string"]}
-    """
-    publish_message(TEST_ARN, succ_msg, "Test upload success")
-    return jsonify(test_id=str(test_id))
+    return post_process_results(test_id, batch, test_data)
 
 @app.route('/batch_data', methods=['GET'])
 def batch_data():
-    return jsonify(data=BATCH_SIZES)
+    return BATCH_JSON, 200, {CONTENT_TYPE : CONTENT_JSON}
 
 @app.route('/grid_data/<batch_size>', methods=['GET'])
 def screen_data(batch_size):
