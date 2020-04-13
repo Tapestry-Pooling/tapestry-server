@@ -287,8 +287,8 @@ def start_test():
     payload_json = request.json
     batch = payload_json.get('batch', "").strip()
     label = payload_json.get('label', "").strip()
-    if label == "" or label is None or label.isspace() or batch == "" or batch.isspace() or batch is None:
-        return err_json("Empty test label or batch size")
+    if label == "" or label.isspace() or batch == "" or batch.isspace() or batch not in MLABELS:
+        return err_json(f"Empty test label or invalid batch size {batch}")
     test_uploads_sql = "insert into test_uploads (user_id, label, batch_size) values (%s, %s, %s) returning id;"
     test_id = execute_sql(test_uploads_sql, (g.user_id, label, batch), one_row=True)[0]
     return jsonify(test_id=str(test_id))
@@ -300,7 +300,7 @@ def upload_test_data():
     test_id = int(payload_json['test_id'])
     test_data = payload_json.get('test_data', [])
     batch = payload_json.get('batch', "").strip()
-    if batch == "" or batch.isspace or batch not in MLABELS:
+    if batch == "" or batch.isspace() or batch not in MLABELS:
         return err_json(f"Invalid batch size : {batch}")
     lp = len(test_data)
     if not verify_batch_dimensions(batch, lp) or lp not in VECTOR_SIZES:
