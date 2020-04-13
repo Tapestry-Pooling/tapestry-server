@@ -124,7 +124,7 @@ def check_auth(request):
     auth_token = headers.get('X-Auth', "")
     mob = headers.get('X-Mob', "")
     reg_phone = normalize_phone(mob)
-    app.logger.info(f'Mob : {reg_phone}\tToken: {auth_token}')
+    app.logger.info(f'Mob : {reg_phone}  Token: {auth_token}')
     if auth_token is None or auth_token == '' or reg_phone is None:
         return False
     raw_data = None
