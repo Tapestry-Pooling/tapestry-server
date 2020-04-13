@@ -273,7 +273,7 @@ def validate_otp():
         txn.put(reg_phone.encode('utf8'), auth_value.encode('utf8'))
     return jsonify(user_id=user_id, token=token, phone=reg_phone)
 
-@app.route('/dashboard/', methods=['GET'])
+@app.route('/dashboard', methods=['GET'])
 @requires_auth
 def user_dashboard():
     pagination = request.args.get('pagination', '')
