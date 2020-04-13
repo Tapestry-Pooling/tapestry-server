@@ -300,7 +300,6 @@ def upload_test_data():
     test_id = int(payload_json['test_id'])
     test_data = payload_json.get('test_data', [])
     batch = payload_json.get('batch', "").strip()
-    app.logger.info(f'{batch} {MLABELS}')
     if batch == "" or batch.isspace() or batch not in MLABELS:
         return err_json(f"Invalid batch size : {batch}")
     lp = len(test_data)
@@ -314,6 +313,8 @@ def upload_test_data():
         return err_json(f"Test id not found {test_id}")
     updated_id = res[0][0]
     mresults = process_test_upload(test_id, batch, test_data)
+    for k in mresults:
+        app.logger.info(f'{k}, {type(k)}')
     return post_process_results(test_id, batch, mresults)
 
 @app.route('/batch_data', methods=['GET'])
