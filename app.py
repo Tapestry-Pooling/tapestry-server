@@ -27,6 +27,7 @@ import get_test_results as expt
 
 app = Flask(__name__)
 app.secret_key = 'covid-19-testing-backend'
+psycopg2.extras.register_default_jsonb(loads=orjson.loads, globally=True)
 
 # Response headers
 CONTENT_TYPE = "Content-Type"
@@ -197,7 +198,7 @@ def notify_test_success(test_id, batch, mresults):
     Result summary:
     {mresults["result_string"]}
     """
-    publish_message(TEST_ARN, succ_msg, "Test upload success")
+    publish_message(PROD_ARN, succ_msg, "Test upload success")
 
 def notify_test_failure(test_id, batch, mresults):
     err_msg = f"""
@@ -207,7 +208,7 @@ def notify_test_failure(test_id, batch, mresults):
     Error summary:
     {mresults["error"]}
     """
-    publish_message(TEST_ARN, err_msg, "Test upload failure")
+    publish_message(PROD_ARN, err_msg, "Test upload failure")
 
 def post_process_results(test_id, batch, mresults):
     if "error" in mresults:
@@ -317,6 +318,18 @@ def upload_test_data():
     updated_id = res[0][0]
     mresults = process_test_upload(test_id, batch, test_data)
     return post_process_results(test_id, batch, mresults)
+
+@app.route('/results/<test_id>', methods=['GET'])
+@requires_auth
+def fetch_test_results(test_id):
+    test_id = int(test_id)
+    result_sql = "select r.test_id, r.result_data, r.matrix_label, u.batch_size, u.label from test_results r, test_uploads u where r.test_id = u.id and u.user_id = %s and u.id = %s"
+    res = select(result_sql, (g.user_id, test_id))
+    if not res and len(res) > 0:
+        return err_json(f"Test not found for test_id : {test_id}")
+    result = res[0]
+    app.logger.info(f'Result: {result}')
+    return jsonify(test_id=test_id, result=result[1]["result_string"], matrix=result[2], batch=result[3], label=result[4])
 
 @app.route('/batch_data', methods=['GET'])
 def batch_data():
