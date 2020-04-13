@@ -314,7 +314,7 @@ def upload_test_data():
         return err_json(f"Test id not found {test_id}")
     updated_id = res[0][0]
     mresults = process_test_upload(test_id, batch, test_data)
-    return post_process_results(test_id, batch, test_data, mresults)
+    return post_process_results(test_id, batch, mresults)
 
 @app.route('/batch_data', methods=['GET'])
 def batch_data():
