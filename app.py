@@ -44,7 +44,7 @@ MATRICES = expt.get_matrix_labels_and_matrices()
 VECTOR_SIZES = [int(k.split("x")[0]) for k in MLABELS]
 BATCH_SIZES = {k : f'{k.split("x")[1]} Samples ( {k.split("x")[0]} Tests)' for k in MLABELS}
 GRID_JSON, CELL_JSON = grid.generate_grid_and_cell_data_json(MLABELS, MATRICES)
-BATCH_JSON = orjson.dumps(BATCH_SIZES)
+BATCH_JSON = orjson.dumps({"data" : BATCH_SIZES})
 
 # App Version
 MIN_VERSION = "1.0"
