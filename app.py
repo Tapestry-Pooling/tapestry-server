@@ -152,8 +152,8 @@ def requires_auth(func):
 def select(query, params):
     try:
         conn = pgpool.getconn()
-        with g.conn.cursor() as cur:
-            app.logger.info("Executing query: " + query)
+        with conn.cursor() as cur:
+            app.logger.info(f"Executing query: {query} with params {params}")
             cur.execute(query, params)
             return cur.fetchall()
     except:
@@ -165,6 +165,7 @@ def execute_sql(query, params, one_row=False):
     try:
         conn = pgpool.getconn()
         with conn.cursor() as cur:
+            app.logger.info(f"Executing query: {query} with params {params}")
             cur.execute(query, params)
             conn.commit()
             if one_row:
