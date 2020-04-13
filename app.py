@@ -314,7 +314,7 @@ def upload_test_data():
     updated_id = res[0][0]
     mresults = process_test_upload(test_id, batch, test_data)
     for k in mresults:
-        app.logger.info(f'{k}, {type(k)}')
+        app.logger.info(f'{k}, {type(mresults[k])}')
     return post_process_results(test_id, batch, mresults)
 
 @app.route('/batch_data', methods=['GET'])
