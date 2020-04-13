@@ -278,7 +278,10 @@ def validate_otp():
 def user_dashboard():
     pagination = request.args.get('pagination', '')
     app.logger.info(f'Pagination : {pagination}')
-    pagination_clause = '' if pagination is None or not pagination or pagination == '' or pagination == 'false' else ' and u.id < %s'
+    pagination_clause = ' and u.id < %s'
+    if pagination is None or not pagination or pagination == '' or pagination == 'false':
+        pagination = 0
+        pagination_clause = ''
     dashboard_sql = f"""select u.id as test_id, u.updated_at, r.test_id, u.test_data 
     from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s {pagination_clause} order by u.id desc limit 50;"""
     res = select(dashboard_sql, (g.user_id, int(pagination)))
