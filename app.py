@@ -293,7 +293,7 @@ def start_test():
         return err_json(f"Empty test label or invalid batch size {batch}")
     test_uploads_sql = "insert into test_uploads (user_id, label, batch_size) values (%s, %s, %s) on conflict(user_id, label) do nothing returning id;"
     res = execute_sql(test_uploads_sql, (g.user_id, label, batch))
-    if not res and len(res) > 0 and len(res[0][0]) > 0:
+    if not res or len(res) == 0:
         return err_json(f"Label '{label}' already exists.")
     test_id = res[0][0]
     return jsonify(test_id=str(test_id))
@@ -314,7 +314,7 @@ def upload_test_data():
         return err_json(err_msg)
     test_uploads_sql ="update test_uploads set batch_end_time = now(), updated_at = now(), test_data = %s where id = %s and user_id = %s returning id;"
     res = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id))
-    if not res and len(res) > 0 and len(res[0][0]) > 0:
+    if not res or len(res) == 0:
         return err_json(f"Test id not found {test_id}")
     updated_id = res[0][0]
     mresults = process_test_upload(test_id, batch, test_data)
@@ -326,7 +326,7 @@ def fetch_test_results(test_id):
     test_id = int(test_id)
     result_sql = "select r.test_id, r.result_data, r.matrix_label, u.batch_size, u.label from test_results r, test_uploads u where r.test_id = u.id and u.user_id = %s and u.id = %s"
     res = select(result_sql, (g.user_id, test_id))
-    if not res and len(res) > 0:
+    if not res or len(res) == 0:
         return err_json(f"Test not found for test_id : {test_id}")
     result = res[0]
     app.logger.info(f'Result: {result}')
