@@ -287,7 +287,7 @@ def start_test():
     payload_json = request.json
     batch = payload_json.get('batch', "").strip()
     label = payload_json.get('label', "").strip()
-    if label == "" or label is None or label.isspace or batch == "" or batch.isspace() or batch is None:
+    if label == "" or label is None or label.isspace() or batch == "" or batch.isspace() or batch is None:
         return err_json("Empty test label or batch size")
     test_uploads_sql = "insert into test_uploads (user_id, label, batch_size) values (%s, %s, %s) returning id;"
     test_id = execute_sql(test_uploads_sql, (g.user_id, label, batch), one_row=True)[0]
