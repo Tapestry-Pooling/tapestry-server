@@ -70,7 +70,6 @@ NOTIFICATIONS_ENABLED = False
     Utils
 """
 
-
 def curr_epoch():
     return int(time.time())
 
@@ -267,7 +266,6 @@ def validate_otp():
     if data[0] != otp or curr_time - int(data[1]) > 900:
         return err_json("Invalid or expired OTP")
     token = secrets.token_urlsafe(16)
-    # DB upsert
     upsert_sql = "insert into users(phone) values (%s) on conflict(phone) do update set phone=excluded.phone returning id;"
     user_id = execute_sql(upsert_sql, (reg_phone,), one_row=True)[0]
     auth_value = str(user_id) + ":" + token + ":" + str(curr_time)
@@ -278,10 +276,14 @@ def validate_otp():
 @app.route('/dashboard/', methods=['GET'])
 @requires_auth
 def user_dashboard():
-    user_sql = """select t1.id as test_id, t1.updated_at, t1.test_data, t2.result_data 
-        from test_uploads t1, test_results t2 where t1.id = t2.test_id and t1.user_id = %s order by t1.updated_at desc;"""
-    result = select(user_sql, (g.user_id,))
-    return result
+    # TODO pagination
+    dashboard_sql = """select u.id as test_id, u.updated_at, r.test_id, u.test_data 
+    from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s order by u.id desc;"""
+    res = select(dashboard_sql, (g.user_id,))
+    if not res or len(res) == 0:
+        return jsonify(data=[])
+    results = [{"test_id" : r[0], "updated_at" : r[1], "results_available" : r[2] != None, "test_data": r[3]} for r in res]
+    return jsonify(data=results)
 
 @app.route('/start_test', methods=['POST'])
 @requires_auth
