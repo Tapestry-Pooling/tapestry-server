@@ -191,7 +191,7 @@ def process_test_upload(test_id, batch, vector):
 
 def notify_test_success(test_id, batch, mresults):
     succ_msg = f"""
-    {test_id} successful at {time.ctime()}
+    Test ID: {test_id} successful at {time.ctime()}
     Batch size: {batch}
     Matrix used: {MLABELS[batch]}
     Result summary:
@@ -201,7 +201,7 @@ def notify_test_success(test_id, batch, mresults):
 
 def notify_test_failure(test_id, batch, mresults):
     err_msg = f"""
-    {test_id} failed at {time.ctime()}
+    Test ID: {test_id} failed at {time.ctime()}
     Batch size: {batch}
     Matrix used: {MLABELS[batch]}
     Error summary:
