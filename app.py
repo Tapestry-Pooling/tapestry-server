@@ -276,14 +276,19 @@ def validate_otp():
 @app.route('/dashboard/', methods=['GET'])
 @requires_auth
 def user_dashboard():
-    # TODO pagination
-    dashboard_sql = """select u.id as test_id, u.updated_at, r.test_id, u.test_data 
-    from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s order by u.id desc;"""
-    res = select(dashboard_sql, (g.user_id,))
+    pagination = request.args.get('pagination', '')
+    app.logger.info(f'Pagination : {pagination}')
+    pagination_clause = '' if pagination is None or not pagination or pagination == '' or pagination == 'false' else ' and u.id < %s'
+    dashboard_sql = f"""select u.id as test_id, u.updated_at, r.test_id, u.test_data 
+    from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s {pagination_clause} order by u.id desc limit 50;"""
+    res = select(dashboard_sql, (g.user_id, int(pagination)))
+    last_pag = False
     if not res or len(res) == 0:
-        return jsonify(data=[])
+        return jsonify(data=[], pagination=last_pag)
     results = [{"test_id" : r[0], "updated_at" : r[1], "results_available" : r[2] != None, "test_data": r[3]} for r in res]
-    return jsonify(data=results)
+    if len(results) >= 50:
+        last_pag = str(results[-1]["test_id"])
+    return jsonify(data=results, pagination=last_pag)
 
 @app.route('/start_test', methods=['POST'])
 @requires_auth
