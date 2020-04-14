@@ -188,37 +188,39 @@ def process_test_upload(test_id, batch, vector):
         app.logger.error("Error occured" + str(e))
         return {"error" : str(e)}
 
-def notify_test_success(test_id, batch, mresults):
+def notify_test_success(test_id, batch, mresults, test_data):
     succ_msg = f"""
     Test ID: {test_id} successful at {time.ctime()}
     Batch size: {batch}
     Matrix used: {MLABELS[batch]}
+    CT Vector: {test_data}
     Result summary:
     {mresults["result_string"]}
     """
     publish_message(PROD_ARN, succ_msg, "Test upload success")
 
-def notify_test_failure(test_id, batch, mresults):
+def notify_test_failure(test_id, batch, mresults, test_data):
     err_msg = f"""
     Test ID: {test_id} failed at {time.ctime()}
     Batch size: {batch}
     Matrix used: {MLABELS[batch]}
+    CT Vector: {test_data}
     Error summary:
     {mresults["error"]}
     """
     publish_message(PROD_ARN, err_msg, "Test upload failure")
 
-def post_process_results(test_id, batch, mresults):
+def post_process_results(test_id, batch, mresults, test_data):
     if "error" in mresults:
-        notify_test_failure(test_id, batch, mresults)
+        notify_test_failure(test_id, batch, mresults, test_data)
         return err_json("Error occured while processing test upload. Don't worry! We will try again soon!")
     if "x" in mresults:
         mresults["x"] = mresults["x"].tolist()
-    app.logger.info(mresults["result_string"])
+    app.logger.info(f'{mresults}')
     test_results_sql = """insert into test_results (test_id, matrix_label, result_data ) values (%s, %s, %s) on conflict(test_id) 
     do update set updated_at = now(), matrix_label=excluded.matrix_label, result_data=excluded.result_data returning test_id;"""
     execute_sql(test_results_sql, (test_id, MLABELS[batch], Json(mresults, dumps=orjson.dumps)))
-    notify_test_success(test_id, batch, mresults)
+    notify_test_success(test_id, batch, mresults, test_data)
     return jsonify(test_id=str(test_id), results=mresults["result_string"])
 
 """
@@ -349,7 +351,7 @@ def upload_test_data():
         return err_json(f"Test id not found {test_id}")
     updated_id = res[0][0]
     mresults = process_test_upload(test_id, batch, test_data)
-    return post_process_results(test_id, batch, mresults)
+    return post_process_results(test_id, batch, mresults, test_data)
 
 @app.route('/results/<test_id>', methods=['GET'])
 @requires_auth

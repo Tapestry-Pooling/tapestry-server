@@ -41,7 +41,7 @@ function formPostHandler(elementName, url, success, error) {
 document.getElementById("TestUpload").addEventListener("click", function(){
         if (window.authToken && window.phone) {
                 const XHR = new XMLHttpRequest();
-                XHR.open( "POST", "/test_data" );
+                XHR.open( "POST", "/api/test_data" );
                 XHR.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
                 XHR.setRequestHeader("X-Auth", window.authToken);
                 XHR.setRequestHeader("X-Mob", window.phone);
