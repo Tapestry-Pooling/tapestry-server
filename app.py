@@ -219,7 +219,7 @@ def post_process_results(test_id, batch, mresults, test_data):
     app.logger.info(f'{mresults}')
     test_results_sql = """insert into test_results (test_id, matrix_label, result_data ) values (%s, %s, %s) on conflict(test_id) 
     do update set updated_at = now(), matrix_label=excluded.matrix_label, result_data=excluded.result_data returning test_id;"""
-    execute_sql(test_results_sql, (test_id, MLABELS[batch], Json(mresults, dumps=orjson.dumps)))
+    execute_sql(test_results_sql, (test_id, MLABELS[batch], Json(mresults)))
     notify_test_success(test_id, batch, mresults, test_data)
     return jsonify(test_id=str(test_id), results=mresults["result_string"])
 
