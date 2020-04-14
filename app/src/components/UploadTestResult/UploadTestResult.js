@@ -7,7 +7,7 @@ const UploadTestResult = (props) => {
   const { result } = props;
   return (
     <div className="upload-test-result">
-      {result}
+      <div dangerouslySetInnerHTML={{ __html: result.replace(/[\n\r]/g, '<div class="upload-test-result-break"></div>') }} />
     </div>
   );
 };

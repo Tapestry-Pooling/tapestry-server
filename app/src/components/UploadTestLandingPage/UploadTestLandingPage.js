@@ -73,6 +73,9 @@ const UploadTestLandingPage = (props) => {
   return (
     <div className="upload-test-landing-page">
       {testsData.map((data) => (<CTCard key={data.test_id} {...data} />))}
+      {testsData.length === 0
+        ? <div className="upload-test-landing-page-empty">No tests done yet</div>
+        : ''}
     </div>
   );
 };
