@@ -13,7 +13,7 @@ const CTInput = (props) => {
         {cell.label}
       </div>
       <div className="ct-input-box-input">
-        <input type="text" name={cell.label} value={cell.value} onChange={handleChangeCellValue} />
+        <input type="tel" name={cell.label} value={cell.value} onChange={handleChangeCellValue} />
         {' Ct'}
       </div>
     </div>
