@@ -283,7 +283,8 @@ def user_dashboard():
     if pagination is None or not pagination or pagination == '' or pagination == 'false':
         pagination_clause = ''
         pagination = 0
-    dashboard_sql = f"""select u.id as test_id, u.updated_at, r.test_id, u.test_data, u.label, u.batch_size  
+    dashboard_sql = f"""select u.id as test_id, u.updated_at, r.test_id, u.test_data, u.label, u.batch_size, 
+    extract(minute from (u.batch_end_time - u.batch_start_time)) as test_duration_minutes 
     from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s {pagination_clause} order by u.id desc limit 50;"""
     params = (g.user_id,) if pagination == 0 else (g.user_id, int(pagination))
     res = select(dashboard_sql, params)
