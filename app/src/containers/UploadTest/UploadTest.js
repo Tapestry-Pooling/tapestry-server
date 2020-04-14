@@ -147,7 +147,7 @@ class UploadTest extends React.Component {
     const { history } = this.props;
     const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
     const { batch } = testData;
-    uploadTestDataAPI(authToken, phone, parseInt(testId, 10),
+    uploadTestDataAPI(authToken, phone, testId,
       batch, cellData.map((cell) => (parseFloat(cell.value))))
       .then((response) => {
         console.log('data uploaded! ', response.data);
