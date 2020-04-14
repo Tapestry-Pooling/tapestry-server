@@ -320,7 +320,7 @@ def end_test():
     test_id = payload_json.get('test_id', "").strip()
     if test_id == "" or test_id.isspace() or not test_id.isdigit():
         return err_json(f"Invalid test id {test_id}")
-    test_uploads_sql = "update test_uploads set batch_end_time = now() where user_id = %s and id = %s returning id;"
+    test_uploads_sql = "update test_uploads set batch_end_time = now(), updated_at = now() where user_id = %s and id = %s returning id;"
     res = execute_sql(test_uploads_sql, (g.user_id, int(test_id)))
     if not res or len(res) == 0:
         return err_json(f"Test id {test_id} not found")
