@@ -1,16 +1,15 @@
-/* const XHR = new XMLHttpRequest();
-                XHR.open( "GET", "/grid_data/46x96" );
-                XHR.addEventListener("load", (e) =>  {
-                    var j = JSON.parse(e.target.responseText);
-                    window.gridData = j.gridData;
-                });
-                XHR.send(); */
-var cells = [ "B11", "E1", "F5", "F11", "G9" ]
-const ac = 'A'.charCodeAt(0);
-function pos(s) {
-    return [s.charCodeAt(0) - ac, parseInt(s.substr(1,)) -1 ]
-}
-
+let batch_size = window.location.pathname.split("batch_")[1].split(".")[0]
+const XHR = new XMLHttpRequest();
+XHR.open( "GET", "/api/grid_data/"+batch_size );
+XHR.addEventListener("load", (e) => {
+    var j = JSON.parse(e.target.responseText);
+    gridData = j.gridData;
+    screens = gridData.map((o) => o.screenData);
+    for (let i = 0; i < screens.length; i++) {
+        screen_maker(batch_size, i + 1, screens[i]);
+    }
+});
+XHR.send();
 function ain(y, x) {
     return String.fromCharCode(65+y) + (x+1)
 }
@@ -27,7 +26,7 @@ function gridObj(cells) {
 }
 
 function drawGrid(cells, screenName, comp) {
-    var draw = SVG().addTo(comp).size(800, 650);
+    var draw = SVG().addTo(comp).size('100%', '100%');
     var baseX = 40
     var baseY = 160;
     var dim = 60;
@@ -65,4 +64,12 @@ function drawGrid(cells, screenName, comp) {
     return draw;
 }
 
-var svg1 = drawGrid(cells, "Sample 01", "#lol1").svg();
+function screen_maker(batch_size, num, cells) {
+    var g = document.createElement("div");
+    var el_id = "batch_" + batch_size + num
+    g.setAttribute("id", el_id);
+    g.setAttribute("style", "height: 650px;")
+    var body = document.getElementsByTagName("BODY")[0];
+    body.appendChild(g);
+    var svg1 = drawGrid(cells, "Sample " + num, "#" + el_id).svg();
+}
