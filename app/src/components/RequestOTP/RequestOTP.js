@@ -15,7 +15,7 @@ const RequestOTP = (props) => {
           Phone number for verification
         </div>
         <span className="request-otp__input-group-phone-prepend">+91</span>
-        <input type="text" value={phoneNumber} name="phoneNumber" onChange={handleRequestOTPInput} />
+        <input type="tel" value={phoneNumber} name="phoneNumber" onChange={handleRequestOTPInput} />
       </div>
       <div className="request-otp__input-group">
         <div className="request-otp__input-group-label">

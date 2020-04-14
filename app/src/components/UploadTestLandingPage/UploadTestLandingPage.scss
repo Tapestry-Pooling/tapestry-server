@@ -6,7 +6,11 @@
   padding: 20px;
   margin: -20px;
   background: #eee;
-  height: 100%;
+  height: calc(100% + 40px);
+  &-empty {
+    text-align: center;
+    margin-top: 30px;
+  }
 }
 
 .ct-card {
