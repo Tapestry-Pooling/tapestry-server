@@ -285,7 +285,8 @@ def user_dashboard():
         pagination = 0
     dashboard_sql = f"""select u.id as test_id, u.updated_at, r.test_id, u.test_data, u.label, u.batch_size, 
     extract(minute from (u.batch_end_time - u.batch_start_time)) as test_duration_minutes 
-    from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s {pagination_clause} order by u.id desc limit 50;"""
+    from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s and u.batch_end_time is not null
+    {pagination_clause} order by u.id desc limit 50;"""
     params = (g.user_id,) if pagination == 0 else (g.user_id, int(pagination))
     res = select(dashboard_sql, params)
     last_pag = False
@@ -312,11 +313,27 @@ def start_test():
     test_id = res[0][0]
     return jsonify(test_id=str(test_id))
 
+@app.route('/end_test', methods=['POST'])
+@requires_auth
+def end_test():
+    payload_json = request.json
+    test_id = payload_json.get('test_id', "").strip()
+    if test_id == "" or test_id.isspace() or not test_id.isdigit():
+        return err_json(f"Invalid test id {test_id}")
+    test_uploads_sql = "update test_uploads set batch_end_time = now() where user_id = %s and id = %s returning id;"
+    res = execute_sql(test_uploads_sql, (g.user_id, int(test_id)))
+    if not res or len(res) == 0:
+        return err_json(f"Test id {test_id} not found")
+    test_id = res[0][0]
+    return jsonify(test_id=str(test_id))
+
 @app.route('/test_data', methods=['POST', 'PUT'])
 @requires_auth
 def upload_test_data():
     payload_json = request.json
-    test_id = int(payload_json['test_id'])
+    test_id = payload_json.get('test_id', "").strip()
+    if test_id == "" or test_id.isspace() or not test_id.isdigit():
+        return err_json(f"Invalid test id {test_id}")
     test_data = payload_json.get('test_data', [])
     batch = payload_json.get('batch', "").strip()
     if batch == "" or batch.isspace() or batch not in MLABELS:
@@ -326,7 +343,7 @@ def upload_test_data():
         err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
         app.logger.error(err_msg)
         return err_json(err_msg)
-    test_uploads_sql ="update test_uploads set batch_end_time = now(), updated_at = now(), test_data = %s where id = %s and user_id = %s returning id;"
+    test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s where id = %s and user_id = %s returning id;"
     res = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id))
     if not res or len(res) == 0:
         return err_json(f"Test id not found {test_id}")
