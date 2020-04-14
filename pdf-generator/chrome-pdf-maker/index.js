@@ -21,7 +21,6 @@
                         headless: chromium.headless,
                     });
 
-
                     let page = await browser.newPage();
                     await page.goto(url, {
                         waitUntil: ["networkidle0", "load", "domcontentloaded"]
