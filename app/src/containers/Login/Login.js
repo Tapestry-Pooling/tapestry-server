@@ -64,7 +64,7 @@ class Login extends React.Component {
               otp: '',
               email: '',
             });
-            history.replace(`/app/login/success?authToken=${response.data.token}`);
+            history.replace(`/app/login/success?authToken=${response.data.token}&phone=${phoneNumber}`);
           } else {
             this.setState({
               errorMessage: response.data.error,
