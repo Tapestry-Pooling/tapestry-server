@@ -1,6 +1,6 @@
 [Unit]
 Description=Gunicorn daemon for covid-testing-backend
-After=network.target
+After=postgresql.service
 
 [Service]
 User=ubuntu
