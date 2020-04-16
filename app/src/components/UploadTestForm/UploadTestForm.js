@@ -13,8 +13,17 @@ const CTInput = (props) => {
         {cell.label}
       </div>
       <div className="ct-input-box-input">
-        <input type="tel" name={cell.label} value={cell.value} onChange={handleChangeCellValue} />
-        {' Ct'}
+        <div className="ct-input-box-input-checkbox">
+          <input type="checkbox" name={cell.label} checked={cell.isChecked} onChange={handleChangeCellValue} />
+          {' '}
+          Threshold not reached
+        </div>
+        {cell.value !== '100' && (
+        <div>
+          <input type="tel" name={cell.label} value={cell.value} onChange={handleChangeCellValue} />
+          {' Ct'}
+        </div>
+        )}
       </div>
     </div>
   );
@@ -23,6 +32,7 @@ const CTInput = (props) => {
 CTInput.propTypes = {
   cell: PropTypes.shape({
     label: PropTypes.string,
+    isChecked: PropTypes.bool,
     value: PropTypes.string,
   }),
   handleChangeCellValue: PropTypes.func.isRequired,
