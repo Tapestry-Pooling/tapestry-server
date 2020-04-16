@@ -49,7 +49,7 @@ class UploadTest extends React.Component {
       getCellDataAPI(authToken, testData.batch)
         .then((response) => {
           this.setState({
-            cellData: response.data.cellData.map((label, index) => ({ label, value: testData.test_data ? testData.test_data[index].toString() : '' })),
+            cellData: response.data.cellData.map((label, index) => ({ label, isChecked: (testData.test_data === undefined || testData.test_data[index] === 100), value: testData.test_data ? testData.test_data[index].toString() : '100' })),
             testId,
             testsData: testsDataLocal,
           }, this.checkCtaDisabled);
@@ -91,7 +91,7 @@ class UploadTest extends React.Component {
           .then((response) => {
             this.setState({
               testId,
-              cellData: response.data.cellData.map((label, index) => ({ label, value: testData.test_data ? testData.test_data[index].toString() : '' })),
+              cellData: response.data.cellData.map((label, index) => ({ label, isChecked: (testData.test_data === undefined || testData.test_data[index] === 100), value: testData.test_data ? testData.test_data[index].toString() : '100' })),
             }, this.checkCtaDisabled);
           });
       } else if (/upload-test\/result/.test(pathname)) {
@@ -107,14 +107,19 @@ class UploadTest extends React.Component {
   }
 
   handleChangeCellValue = (e) => {
-    const { name, value } = e.target;
-    if (!value || (/^\d+(\.\d{0,5})?$/.test(value) && parseFloat(value) >= 0 && parseFloat(value) <= 50)) {
+    const { name, value, type } = e.target;
+    let isCheckbox = false;
+    if (type === 'checkbox') {
+      isCheckbox = true;
+    }
+    if (isCheckbox || !value || (/^\d+(\.\d{0,5})?$/.test(value) && parseFloat(value) >= 0 && parseFloat(value) <= 50)) {
       const { cellData } = this.state;
       const cellDataNew = [...cellData];
       const cellIndex = cellData.findIndex((cell) => (cell.label === name));
       cellDataNew[cellIndex] = {
         label: name,
-        value,
+        isChecked: isCheckbox ? !cellData[cellIndex].isChecked : cellData[cellIndex].isChecked,
+        value: isCheckbox ? (!cellData[cellIndex].isChecked ? '100' : '0') : value,
       };
       this.setState({
         cellData: cellDataNew,

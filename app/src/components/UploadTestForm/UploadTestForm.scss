@@ -20,13 +20,20 @@
   padding: 20px 0;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   border-bottom: 2px solid #eee;
   &-label {
     font-weight: 600;
     flex: 1;
   }
   &-input {
+    &-checkbox {
+      margin-bottom: 10px;
+      input {
+        vertical-align: middle;
+        margin-top: -2px;
+      }
+    }
     text-align: right;
     flex: 1;
     color: #333;
