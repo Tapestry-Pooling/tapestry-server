@@ -4,18 +4,9 @@
 import grid
 import orjson
 import sys
-# Load the matrices from "compute" folder
-EXPT_DIR="./compute/"
-sys.path.append(EXPT_DIR)
-import config
-config.root_dir=EXPT_DIR
-import get_test_results as expt
 
 # VERSION_FILE
 VERSION_FILE = "versioning.json"
-# Matrices
-MLABELS = expt.get_matrix_sizes_and_labels()
-MATRICES = expt.get_matrix_labels_and_matrices()
 
 def readable_string(batch, num_infected, infection_rate):
     m,n = grid.parse_batch(batch)
@@ -34,7 +25,7 @@ def update_cache(mlabels, matrices, jfile):
         m,n,i = mlabels[batch]
         mat = matrices[m]
         g, c = grid.generate_grid_and_cell_data(batch, mat)
-        f[batch] = {m : {"num_infected" : n, "infection_rate" : i, "readable" : readable_string(batch, n, i), "gridData" : g, "cellData" : c}}
+        f[batch] = {m : {"num_infected" : n, "infection_rate" : i, "readable" : readable_string(batch, n, i), "gridData" : g, "cellData" : c, "matrix" : m}}
     ob = set(old_data)
     nb = set(f)
     for batch in old_data:
@@ -83,6 +74,32 @@ def update_cache(mlabels, matrices, jfile):
     with open(jfile, "wb") as outfile:
         outfile.write(jstr)
 
+def load_cache():
+    data = {}
+    try:
+        with open(VERSION_FILE, 'rb') as reader:
+            data = orjson.loads(reader.read())
+    except Exception as e:
+        raise
+    active_batches = {}
+    all_batches = {}
+    for batch in data:
+        meta = data[batch]["metadata"]
+        mats = meta["matrices"]
+        is_active = meta["active"]
+        mat_names = set(data[batch]) - {"metadata"}
+        curr_version = len(mats) - 1
+        for i, m in enumerate(mats):
+            all_batches[f'{batch}_v{i}'] = data[batch][m]
+            if i == curr_version and is_active:
+                active_batches[f'{batch}_v{i}'] = data[batch][m]
+    return active_batches, all_batches
+
 if __name__ == '__main__':
-    #init_cache(MLABELS, MATRICES, VERSION_FILE)
-    update_cache(MLABELS, MATRICES, VERSION_FILE)
+    # Load the matrices from "compute" folder
+    EXPT_DIR="./compute/"
+    sys.path.append(EXPT_DIR)
+    import config
+    config.root_dir=EXPT_DIR
+    import get_test_results as expt
+    update_cache(expt.get_matrix_sizes_and_labels(), expt.get_matrix_labels_and_matrices(), VERSION_FILE)
