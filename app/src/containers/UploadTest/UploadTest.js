@@ -123,7 +123,13 @@ class UploadTest extends React.Component {
       };
       this.setState({
         cellData: cellDataNew,
-      }, this.checkCtaDisabled);
+      }, () => {
+        this.checkCtaDisabled();
+        const input = document.getElementsByName(name)[1];
+        if (isCheckbox && input) {
+          input.select();
+        }
+      });
     }
   }
 
