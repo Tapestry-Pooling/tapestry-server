@@ -62,19 +62,3 @@ def parse_batch(batch):
     if mat:
         return int(mat[1]),int(mat[2])
     return None
-
-def main():
-    EXPT_DIR="./compute/"
-    import sys
-    sys.path.append(EXPT_DIR)
-    import config
-    config.root_dir=EXPT_DIR
-    import get_test_results as expt
-    MLABELS = expt.get_matrix_sizes_and_labels()
-    MATRICES = expt.get_matrix_labels_and_matrices()
-    GRID_JSON, CELL_JSON = generate_grid_and_cell_data_json(MLABELS, MATRICES)
-    print(GRID_JSON)
-    print(CELL_JSON)
-
-if __name__ == '__main__':
-    main()
