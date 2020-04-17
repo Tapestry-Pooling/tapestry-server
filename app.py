@@ -20,7 +20,7 @@ def get_sentry_env():
 
 sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', environment=get_sentry_env())
 
-import grid
+import matrix_manager
 
 EXPT_DIR="./compute/"
 sys.path.append(EXPT_DIR)
@@ -48,12 +48,11 @@ lmdb_write_env = lmdb.open(LMDB_PATH, map_size=LMDB_SIZE)
 lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
 
 # Matrices
-MLABELS = expt.get_matrix_sizes_and_labels()
-MATRICES = expt.get_matrix_labels_and_matrices()
-VECTOR_SIZES = [int(k.split("x")[0]) for k in MLABELS]
-BATCH_SIZES = {k : f'{k.split("x")[1]} Samples ( {k.split("x")[0]} Tests)' for k in MLABELS}
-GRID_JSON, CELL_JSON = grid.generate_grid_and_cell_data_json(MLABELS, MATRICES)
-BATCH_JSON = orjson.dumps({"data" : BATCH_SIZES})
+ACTIVE_BATCHES, ALL_BATCHES = matrix_manager.load_cache()
+MLABELS = {k : ALL_BATCHES[k]['matrix'] for k in ALL_BATCHES}
+ACTIVE_BATCH_JSON = orjson.dumps({"data" : {k : ACTIVE_BATCHES[k]['readable'] for k in ACTIVE_BATCHES}})
+VECTOR_SIZES = {int(k.split("x")[0]) for k in ALL_BATCHES}
+GRID_JSON = {k : orjson.dumps({d : ALL_BATCHES[k][d] for d in {"gridData", "cellData"}}) for k in ALL_BATCHES}
 
 # App Version
 MIN_VERSION = "1.0"
@@ -64,7 +63,7 @@ DUMMY_OTP = '3456'
 AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
 OTP_VALIDITY = 900
 # pg connection pool
-pgpool = psycopg2.pool.SimpleConnectionPool(1, 4, user = "covid", password = "covid", host = "127.0.0.1", port = "5432", database = "covid")
+PG_POOL = psycopg2.pool.SimpleConnectionPool(1, 4, user = "covid", password = "covid", host = "127.0.0.1", port = "5432", database = "covid")
 
 # Alerts on test upload and failure
 NOTIFY_EMAILS = ['ssgosh@gmail.com', 'manoj.gopalkrishnan@gmail.com']
@@ -152,13 +151,13 @@ def requires_auth(func):
     def decorated(*args, **kwargs):
         "Decorator function for auth"
         if not check_auth(request):
-            return err_json("Invalid credentials")
+            return jsonify(error="Invalid credentials"),401
         return func(*args, **kwargs)
     return decorated
 
 def select(query, params):
     try:
-        conn = pgpool.getconn()
+        conn = PG_POOL.getconn()
         with conn.cursor() as cur:
             app.logger.info(f"Executing query: {query} with params {params}")
             cur.execute(query, params)
@@ -166,11 +165,11 @@ def select(query, params):
     except:
         raise
     finally:
-        pgpool.putconn(conn)
+        PG_POOL.putconn(conn)
 
 def execute_sql(query, params, one_row=False):
     try:
-        conn = pgpool.getconn()
+        conn = PG_POOL.getconn()
         with conn.cursor() as cur:
             app.logger.info(f"Executing query: {query} with params {params}")
             cur.execute(query, params)
@@ -181,7 +180,7 @@ def execute_sql(query, params, one_row=False):
     except:
         raise
     finally:
-        pgpool.putconn(conn)
+        PG_POOL.putconn(conn)
 
 def publish_message(topic, message, subject=None):
     if not NOTIFICATIONS_ENABLED:
@@ -237,6 +236,10 @@ def post_process_results(test_id, batch, mresults, test_data):
 @app.route('/ping', methods=['GET'])
 def ping():
     return "PONG"
+
+@app.route('/debug_info', methods=['GET'])
+def debug_info():
+    return jsonify(matrix_labels=MLABELS, vector_sizes=list(VECTOR_SIZES))
 
 @app.route('/app_version_check', methods=['GET'])
 def app_version_check_endpoint():
@@ -374,7 +377,7 @@ def fetch_test_results(test_id):
 
 @app.route('/batch_data', methods=['GET'])
 def batch_data():
-    return BATCH_JSON, 200, {CONTENT_TYPE : CONTENT_JSON}
+    return ACTIVE_BATCH_JSON, 200, {CONTENT_TYPE : CONTENT_JSON}
 
 @app.route('/grid_data/<batch_size>', methods=['GET'])
 def screen_data(batch_size):
@@ -382,7 +385,7 @@ def screen_data(batch_size):
 
 @app.route('/cell_data/<batch_size>', methods=['GET'])
 def cell_data(batch_size):
-    return CELL_JSON.get(batch_size.strip(), "{}"), 200, {CONTENT_TYPE : CONTENT_JSON}
+    return GRID_JSON.get(batch_size.strip(), "{}"), 200, {CONTENT_TYPE : CONTENT_JSON}
 
 """
     Main
