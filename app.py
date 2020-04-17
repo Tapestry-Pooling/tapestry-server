@@ -52,7 +52,7 @@ ACTIVE_BATCHES, ALL_BATCHES = matrix_manager.load_cache()
 MLABELS = {k : ALL_BATCHES[k]['matrix'] for k in ALL_BATCHES}
 ACTIVE_BATCH_JSON = orjson.dumps({"data" : {k : ACTIVE_BATCHES[k]['readable'] for k in ACTIVE_BATCHES}})
 VECTOR_SIZES = {int(k.split("x")[0]) for k in ALL_BATCHES}
-GRID_JSON = {k : orjson.dumps({d : ALL_BATCHES[k][d] for d in {"gridData", "cellData"}}) for k in ALL_BATCHES}
+GRID_JSON = {k : orjson.dumps({d : ALL_BATCHES[k][d][d] for d in {"gridData", "cellData"}}) for k in ALL_BATCHES}
 
 # App Version
 MIN_VERSION = "1.0"
