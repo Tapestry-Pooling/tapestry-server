@@ -23,9 +23,12 @@ def readable_string(batch, num_infected, infection_rate):
 
 def update_cache(mlabels, matrices, jfile):
     old_data = {}
-    with open(jfile, 'rb') as reader:
-        old_data = orjson.loads(reader.read())
     f = {}
+    try:
+        with open(jfile, 'rb') as reader:
+            old_data = orjson.loads(reader.read())
+    except Exception as e:
+        print(f'Error : {e}')
     for batch in mlabels:
         print(batch)
         m,n,i = mlabels[batch]
