@@ -21,21 +21,6 @@ def readable_string(batch, num_infected, infection_rate):
     m,n = grid.parse_batch(batch)
     return f'{n} Samples (with {m} tests. For {num_infected} infections or {infection_rate}% infection rate)'
 
-# TODO : Add an old version which is saved into cache
-def init_cache(mlabels, matrices, jfile):
-    f = {}
-    for batch in mlabels:
-        print(batch)
-        m,n,i = mlabels[batch]
-        mat = matrices[m]
-        g, c = grid.generate_grid_and_cell_data(batch, mat)
-        f[batch] = {m : {"num_infected" : n, "infection_rate" : i,
-            "readable" : readable_string(batch, n, i), "gridData" : g, "cellData" : c}, 
-            "metadata" : {"latest_version" : 0, "matrices" : [m], "active" : True}}
-    jstr = orjson.dumps(f)
-    with open(jfile, "wb") as outfile:
-        outfile.write(jstr)
-
 def update_cache(mlabels, matrices, jfile):
     old_data = {}
     with open(jfile, 'rb') as reader:
