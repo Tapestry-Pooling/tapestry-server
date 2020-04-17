@@ -13,6 +13,13 @@ import secrets
 import sys
 import time
 
+from sentry_sdk import init as sentry_init
+
+def get_sentry_env():
+    return os.getenv('SENTRY_ENV', 'dev')
+
+sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', environment=get_sentry_env())
+
 import grid
 
 EXPT_DIR="./compute/"
