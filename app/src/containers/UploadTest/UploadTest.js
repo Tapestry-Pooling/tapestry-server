@@ -49,7 +49,7 @@ class UploadTest extends React.Component {
       getCellDataAPI(authToken, testData.batch)
         .then((response) => {
           this.setState({
-            cellData: response.data.cellData.map((label, index) => ({ label, isChecked: (testData.test_data === undefined || testData.test_data[index] === 100), value: testData.test_data ? testData.test_data[index].toString() : '100' })),
+            cellData: response.data.cellData.map((label, index) => ({ label, isChecked: (testData.test_data === undefined || testData.test_data === null || testData.test_data[index] === 100), value: testData.test_data ? testData.test_data[index].toString() : '100' })),
             testId,
             testsData: testsDataLocal,
           }, this.checkCtaDisabled);
@@ -91,7 +91,7 @@ class UploadTest extends React.Component {
           .then((response) => {
             this.setState({
               testId,
-              cellData: response.data.cellData.map((label, index) => ({ label, isChecked: (testData.test_data === undefined || testData.test_data[index] === 100), value: testData.test_data ? testData.test_data[index].toString() : '100' })),
+              cellData: response.data.cellData.map((label, index) => ({ label, isChecked: (testData.test_data === undefined || testData.test_data === null || testData.test_data[index] === 100), value: testData.test_data ? testData.test_data[index].toString() : '100' })),
             }, this.checkCtaDisabled);
           });
       } else if (/upload-test\/result/.test(pathname)) {
