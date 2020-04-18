@@ -18,4 +18,5 @@ sudo systemctl restart covid.service
 echo "App restarted"
 sentry-cli releases deploys $SENTRY_VERSION new -e $SENTRY_ENV
 echo "Generating HTML files for batch sizes"
+sleep 1
 ./scripts/generate_batch_html.sh
