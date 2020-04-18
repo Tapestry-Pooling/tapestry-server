@@ -1,4 +1,5 @@
 #!/bin/bash
+start=$(date +%s)
 REPO="$HOME/covid"
 ENV_FILE="$HOME/env/covid.env"
 source $ENV_FILE
@@ -15,8 +16,9 @@ sed -i -r "s/SENTRY_RELEASE=.+/SENTRY_RELEASE=$SENTRY_VERSION/" $ENV_FILE
 sentry-cli releases new $SENTRY_VERSION --finalize
 echo "Sentry version created: $SENTRY_VERSION"
 sudo systemctl restart covid.service
-echo "App restarted"
-sentry-cli releases deploys $SENTRY_VERSION new -e $SENTRY_ENV
-echo "Generating HTML files for batch sizes"
+echo "App restarted, sleeping 1 sec"
 sleep 1
+now=$(date +%s)
+sentry-cli releases deploys $SENTRY_VERSION new -e $SENTRY_ENV -t $((now-start))
+echo "Generating HTML files for batch sizes"
 ./scripts/generate_batch_html.sh
