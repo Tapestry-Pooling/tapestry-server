@@ -26,7 +26,7 @@ ALTER TABLE test_uploads ADD UNIQUE (user_id, label);
 create table test_results (test_id bigint references test_uploads(id) primary key, matrix_label text not null, updated_at timestamptz default now(),result_data jsonb);
 
 -- audit tables for test_uploads and test_results
-create table test_uploads_audit ( auditid bigserial primary key, test_id bigint not null, user_id bigint, label text, batch_size text,
+create table test_uploads_audit ( auditid bigserial primary key, test_id bigint not null, user_id bigint, label text, batch_size text, num_screens int,
     batch_start_time timestamptz, batch_end_time timestamptz, test_data real[], operation text, updated_at timestamptz default now());
 
 CREATE OR REPLACE FUNCTION test_uploads_audit_proc() RETURNS TRIGGER AS $$
