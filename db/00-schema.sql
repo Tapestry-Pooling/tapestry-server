@@ -18,9 +18,10 @@ END;
 $$ LANGUAGE PLPGSQL;
 
 -- tables
-create table users ( id bigint primary key default id_generator(), username text, email text, phone text unique not null, lab text);
+create table users ( id bigint primary key default id_generator(), username text, email text unique not null, phone text, lab text, name text);
+create table user_auth(user_id bigint references users(id) primary key, auth_token text, token_info jsonb);
 create table test_uploads (id bigint primary key default id_generator(), user_id bigint references users(id), label text not null, 
-    batch_size text not null, batch_start_time timestamptz default now(), batch_end_time timestamptz, updated_at timestamptz default now(), test_data real[]);
+    batch_size text not null, num_screens int, batch_start_time timestamptz default now(), batch_end_time timestamptz, updated_at timestamptz default now(), test_data real[]);
 ALTER TABLE test_uploads ADD UNIQUE (user_id, label);
 create table test_results (test_id bigint references test_uploads(id) primary key, matrix_label text not null, updated_at timestamptz default now(),result_data jsonb);
 
@@ -32,11 +33,11 @@ CREATE OR REPLACE FUNCTION test_uploads_audit_proc() RETURNS TRIGGER AS $$
     BEGIN
         IF (TG_OP = 'INSERT' or (TG_OP = 'UPDATE' and OLD.test_data <> NEW.test_data)) THEN
             INSERT INTO test_uploads_audit VALUES (
-                DEFAULT, NEW.id, NEW.user_id, NEW.label, NEW.batch_size, NEW.batch_start_time, NEW.batch_end_time, NEW.test_data, TG_OP, now());
+                DEFAULT, NEW.id, NEW.user_id, NEW.label, NEW.batch_size, NEW.num_screens, NEW.batch_start_time, NEW.batch_end_time, NEW.test_data, TG_OP, now());
             RETURN NEW;
         ELSIF (TG_OP = 'DELETE') THEN
             INSERT INTO test_uploads_audit VALUES (
-                DEFAULT, OLD.id, OLD.user_id, OLD.label, OLD.batch_size, OLD.batch_start_time, OLD.batch_end_time, OLD.test_data, TG_OP, now());
+                DEFAULT, OLD.id, OLD.user_id, OLD.label, OLD.batch_size, OLD.num_screens, OLD.batch_start_time, OLD.batch_end_time, OLD.test_data, TG_OP, now());
             RETURN OLD;
         END IF;
         RETURN NULL;
