@@ -151,7 +151,7 @@ class Login extends React.Component {
     loginCallbackAPI(idToken, email)
       .then((response) => {
         if (response.status === 200) {
-          history.push(`/app/login/success?token=${idToken}`);
+          history.push(`/app/login/success?authToken=${idToken}`);
         }
       });
   }
