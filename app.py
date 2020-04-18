@@ -20,7 +20,7 @@ import time
 
 import matrix_manager
 
-sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', environment= os.getenv('SENTRY_ENV', 'dev'))
+sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', environment= os.getenv('SENTRY_ENV', 'dev'), release=os.getenv('SENTRY_RELEASE', 'unknown'))
 
 EXPT_DIR="./compute/"
 sys.path.append(EXPT_DIR)

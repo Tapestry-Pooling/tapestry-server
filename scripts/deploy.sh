@@ -1,6 +1,7 @@
 #!/bin/bash
 REPO="$HOME/covid"
-source $HOME/env/covid.env
+ENV_FILE="$HOME/env/covid.env"
+source $ENV_FILE
 cd $REPO
 # Activate virtualenv
 source env/bin/activate
@@ -10,6 +11,7 @@ echo "Regenerate versioning.json"
 python matrix_manager.py
 # TODO : Update DB
 SENTRY_VERSION=$(sentry-cli releases propose-version)
+sed -i -r "s/SENTRY_RELEASE=.+/SENTRY_RELEASE=$SENTRY_VERSION/" $ENV_FILE
 sentry-cli releases new $SENTRY_VERSION --finalize
 echo "Sentry version created: $SENTRY_VERSION"
 sudo systemctl restart covid.service
