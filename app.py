@@ -33,7 +33,7 @@ import get_test_results as expt
 """
 
 app = Flask(__name__)
-app.secret_key = 'covid-19-testing-backend'
+app.secret_key = 'c19-testing-backend'
 psycopg2.extras.register_default_jsonb(loads=orjson.loads, globally=True)
 
 # Response headers
@@ -241,6 +241,14 @@ def ping():
 def debug_info():
     return jsonify(matrix_labels=MLABELS, vector_sizes=list(VECTOR_SIZES))
 
+@app.route('/login_callback', methods=['POST'])
+def login_sucess():
+    payload = request.json
+    app.logger.info(payload)
+    token = payload['token']
+    email = payload['email']
+    return "OK"
+
 @app.route('/app_version_check', methods=['GET'])
 def app_version_check_endpoint():
     app_version = request.args.get('version')
@@ -251,7 +259,6 @@ def app_version_check_endpoint():
 def request_otp():
     # TODO : generate OTP, send SMS using Exotel
     payload = request.json
-    app.logger.info(payload)
     reg_phone = normalize_phone(payload.get('phone', None))
     if reg_phone is None:
         return err_json("Invalid mobile number")
