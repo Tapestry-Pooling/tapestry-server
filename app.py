@@ -1,6 +1,9 @@
 import boto3
+from cachecontrol import CacheControl
 from flask import Flask, request, json, jsonify, g
 from functools import wraps
+from google.oauth2 import id_token
+import google.auth.transport.requests
 import lmdb
 import logging
 import numpy as np
@@ -9,18 +12,15 @@ import os
 import psycopg2
 from psycopg2 import pool
 from psycopg2.extras import Json
+import requests
 import secrets
+from sentry_sdk import init as sentry_init
 import sys
 import time
 
-from sentry_sdk import init as sentry_init
-
-def get_sentry_env():
-    return os.getenv('SENTRY_ENV', 'dev')
-
-sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', environment=get_sentry_env())
-
 import matrix_manager
+
+sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', environment= os.getenv('SENTRY_ENV', 'dev'))
 
 EXPT_DIR="./compute/"
 sys.path.append(EXPT_DIR)
@@ -34,7 +34,6 @@ import get_test_results as expt
 
 app = Flask(__name__)
 app.secret_key = 'c19-testing-backend'
-psycopg2.extras.register_default_jsonb(loads=orjson.loads, globally=True)
 
 # Response headers
 CONTENT_TYPE = "Content-Type"
@@ -59,10 +58,15 @@ MIN_VERSION = "1.0"
 MIN_VERSION_INTS = tuple(int(x) for x in MIN_VERSION.split("."))
 APP_UPDATE_URL = "https://play.google.com/store/apps/details?id=com.o1"
 
-DUMMY_OTP = '3456'
+# Auth
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', 'dummy')
+CACHED_SESSION = CacheControl(requests.session())
+TOK_INFO_KEYS = {'aud', 'iss', 'email', 'sub', 'iat', 'exp'}
+VALID_ISSUERS = {'accounts.google.com', 'https://accounts.google.com'}
 AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
-OTP_VALIDITY = 900
-# pg connection pool
+
+# Postgres related
+psycopg2.extras.register_default_jsonb(loads=orjson.loads, globally=True)
 PG_POOL = psycopg2.pool.SimpleConnectionPool(1, 4, user = "covid", password = "covid", host = "127.0.0.1", port = "5432", database = "covid")
 
 # Alerts on test upload and failure
@@ -91,22 +95,10 @@ def app_version_check(version):
     vs = tuple(int(x) for x in version.split("."))
     return vs >= MIN_VERSION_INTS
 
-@app.errorhandler
+@app.errorhandler(Exception)
 def error_handler(error):
-    app.logger.error("Error occured" + str(error))
+    app.logger.error(f"Error occured {error}")
     return err_json("Unhandled error!!")
-
-def normalize_phone(phone):
-    if phone is None or phone == "" or phone.isspace():
-        return None
-    phone = phone.strip()
-    if phone.startswith('+91') and len(phone) == 13:
-        return phone
-    if len(phone) == 11 and phone.startswith('0') and phone.isdigit():
-        return '+91' + phone[1:]
-    if len(phone) == 10 and phone.isdigit() and not phone.startswith('0'):
-        return '+91' + phone
-    return None
 
 def normalize_email(email):
     if email is None or email == "" or email.isspace() or email.count("@") != 1 or email.count(":") != 0:
@@ -124,18 +116,54 @@ def parse_lmdb_auth_data(raw_data):
     # user_id:auth_token:timestamp
     return raw_data.decode('utf8').split(':')
 
+def retrieve_auth_token_info(token):
+    try:
+        # According to https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.id_token.html#module-google.oauth2.id_token
+        return id_token.verify_oauth2_token(token, google.auth.transport.requests.Request(session=CACHED_SESSION), GOOGLE_CLIENT_ID)
+    except Exception as e:
+        app.logger.info(f"Google auth token retrieval failed for {token} with error {e}")
+    return {}
+
+def validate_token_info(tok_info, email):
+    # Expected fields in tok_info : https://developers.google.com/identity/protocols/oauth2/openid-connect#obtainuserinfo
+    if not tok_info or not all(k in tok_info for k in TOK_INFO_KEYS):
+        return {"error" : "Invalid token info"}
+    reg_email = normalize_email(email)
+    if reg_email is None or tok_info['email'] != reg_email:
+        return {"error" : f"Invalid email supplied: {email}"}
+    if tok_info['aud'] != GOOGLE_CLIENT_ID or tok_info['iss'] not in VALID_ISSUERS:
+        return {"error" : f"Invalid client id / issuer"}
+    # Is an expiry check necessary?
+    if curr_epoch() > tok_info['exp'] + 60:
+        return {"error" : f"Expired token"}
+    return tok_info
+
+def save_login_callback(tok_info):
+    email = tok_info['email']
+    # Saving email : authToken in LMDB
+    curr_time = curr_epoch()
+    token = secrets.token_urlsafe(16)
+    upsert_sql = "insert into users(email, name) values (%s,%s) on conflict(email) do update set name=excluded.name returning id;"
+    user_id = execute_sql(upsert_sql, (email, tok_info.get('name', '')), one_row=True)[0]
+    auth_value = str(user_id) + ":" + token + ":" + str(curr_time)
+    with lmdb_write_env.begin(write=True) as txn:
+        txn.put(email.encode('utf8'), auth_value.encode('utf8'))
+    user_auth_sql = 'insert into user_auth(user_id, token_info, auth_token) values (%s, %s, %s) on conflict(user_id) do update set token_info = excluded.token_info, auth_token = excluded.auth_token returning user_id;'
+    execute_sql(user_auth_sql, (user_id, Json(tok_info), token))
+    return jsonify(user_id=user_id, token=token, email=email)
+
 def check_auth(request):
     "Checks if user is signed in using auth header"
     headers = request.headers
     auth_token = headers.get('X-Auth', "")
-    mob = headers.get('X-Mob', "")
-    reg_phone = normalize_phone(mob)
-    app.logger.info(f'Mob : {reg_phone}  Token: {auth_token}')
-    if auth_token is None or auth_token == '' or reg_phone is None:
+    email = headers.get('X-Email', "")
+    reg_email = normalize_email(email)
+    app.logger.info(f'Email : {reg_email}  Token: {auth_token}')
+    if auth_token is None or auth_token == '' or reg_email is None:
         return False
     raw_data = None
     with lmdb_read_env.begin() as txn:
-        raw_data = txn.get(reg_phone.encode('utf8'))
+        raw_data = txn.get(reg_email.encode('utf8'))
     if raw_data is None:
         return False
     data = parse_lmdb_auth_data(raw_data)
@@ -244,54 +272,23 @@ def debug_info():
 @app.route('/login_callback', methods=['POST'])
 def login_sucess():
     payload = request.json
-    app.logger.info(payload)
+    app.logger.info(f'Google Auth Callback: {payload}')
     token = payload['token']
     email = payload['email']
-    return "OK"
+    tok_info = retrieve_auth_token_info(token)
+    if not tok_info:
+        return jsonify(error="Invalid token"), 401
+    app.logger.info(f'Validated with Google {tok_info}')
+    val_tok_info = validate_token_info(tok_info, email)
+    if "error" in val_tok_info:
+        return jsonify(val_tok_info), 401
+    return save_login_callback(val_tok_info)
 
 @app.route('/app_version_check', methods=['GET'])
 def app_version_check_endpoint():
     app_version = request.args.get('version')
     force = not app_version_check(app_version)
     return jsonify(force=force, url=APP_UPDATE_URL)
-
-@app.route('/request_otp', methods=['POST'])
-def request_otp():
-    # TODO : generate OTP, send SMS using Exotel
-    payload = request.json
-    reg_phone = normalize_phone(payload.get('phone', None))
-    if reg_phone is None:
-        return err_json("Invalid mobile number")
-    otp_key = 'otp:' + reg_phone
-    otp_value = DUMMY_OTP + ':' + str(curr_epoch())
-    with lmdb_write_env.begin(write=True) as txn:
-        txn.put(otp_key.encode('utf8'), otp_value.encode('utf8'))
-    return jsonify(phone=reg_phone)
-
-@app.route('/validate_otp', methods=['POST'])
-def validate_otp():
-    payload = request.json
-    otp = payload['otp']
-    reg_phone = normalize_phone(payload.get('phone', None))
-    if reg_phone is None or otp is None or not otp.isdigit():
-        return err_json("Mobile or OTP incorrect")
-    otp_key = 'otp:' + reg_phone
-    raw_data = None
-    with lmdb_read_env.begin() as txn:
-        raw_data = txn.get(otp_key.encode('utf8'))
-    if raw_data is None:
-        return err_json("Invalid mobile number")
-    data = parse_lmdb_otp_data(raw_data)
-    curr_time = curr_epoch()
-    if data[0] != otp or curr_time - int(data[1]) > 900:
-        return err_json("Invalid or expired OTP")
-    token = secrets.token_urlsafe(16)
-    upsert_sql = "insert into users(phone) values (%s) on conflict(phone) do update set phone=excluded.phone returning id;"
-    user_id = execute_sql(upsert_sql, (reg_phone,), one_row=True)[0]
-    auth_value = str(user_id) + ":" + token + ":" + str(curr_time)
-    with lmdb_write_env.begin(write=True) as txn:
-        txn.put(reg_phone.encode('utf8'), auth_value.encode('utf8'))
-    return jsonify(user_id=user_id, token=token, phone=reg_phone)
 
 @app.route('/dashboard', methods=['GET'])
 @requires_auth
