@@ -11,6 +11,7 @@ ExecStart=/home/ubuntu/covid/env/bin/gunicorn -w 2 -n c19 --bind unix:app.sock -
 KillMode=mixed
 TimeoutStopSec=5
 PrivateTmp=true
+EnvironmentFile=/home/ubuntu/env/covid.env
 
 [Install]
 WantedBy=multi-user.target
