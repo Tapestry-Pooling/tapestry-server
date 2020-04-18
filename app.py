@@ -33,7 +33,7 @@ import get_test_results as expt
 """
 
 app = Flask(__name__)
-app.secret_key = 'c19-testing-backend'
+app.secret_key = 'byom-testing-backend'
 
 # Response headers
 CONTENT_TYPE = "Content-Type"
@@ -67,7 +67,7 @@ AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
 
 # Postgres related
 psycopg2.extras.register_default_jsonb(loads=orjson.loads, globally=True)
-PG_POOL = psycopg2.pool.SimpleConnectionPool(1, 4, user = "covid", password = "covid", host = "127.0.0.1", port = "5432", database = "covid")
+PG_POOL = psycopg2.pool.SimpleConnectionPool(1, 4, user = "covid", password = "covid", host = "127.0.0.1", port = "5432", database = "covid", application_name = "byom")
 
 # Alerts on test upload and failure
 NOTIFY_EMAILS = ['ssgosh@gmail.com', 'manoj.gopalkrishnan@gmail.com']
