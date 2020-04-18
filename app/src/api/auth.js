@@ -45,7 +45,31 @@ export const verifyOTPAPI = (phone, otp) => {
     });
 };
 
+export const loginCallbackAPI = (token, email) => {
+  const data = {
+    token,
+    email,
+  };
+  const options = {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  };
+  return request.post('/login_callback', data, options)
+    .then((response) => {
+      if (response.status === 200) {
+        console.log('response data: ', response.data);
+      }
+      return response;
+    }, (err) => (err.response))
+    .catch((err) => {
+      console.log('Caught in api chain: ', err.message);
+    });
+};
+
 export default {
   requestOTPAPI,
   verifyOTPAPI,
+  loginCallbackAPI,
 };
