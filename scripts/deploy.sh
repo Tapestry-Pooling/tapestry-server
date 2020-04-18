@@ -1,5 +1,6 @@
 #!/bin/bash
 REPO="$HOME/covid"
+source $HOME/env/covid.env
 cd $REPO
 # Activate virtualenv
 source env/bin/activate
