@@ -25,7 +25,7 @@ sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', envi
 EXPT_DIR="./compute/"
 sys.path.append(EXPT_DIR)
 import config
-config.root_dir=EXPT_DIR
+config.set_root_dir(EXPT_DIR)
 import get_test_results as expt
 
 """

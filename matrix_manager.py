@@ -10,7 +10,7 @@ VERSION_FILE = "versioning.json"
 
 def readable_string(batch, num_infected, infection_rate):
     m,n = grid.parse_batch(batch)
-    return f'{n} Samples (with {m} tests. For {num_infected} infections or {infection_rate}% infection rate)'
+    return f'{n} Samples (with {m} tests. Upto {num_infected} infections)'
 
 def update_cache(mlabels, matrices, jfile):
     old_data = {}
@@ -100,6 +100,6 @@ if __name__ == '__main__':
     EXPT_DIR="./compute/"
     sys.path.append(EXPT_DIR)
     import config
-    config.root_dir=EXPT_DIR
+    config.set_root_dir(EXPT_DIR)
     import get_test_results as expt
     update_cache(expt.get_matrix_sizes_and_labels(), expt.get_matrix_labels_and_matrices(), VERSION_FILE)
