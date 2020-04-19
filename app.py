@@ -358,6 +358,7 @@ def upload_test_data():
         return err_json(f"Invalid test id {test_id}")
     test_data = payload_json.get('test_data', [])
     batch = payload_json.get('batch', "").strip()
+    num_samples = payload_json.get('num_samples', None)
     if batch == "" or batch.isspace() or batch not in MLABELS:
         return err_json(f"Invalid batch size : {batch}")
     lp = len(test_data)
@@ -365,6 +366,8 @@ def upload_test_data():
         err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
         app.logger.error(err_msg)
         return err_json(err_msg)
+    if num_samples is None or num_samples == "" or num_samples.isspace() or not num_samples.isdigit():
+        num_samples = None
     test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s where id = %s and user_id = %s returning id;"
     res = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id))
     if not res or len(res) == 0:
