@@ -1,6 +1,6 @@
 import boto3
 from cachecontrol import CacheControl
-from flask import Flask, request, json, jsonify, g
+from flask import Flask, request, json, jsonify, g, redirect
 from functools import wraps
 from google.oauth2 import id_token
 import google.auth.transport.requests
@@ -49,6 +49,8 @@ lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
 # Matrices
 ACTIVE_BATCHES, ALL_BATCHES = matrix_manager.load_cache()
 MLABELS = {k : ALL_BATCHES[k]['matrix'] for k in ALL_BATCHES}
+MCODENAMES = expt.get_matrix_codenames()
+BATCH_TO_CODENAMES = {b : MCODENAMES[MLABELS[b]] for b in MLABELS}
 ACTIVE_BATCH_JSON = orjson.dumps({"data" : {k : ACTIVE_BATCHES[k]['readable'] for k in ACTIVE_BATCHES}})
 VECTOR_SIZES = {int(k.split("x")[0]) for k in ALL_BATCHES}
 GRID_JSON = {k : orjson.dumps({d : ALL_BATCHES[k][d][d] for d in {"gridData", "cellData"}}) for k in ALL_BATCHES}
@@ -267,7 +269,11 @@ def ping():
 
 @app.route('/debug_info', methods=['GET'])
 def debug_info():
-    return jsonify(matrix_labels=MLABELS, vector_sizes=list(VECTOR_SIZES))
+    return jsonify(matrix_labels=MLABELS, vector_sizes=list(VECTOR_SIZES), batch_to_codenames=BATCH_TO_CODENAMES)
+
+@app.route('/pdf_info/<batch>', methods=['GET'])
+def get_pdf_for(batch):
+    return redirect(f"/pdfs/{expt.get_matrix_pdf_location(MLABELS[batch]).split('/')[-1]}", 301)
 
 @app.route('/login_callback', methods=['POST'])
 def login_sucess():
