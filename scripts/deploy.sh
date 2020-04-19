@@ -12,6 +12,7 @@ python matrix_manager.py
 # TODO : Update DB
 SENTRY_VERSION=$(sentry-cli releases propose-version)
 OLD_VERSION=$(sentry-cli releases list | tail -n +4 | head -n1 | awk -F'|' '{print $3}')
+echo "git log --name-status --pretty='format:P { "id" : "%H", "message" : "%f", "timestamp":"%aI", "author_name" : "%aN", "author_email" : "%aE", "repository" : "rrampage/covid-test-py"}' "$OLD_VERSION".."$SENTRY_VERSION" | python scripts/git-log-to-json.py | jq -c '. + {"version" : env.SENTRY_VERSION}'"
 COMMIT_DATA=$(git log --name-status --pretty='format:P { "id" : "%H", "message" : "%f", "timestamp":"%aI", "author_name" : "%aN", "author_email" : "%aE", "repository" : "rrampage/covid-test-py"}' "$OLD_VERSION".."$SENTRY_VERSION" | python scripts/git-log-to-json.py | jq -c '. + {"version" : env.SENTRY_VERSION}')
 sed -i -r "s/SENTRY_RELEASE=.+/SENTRY_RELEASE=$SENTRY_VERSION/" $ENV_FILE
 # TODO : Make request to sentry with commit data
