@@ -17,7 +17,6 @@ sed -i -r "s/SENTRY_RELEASE=.+/SENTRY_RELEASE=$SENTRY_VERSION/" $ENV_FILE
 # TODO : Make request to sentry with commit data
 curl -XPOST -H "Authorization: Bearer $SENTRY_TOKEN" -H 'Content-Type: application/json' 'https://sentry.zyxw365.in/api/0/organizations/shop101/releases/' -d "$COMMIT_DATA"
 #sentry-cli releases new "$SENTRY_VERSION"
-#sentry-cli releases set-commits --auto "$SENTRY_VERSION"
 #sentry-cli releases finalize "$SENTRY_VERSION"
 echo "Sentry version created: $SENTRY_VERSION"
 start=$(date +%s)
