@@ -15,5 +15,5 @@ def parse_git_log(ls):
             if t == 'R':
                     p = p.split('\t')[1]
             o['patch_set'].append({"path" : p, "type" : t})
-    return json.dumps({"commits" : res})
+    return json.dumps({"commits" : res, "projects" : ["c19-backend"]})
 print(parse_git_log((line for line in sys.stdin)))
