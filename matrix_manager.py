@@ -42,6 +42,7 @@ def update_cache(mlabels, matrices, jfile):
             # Currently active matrix in old data is same as new data
             if not oa:
                 od["metadata"]["active"] = True
+                od[m] = nd[m]
             continue
         # If old batch is not active, check if there is a key in new data
         if not oa:
@@ -93,7 +94,10 @@ def load_cache():
             all_batches[f'{batch}_v{i}'] = data[batch][m]
             if i == curr_version and is_active:
                 active_batches[f'{batch}_v{i}'] = data[batch][m]
-    return active_batches, all_batches
+    # Active batches to be sorted by number of samples
+    sorted_bnames = sorted((grid.parse_batch(b)[1], b) for b in active_batches)
+    sorted_active_batches = {b : active_batches[b] for n, b in sorted_bnames}
+    return sorted_active_batches, all_batches
 
 if __name__ == '__main__':
     # Load the matrices from "compute" folder
