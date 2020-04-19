@@ -12,7 +12,7 @@ def readable_string(batch, num_infected, infection_rate):
     m,n = grid.parse_batch(batch)
     return f'{n} Samples (with {m} tests. Upto {num_infected} infections)'
 
-def update_cache(mlabels, matrices, jfile):
+def update_cache(mlabels, matrices, codenames, jfile):
     old_data = {}
     f = {}
     try:
@@ -25,7 +25,7 @@ def update_cache(mlabels, matrices, jfile):
         m,n,i = mlabels[batch]
         mat = matrices[m]
         g, c = grid.generate_grid_and_cell_data(batch, mat)
-        f[batch] = {m : {"num_infected" : n, "infection_rate" : i, "readable" : readable_string(batch, n, i), "gridData" : g, "cellData" : c, "matrix" : m}}
+        f[batch] = {m : {"num_infected" : n, "infection_rate" : i, "readable" : readable_string(batch, n, i), "gridData" : g, "cellData" : c, "matrix" : m, "codename" : codenames[m]}}
     ob = set(old_data)
     nb = set(f)
     for batch in old_data:
@@ -106,4 +106,4 @@ if __name__ == '__main__':
     import config
     config.set_root_dir(EXPT_DIR)
     import get_test_results as expt
-    update_cache(expt.get_matrix_sizes_and_labels(), expt.get_matrix_labels_and_matrices(), VERSION_FILE)
+    update_cache(expt.get_matrix_sizes_and_labels(), expt.get_matrix_labels_and_matrices(), expt.get_matrix_codenames(), VERSION_FILE)
