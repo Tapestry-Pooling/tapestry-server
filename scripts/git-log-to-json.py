@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 def parse_git_log(ls):
     res = []
@@ -15,5 +16,5 @@ def parse_git_log(ls):
             if t == 'R':
                     p = p.split('\t')[1]
             o['patch_set'].append({"path" : p, "type" : t})
-    return json.dumps({"commits" : res, "projects" : ["c19-backend"]})
+    return json.dumps({"commits" : res, "projects" : ["c19-backend"], "version" : os.getenv("SENTRY_VERSION")})
 print(parse_git_log((line for line in sys.stdin)))
