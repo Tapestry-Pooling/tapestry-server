@@ -1,10 +1,10 @@
 import { request } from 'api';
 
-export const getDashboardDataAPI = (authToken, phone) => {
+export const getDashboardDataAPI = (authToken, email) => {
   const options = {
     headers: {
       'X-Auth': authToken,
-      'X-Mob': phone,
+      'X-Email': email,
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
@@ -41,7 +41,7 @@ export const getCellDataAPI = (authToken, batchSize) => {
     });
 };
 
-export const uploadTestDataAPI = (authToken, phone, testId, batch, testData) => {
+export const uploadTestDataAPI = (authToken, email, testId, batch, testData) => {
   const data = {
     test_id: testId,
     batch,
@@ -50,7 +50,7 @@ export const uploadTestDataAPI = (authToken, phone, testId, batch, testData) => 
   const options = {
     headers: {
       'X-Auth': authToken,
-      'X-Mob': phone,
+      'X-Email': email,
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
@@ -67,11 +67,11 @@ export const uploadTestDataAPI = (authToken, phone, testId, batch, testData) => 
     });
 };
 
-export const getResultAPI = (authToken, phone, testId) => {
+export const getResultAPI = (authToken, email, testId) => {
   const options = {
     headers: {
       'X-Auth': authToken,
-      'X-Mob': phone,
+      'X-Email': email,
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },

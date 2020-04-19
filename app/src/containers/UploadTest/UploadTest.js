@@ -21,19 +21,23 @@ class UploadTest extends React.Component {
       result: '',
       authToken: urlParams.get('authToken') || sessionStorage.getItem('authToken'),
       phone: urlParams.get('phone') || sessionStorage.getItem('phone'),
+      email: urlParams.get('email') || sessionStorage.getItem('email'),
       isCtaDisabled: true,
     };
   }
 
   componentDidMount() {
-    const { authToken, phone } = this.state;
+    const { authToken, phone, email } = this.state;
     const { location: { pathname } } = this.props;
     if (pathname === '/app/upload-test') {
-      getDashboardDataAPI(authToken, phone)
+      getDashboardDataAPI(authToken, email)
         .then((response) => {
           console.log('response: ', response.data.data);
           sessionStorage.setItem('authToken', authToken);
-          sessionStorage.setItem('phone', phone);
+          if (phone) {
+            sessionStorage.setItem('phone', phone);
+          }
+          sessionStorage.setItem('email', email);
           sessionStorage.setItem('testsData', JSON.stringify(response.data.data));
           this.setState({
             testsData: response.data.data,
@@ -58,7 +62,7 @@ class UploadTest extends React.Component {
       const testsDataLocal = JSON.parse(sessionStorage.getItem('testsData'));
       const urlParams = new URLSearchParams(window.location.search);
       const testId = urlParams.get('testId');
-      getResultAPI(authToken, phone, testId)
+      getResultAPI(authToken, email, testId)
         .then((response) => {
           this.setState({
             testId,
@@ -70,14 +74,14 @@ class UploadTest extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { authToken, testsData, phone } = this.state;
+    const { authToken, testsData, email } = this.state;
     const { location: { pathname } } = this.props;
     const { location: { pathname: prevPathname } } = prevProps;
     if (pathname !== prevPathname) {
       const urlParams = new URLSearchParams(window.location.search);
       const testId = urlParams.get('testId');
       if (/upload-test\/?$/.test(pathname)) {
-        getDashboardDataAPI(authToken, phone)
+        getDashboardDataAPI(authToken, email)
           .then((response) => {
             this.setState({
               testsData: response.data.data,
@@ -95,7 +99,7 @@ class UploadTest extends React.Component {
             }, this.checkCtaDisabled);
           });
       } else if (/upload-test\/result/.test(pathname)) {
-        getResultAPI(authToken, phone, testId)
+        getResultAPI(authToken, email, testId)
           .then((response) => {
             this.setState({
               testId,
@@ -153,12 +157,12 @@ class UploadTest extends React.Component {
   submitCtValues = () => {
     const {
       testId, testsData, authToken, cellData,
-      phone,
+      email,
     } = this.state;
     const { history } = this.props;
     const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
     const { batch } = testData;
-    uploadTestDataAPI(authToken, phone, testId,
+    uploadTestDataAPI(authToken, email, testId,
       batch, cellData.map((cell) => (parseFloat(cell.value))))
       .then((response) => {
         console.log('data uploaded! ', response.data);
