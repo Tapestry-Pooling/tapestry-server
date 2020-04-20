@@ -7,6 +7,13 @@ from fpdf import FPDF
 
 BATCH_REGEX = r'(\d+)x(\d+).*'
 
+# COLORS
+BLACK = (0, 0, 0)
+DARK = (64, 64, 64)
+WHITE = (255, 255, 255)
+LIGHT_GREY = (151, 151, 151)
+GRAY = (240, 240, 240)
+
 def parse_batch(batch):
     mat = re.match(BATCH_REGEX, batch)
     if mat:
@@ -54,30 +61,36 @@ class CustomPDF(FPDF):
         sample_partitions = partition(samples, tables_per_page * rows_per_table)
         ww = 17
         hh = 10
-        self.set_text_color(0, 0, 0)
+        self.set_text_color(*BLACK)
         for i in range(len(screen_partitions)):
             self.add_page()
             a = screen_partitions[i]
             b = sample_partitions[i] # Sample numbers
             tlist = partition(a, rows_per_table)
             slist = partition(b, rows_per_table)
+            # Border color
+            self.set_draw_color(*LIGHT_GREY)
+
             for j in range(len(tlist)):
                 # Print sample numbers
-                self.set_font('Arial', 'B', 12)
-                self.set_fill_color(255, 229, 153)
+                self.set_font('Arial', 'B', 11)
+                self.set_text_color(*WHITE)
+                self.set_fill_color(*DARK)
                 self.cell(25, hh, f'Samples', 1, fill=True, align='C')
                 for x in slist[j]:
                     self.cell(ww, hh, f'{x}', 1, fill=True, align='C')
                 self.ln(hh)
                 tt = tlist[j]
-                self.set_fill_color(159, 197, 232)
+                self.set_fill_color(*GRAY)
+                self.set_text_color(*BLACK)
                 for k in range(max_l):
                     if k == 0:
                         self.cell(25, hh*max_l, f'Wells', 1, fill=True, align='C')
                     else:
                         self.cell(25, hh)
                     self.set_font('Arial', '', 12)
-                    for x in tt:
+                    for i, x in enumerate(tt):
+                        self.set_fill_color(*(GRAY if i%2 == 1 else WHITE))
                         if len(x) < max_l:
                             if type(x) == str:
                                 x = []
