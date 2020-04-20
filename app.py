@@ -49,14 +49,13 @@ lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
 # Matrices
 ACTIVE_BATCHES, ALL_BATCHES = matrix_manager.load_cache()
 MLABELS = {k : ALL_BATCHES[k]['matrix'] for k in ALL_BATCHES}
-MCODENAMES = expt.get_matrix_codenames()
-BATCH_TO_CODENAMES = {b : MCODENAMES[MLABELS[b]] for b in MLABELS}
+BATCH_TO_CODENAMES = {k : ALL_BATCHES[k]["codename"] for k in ALL_BATCHES}
 ACTIVE_BATCH_JSON = orjson.dumps({"data" : {k : ACTIVE_BATCHES[k]['readable'] for k in ACTIVE_BATCHES}})
 VECTOR_SIZES = {int(k.split("x")[0]) for k in ALL_BATCHES}
 GRID_JSON = {}
 for k in ALL_BATCHES:
     GRID_JSON[k] = orjson.dumps({ "gridData" :  ALL_BATCHES[k]["gridData"]["gridData"],
-       "cellData" :  ALL_BATCHES[k]["cellData"]["cellData"], "codename" :  BATCH_TO_CODENAMES[k] })
+       "cellData" :  ALL_BATCHES[k]["cellData"]["cellData"], "codename" :  ALL_BATCHES[k]["codename"] })
 
 # App Version
 MIN_VERSION = "1.0"
