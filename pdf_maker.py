@@ -1,11 +1,10 @@
 import json
-import re
 import os
 import requests
 # https://pyfpdf.readthedocs.io
 from fpdf import FPDF
+from grid import parse_batch
 
-BATCH_REGEX = r'(\d+)x(\d+).*'
 PDF_ROOT = f"{os.path.expanduser('~')}/pdfs"
 # COLORS
 BLACK = (0, 0, 0)
@@ -13,12 +12,6 @@ DARK = (64, 64, 64)
 WHITE = (255, 255, 255)
 LIGHT_GREY = (151, 151, 151)
 GRAY = (240, 240, 240)
-
-def parse_batch(batch):
-    mat = re.match(BATCH_REGEX, batch)
-    if mat:
-        return int(mat[1]),int(mat[2])
-    return None
 
 def partition(l, n):
     return [l[i * n:(i + 1) * n] for i in range((len(l) + n - 1) // n )]
@@ -103,10 +96,7 @@ def create_pdf(batch):
     grid_resp = requests.get(f'https://c19.zyxw365.in/api/grid_data/{batch}').json()
     code_name = grid_resp['codename']
     pdf = CustomPDF(batch, grid_resp)    
-    pdf.output(get_pdf_location(batch))
-
-def get_pdf_location(batch):
-    return f'{PDF_ROOT}/{get_pdf_name(batch)}'
+    pdf.output(f'{PDF_ROOT}/{get_pdf_name(batch)}')
 
 def get_pdf_name(batch):
     return f'batch_{batch}_Sheet.pdf'
