@@ -53,7 +53,10 @@ MCODENAMES = expt.get_matrix_codenames()
 BATCH_TO_CODENAMES = {b : MCODENAMES[MLABELS[b]] for b in MLABELS}
 ACTIVE_BATCH_JSON = orjson.dumps({"data" : {k : ACTIVE_BATCHES[k]['readable'] for k in ACTIVE_BATCHES}})
 VECTOR_SIZES = {int(k.split("x")[0]) for k in ALL_BATCHES}
-GRID_JSON = {k : orjson.dumps({d : ALL_BATCHES[k][d][d] for d in {"gridData", "cellData"}}) for k in ALL_BATCHES}
+GRID_JSON = {}
+for k in ALL_BATCHES:
+    GRID_JSON[k] = orjson.dumps({ "gridData" :  ALL_BATCHES[k]["gridData"]["gridData"],
+       "cellData" :  ALL_BATCHES[k]["cellData"]["cellData"], "codeName" :  BATCH_TO_CODENAMES[k] })
 
 # App Version
 MIN_VERSION = "1.0"
