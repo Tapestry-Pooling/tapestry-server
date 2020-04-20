@@ -20,6 +20,7 @@ import time
 
 import matrix_manager
 from pdf_maker import get_pdf_name
+from grid import parse_batch
 sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', environment= os.getenv('SENTRY_ENV', 'dev'), release=os.getenv('SENTRY_RELEASE', 'unknown'))
 
 EXPT_DIR="./compute/"
@@ -89,9 +90,6 @@ def curr_epoch():
 
 def err_json(msg):
     return jsonify(error=msg),500
-
-def verify_batch_dimensions(b, l):
-    return int(b.split("x")[0]) == l
 
 def app_version_check(version):
     if version is None or version == "" or version.isspace() or version.count(".") != 1:
@@ -361,17 +359,18 @@ def upload_test_data():
     test_data = payload_json.get('test_data', [])
     batch = payload_json.get('batch', "").strip()
     num_samples = payload_json.get('num_samples', None)
-    if batch == "" or batch.isspace() or batch not in MLABELS:
+    if batch == "" or batch.isspace() or batch not in ALL_BATCHES:
         return err_json(f"Invalid batch size : {batch}")
     lp = len(test_data)
-    if not verify_batch_dimensions(batch, lp) or lp not in VECTOR_SIZES:
+    nw, ns = parse_batch(batch)
+    if nw != lp or lp not in VECTOR_SIZES:
         err_msg = f"Invalid CT vector size of {lp} for batch type {batch}"
         app.logger.error(err_msg)
         return err_json(err_msg)
-    if num_samples is None or num_samples == "" or num_samples.isspace() or not num_samples.isdigit():
-        num_samples = None
-    test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s where id = %s and user_id = %s returning id;"
-    res = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id))
+    if num_samples is None:
+        num_samples = ns
+    test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s where id = %s and user_id = %s and num_screens = %s returning id;"
+    res = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id, num_samples))
     if not res or len(res) == 0:
         return err_json(f"Test id not found {test_id}")
     updated_id = res[0][0]
