@@ -369,8 +369,8 @@ def upload_test_data():
         return err_json(err_msg)
     if num_samples is None:
         num_samples = ns
-    test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s where id = %s and user_id = %s and num_screens = %s returning id;"
-    res = execute_sql(test_uploads_sql, (test_data, test_id, g.user_id, num_samples))
+    test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s, num_screens = %s where id = %s and user_id = %s returning id;"
+    res = execute_sql(test_uploads_sql, (test_data, num_samples, test_id, g.user_id))
     if not res or len(res) == 0:
         return err_json(f"Test id not found {test_id}")
     updated_id = res[0][0]
