@@ -1,12 +1,12 @@
 import json
 import re
-
+import os
 import requests
 # https://pyfpdf.readthedocs.io
 from fpdf import FPDF
 
 BATCH_REGEX = r'(\d+)x(\d+).*'
-PDF_ROOT = "~/pdfs"
+PDF_ROOT = f"{os.path.expanduser('~')}/pdfs"
 # COLORS
 BLACK = (0, 0, 0)
 DARK = (64, 64, 64)
