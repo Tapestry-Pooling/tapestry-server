@@ -25,7 +25,7 @@ echo "App restarted, sleeping 1 sec"
 sleep 1
 echo "Generating HTML files for batch sizes"
 ./scripts/generate_batch_html.sh
-echo "Copying PDFs to pdfs folder"
-cp compute/mat_pdfs/*.pdf ~/pdfs/
+echo "Generating PDFs to pdfs folder"
+python pdf_maker.py
 now=$(date +%s)
 sentry-cli releases deploys $SENTRY_VERSION new -e $SENTRY_ENV -t $((now-start))
