@@ -96,10 +96,10 @@ def create_pdf(batch):
     grid_resp = requests.get(f'https://c19.zyxw365.in/api/grid_data/{batch}').json()
     code_name = grid_resp['codename']
     pdf = CustomPDF(batch, grid_resp)    
-    pdf.output(f'{PDF_ROOT}/{get_pdf_name(batch)}')
+    pdf.output(f'{PDF_ROOT}/{get_pdf_name(batch, code_name)}')
 
-def get_pdf_name(batch):
-    return f'batch_{batch}_Sheet.pdf'
+def get_pdf_name(batch, code_name):
+    return f'{batch}_Matrix_{code_name}.pdf'
 
 def generate_pdfs():
     batches = requests.get(f'https://c19.zyxw365.in/api/debug_info').json()['matrix_labels']

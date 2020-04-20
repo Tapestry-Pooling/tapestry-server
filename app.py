@@ -273,7 +273,7 @@ def debug_info():
 
 @app.route('/pdf_info/<batch>', methods=['GET'])
 def get_pdf_for(batch):
-    return redirect(f'/pdfs/{get_pdf_name(batch)}', 302)
+    return redirect(f'/pdfs/{get_pdf_name(batch, BATCH_TO_CODENAMES[batch])}', 302)
 
 @app.route('/login_callback', methods=['POST'])
 def login_sucess():
