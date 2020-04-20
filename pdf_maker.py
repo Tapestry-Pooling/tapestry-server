@@ -106,7 +106,10 @@ def create_pdf(batch):
     pdf.output(get_pdf_location(batch))
 
 def get_pdf_location(batch):
-    return f'{PDF_ROOT}/batch_{batch}_Sheet.pdf'
+    return f'{PDF_ROOT}/{get_pdf_name(batch)}'
+
+def get_pdf_name(batch):
+    return f'batch_{batch}_Sheet.pdf'
 
 def generate_pdfs():
     batches = requests.get(f'https://c19.zyxw365.in/api/debug_info').json()['matrix_labels']
