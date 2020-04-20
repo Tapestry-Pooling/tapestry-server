@@ -6,7 +6,7 @@ import requests
 from fpdf import FPDF
 
 BATCH_REGEX = r'(\d+)x(\d+).*'
-
+PDF_ROOT = "~/pdfs"
 # COLORS
 BLACK = (0, 0, 0)
 DARK = (64, 64, 64)
@@ -101,8 +101,12 @@ class CustomPDF(FPDF):
 
 def create_pdf(batch):
     grid_resp = requests.get(f'https://c19.zyxw365.in/api/grid_data/{batch}').json()
-    pdf = CustomPDF(batch, grid_resp)
-    pdf.output(f'tab_{batch}.pdf')
+    code_name = grid_resp['codename']
+    pdf = CustomPDF(batch, grid_resp)    
+    pdf.output(get_pdf_location(batch))
+
+def get_pdf_location(batch):
+    return f'{PDF_ROOT}/batch_{batch}_Sheet.pdf'
 
 def generate_pdfs():
     batches = requests.get(f'https://c19.zyxw365.in/api/debug_info').json()['matrix_labels']
@@ -110,5 +114,5 @@ def generate_pdfs():
         print(f'Batch : {b}')
         create_pdf(b)
 
-generate_pdfs()
-
+if __name__ == "__main__":
+    generate_pdfs()
