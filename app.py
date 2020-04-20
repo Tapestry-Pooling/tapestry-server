@@ -19,7 +19,7 @@ import sys
 import time
 
 import matrix_manager
-
+from pdf_maker import get_pdf_location
 sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', environment= os.getenv('SENTRY_ENV', 'dev'), release=os.getenv('SENTRY_RELEASE', 'unknown'))
 
 EXPT_DIR="./compute/"
@@ -275,7 +275,7 @@ def debug_info():
 
 @app.route('/pdf_info/<batch>', methods=['GET'])
 def get_pdf_for(batch):
-    return redirect(f"/pdfs/{expt.get_matrix_pdf_location(MLABELS[batch]).split('/')[-1]}", 301)
+    return redirect(get_pdf_location(batch), 301)
 
 @app.route('/login_callback', methods=['POST'])
 def login_sucess():
