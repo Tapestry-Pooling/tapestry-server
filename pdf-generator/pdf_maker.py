@@ -2,6 +2,7 @@ import json
 import re
 
 import requests
+# https://pyfpdf.readthedocs.io
 from fpdf import FPDF
 
 BATCH_REGEX = r'(\d+)x(\d+).*'
@@ -31,10 +32,8 @@ class CustomPDF(FPDF):
         self.set_font('Arial', '', 14)
         self.set_text_color(80, 80, 80)
         self.cell(10)
-        #self.set_fill_color(128, 113, 113)
         self.cell(60, 5, f'{self.num_samples} Samples', 0)
         self.cell(30)
-        #self.set_fill_color(22, 243, 90)
         self.cell(30, 5, f'{self.num_wells} Wells', 0)
         self.cell(30)
         self.cell(30, 5, f'Matrix: {self.code_name}', 0)
@@ -71,8 +70,6 @@ class CustomPDF(FPDF):
                     self.cell(ww, hh, f'{x}', 1, fill=True, align='C')
                 self.ln(hh)
                 tt = tlist[j]
-                if (len(tt)) < rows_per_table:
-                    tt = tt + ['' for x in range(rows_per_table - len(tt))]
                 self.set_fill_color(159, 197, 232)
                 for k in range(max_l):
                     if k == 0:
@@ -81,6 +78,10 @@ class CustomPDF(FPDF):
                         self.cell(25, hh)
                     self.set_font('Arial', '', 12)
                     for x in tt:
+                        if len(x) < max_l:
+                            if type(x) == str:
+                                x = []
+                            x += ['' for _ in range(max_l - len(x))]
                         self.cell(ww, hh, x[k], 1, fill=True, align='C')
                     self.ln(hh)
                 self.ln(20)
@@ -93,6 +94,7 @@ def create_pdf(batch):
 def generate_pdfs():
     batches = requests.get(f'https://c19.zyxw365.in/api/debug_info').json()['matrix_labels']
     for b in batches:
+        print(f'Batch : {b}')
         create_pdf(b)
 
 generate_pdfs()
