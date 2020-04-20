@@ -56,7 +56,7 @@ VECTOR_SIZES = {int(k.split("x")[0]) for k in ALL_BATCHES}
 GRID_JSON = {}
 for k in ALL_BATCHES:
     GRID_JSON[k] = orjson.dumps({ "gridData" :  ALL_BATCHES[k]["gridData"]["gridData"],
-       "cellData" :  ALL_BATCHES[k]["cellData"]["cellData"], "codeName" :  BATCH_TO_CODENAMES[k] })
+       "cellData" :  ALL_BATCHES[k]["cellData"]["cellData"], "codename" :  BATCH_TO_CODENAMES[k] })
 
 # App Version
 MIN_VERSION = "1.0"

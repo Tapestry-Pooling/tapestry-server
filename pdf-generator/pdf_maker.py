@@ -20,7 +20,7 @@ class CustomPDF(FPDF):
         # Landscape mode
         FPDF.__init__(self, orientation='L', unit='mm', format='A4')
         self.grid_data = grid_data['gridData']
-        self.code_name = grid_data['codeName']
+        self.code_name = grid_data['codename']
         self.batch = batch
         self.num_wells, self.num_samples = parse_batch(batch)
         self.make_table()
@@ -53,7 +53,7 @@ class CustomPDF(FPDF):
         rows_per_table = 15
         screen_partitions = partition(g, tables_per_page * rows_per_table)
         sample_partitions = partition(samples, tables_per_page * rows_per_table)
-        ww = 15
+        ww = 17
         hh = 10
         self.set_text_color(0, 0, 0)
         for i in range(len(screen_partitions)):
@@ -65,7 +65,7 @@ class CustomPDF(FPDF):
             for j in range(len(tlist)):
                 # Print sample numbers
                 self.set_font('Arial', 'B', 12)
-                self.set_fill_color(255, 204, 102)
+                self.set_fill_color(255, 229, 153)
                 self.cell(25, hh, f'Samples', 1, fill=True, align='C')
                 for x in slist[j]:
                     self.cell(ww, hh, f'{x}', 1, fill=True, align='C')
@@ -73,9 +73,7 @@ class CustomPDF(FPDF):
                 tt = tlist[j]
                 if (len(tt)) < rows_per_table:
                     tt = tt + ['' for x in range(rows_per_table - len(tt))]
-                self.set_font('Arial', '', 12)
-                self.set_fill_color(153, 170, 255)
-                #self.set_fill_color(153, 153, 255)
+                self.set_fill_color(159, 197, 232)
                 for k in range(max_l):
                     if k == 0:
                         self.cell(25, hh*max_l, f'Wells', 1, fill=True, align='C')
@@ -85,17 +83,17 @@ class CustomPDF(FPDF):
                     for x in tt:
                         self.cell(ww, hh, x[k], 1, fill=True, align='C')
                     self.ln(hh)
-                self.ln(hh)
-
-        
-    def footer(self):
-        self.set_y(-10)
+                self.ln(20)
 
 def create_pdf(batch):
     grid_resp = requests.get(f'https://c19.zyxw365.in/api/grid_data/{batch}').json()
     pdf = CustomPDF(batch, grid_resp)
     pdf.output(f'tab_{batch}.pdf')
 
-batch = '20x1140_v0'
-create_pdf(batch)
+def generate_pdfs():
+    batches = requests.get(f'https://c19.zyxw365.in/api/debug_info').json()['matrix_labels']
+    for b in batches:
+        create_pdf(b)
+
+generate_pdfs()
 
