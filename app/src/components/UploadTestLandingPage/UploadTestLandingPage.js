@@ -5,9 +5,29 @@ import './UploadTestLandingPage.scss';
 
 const CTCard = (props) => {
   const {
-    label, duration_minutes: durationMinutes, batch, results_available: resultsAvailable,
+    label, test_start_time: testStartTime, test_end_time: testEndTime,
+    batch, results_available: resultsAvailable,
     test_id: testId,
   } = props;
+
+  const zeroPadding = (number) => {
+    const numberString = number.toString();
+    if (numberString.length < 2) {
+      return `0${numberString}`;
+    }
+    return numberString;
+  };
+
+  const getFormattedDate = (dateString) => {
+    const dateObj = new Date(dateString);
+    const hours = dateObj.getHours();
+    const minutes = dateObj.getMinutes();
+    const seconds = dateObj.getSeconds();
+    return `${dateObj.toDateString()}, ${((hours === 0 || hours > 12)
+      ? zeroPadding(Math.abs(hours - 12))
+      : zeroPadding(hours))}:${zeroPadding(minutes)}:${zeroPadding(seconds)} ${(hours > 12) ? 'PM' : 'AM'}`;
+  };
+
   return (
     <div className="ct-card">
       <div>
@@ -20,11 +40,18 @@ const CTCard = (props) => {
       </div>
       <div>
         <div className="ct-card-label">
-          Duration:
+          Start Time:
         </div>
         <div className="ct-card-value">
-          {durationMinutes}
-          {' minutes'}
+          {getFormattedDate(testStartTime)}
+        </div>
+      </div>
+      <div>
+        <div className="ct-card-label">
+          End Time:
+        </div>
+        <div className="ct-card-value">
+          {getFormattedDate(testEndTime)}
         </div>
       </div>
       <div>
@@ -54,7 +81,8 @@ const CTCard = (props) => {
 CTCard.propTypes = {
   test_id: PropTypes.number,
   label: PropTypes.string,
-  duration_minutes: PropTypes.number,
+  test_start_time: PropTypes.string,
+  test_end_time: PropTypes.string,
   results_available: PropTypes.bool,
   batch: PropTypes.string,
 };
@@ -62,7 +90,8 @@ CTCard.propTypes = {
 CTCard.defaultProps = {
   test_id: 0,
   label: '',
-  duration_minutes: '',
+  test_start_time: '',
+  test_end_time: '',
   results_available: false,
   batch: '',
 };
