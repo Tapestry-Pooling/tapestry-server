@@ -10,7 +10,7 @@ VERSION_FILE = "versioning.json"
 
 def readable_string(batch, num_infected, infection_rate):
     m,n = grid.parse_batch(batch)
-    return f'{n} Samples (with {m} tests. Upto {num_infected} infections)'
+    return f'{n} Samples (with {m} tests. Upto {num_infected} positives)'
 
 def update_cache(mlabels, matrices, codenames, jfile):
     old_data = {}
