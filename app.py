@@ -331,8 +331,9 @@ def start_test():
     label = payload_json.get('label', "").strip()
     if label == "" or label.isspace() or batch == "" or batch.isspace() or batch not in MLABELS:
         return err_json(f"Empty test label or invalid batch size {batch}")
-    test_uploads_sql = "insert into test_uploads (user_id, label, batch_size) values (%s, %s, %s) on conflict(user_id, label) do nothing returning id;"
-    res = execute_sql(test_uploads_sql, (g.user_id, label, batch))
+    nw, ns = parse_batch(batch)
+    test_uploads_sql = "insert into test_uploads (user_id, label, batch_size, num_screens) values (%s, %s, %s, %s) on conflict(user_id, label) do nothing returning id;"
+    res = execute_sql(test_uploads_sql, (g.user_id, label, batch, ns))
     if not res or len(res) == 0:
         return err_json(f"Label '{label}' already exists.")
     test_id = res[0][0]
