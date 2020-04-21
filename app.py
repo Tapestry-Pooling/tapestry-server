@@ -20,7 +20,7 @@ import time
 
 import matrix_manager
 from pdf_maker import get_pdf_name
-from grid import parse_batch
+from grid import parse_batch, batch_size_from_batch_name
 sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', environment= os.getenv('SENTRY_ENV', 'dev'), release=os.getenv('SENTRY_RELEASE', 'unknown'))
 
 EXPT_DIR="./compute/"
@@ -48,7 +48,7 @@ lmdb_write_env = lmdb.open(LMDB_PATH, map_size=LMDB_SIZE)
 lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
 
 # Matrices
-ACTIVE_BATCHES, ALL_BATCHES = matrix_manager.load_cache()
+ACTIVE_BATCHES, ALL_BATCHES, BATCH_SIZE_TO_BATCH_NAME = matrix_manager.load_cache()
 MLABELS = {k : ALL_BATCHES[k]['matrix'] for k in ALL_BATCHES}
 BATCH_TO_CODENAMES = {k : ALL_BATCHES[k]["codename"] for k in ALL_BATCHES}
 ACTIVE_BATCH_JSON = orjson.dumps({"data" : {k : ACTIVE_BATCHES[k]['readable'] for k in ACTIVE_BATCHES}})
@@ -217,38 +217,40 @@ def publish_message(topic, message, subject=None):
         return
     SNS_CLIENT.publish(TopicArn=topic, Message=message, Subject=subject)
 
-def process_test_upload(test_id, batch, vector):
+def process_test_upload(test_id, batch, vector, num_samples):
     try:
-        return expt.get_test_results(MLABELS[batch], np.float32(vector))
+        return expt.get_test_results(MLABELS[batch], np.float32(vector), num_samples)
     except Exception as e:
         app.logger.error("Error occured" + str(e))
         return {"error" : str(e)}
 
-def notify_test_success(test_id, batch, mresults, test_data):
+def notify_test_success(test_id, batch, mresults, test_data, num_samples):
     succ_msg = f"""
     Test ID: {test_id} successful at {time.ctime()}
     Batch size: {batch}
     Matrix used: {MLABELS[batch]}
     CT Vector: {test_data}
+    Number of samples: {num_samples}
     Result summary:
     {mresults["result_string"]}
     """
     publish_message(PROD_ARN, succ_msg, "Test upload success")
 
-def notify_test_failure(test_id, batch, mresults, test_data):
+def notify_test_failure(test_id, batch, mresults, test_data, num_samples):
     err_msg = f"""
     Test ID: {test_id} failed at {time.ctime()}
     Batch size: {batch}
     Matrix used: {MLABELS[batch]}
     CT Vector: {test_data}
+    Number of samples: {num_samples}
     Error summary:
     {mresults["error"]}
     """
     publish_message(PROD_ARN, err_msg, "Test upload failure")
 
-def post_process_results(test_id, batch, mresults, test_data):
+def post_process_results(test_id, batch, mresults, test_data, num_samples):
     if "error" in mresults:
-        notify_test_failure(test_id, batch, mresults, test_data)
+        notify_test_failure(test_id, batch, mresults, test_data, num_samples)
         return err_json("Error occured while processing test upload. Don't worry! We will try again soon!")
     if "x" in mresults:
         mresults["x"] = mresults["x"].tolist()
@@ -256,7 +258,7 @@ def post_process_results(test_id, batch, mresults, test_data):
     test_results_sql = """insert into test_results (test_id, matrix_label, result_data ) values (%s, %s, %s) on conflict(test_id) 
     do update set updated_at = now(), matrix_label=excluded.matrix_label, result_data=excluded.result_data returning test_id;"""
     execute_sql(test_results_sql, (test_id, MLABELS[batch], Json(mresults)))
-    notify_test_success(test_id, batch, mresults, test_data)
+    notify_test_success(test_id, batch, mresults, test_data, num_samples)
     return jsonify(test_id=str(test_id), results=mresults["result_string"])
 
 """
@@ -306,8 +308,8 @@ def user_dashboard():
         pagination_clause = ''
         pagination = 0
     dashboard_sql = f"""select u.id as test_id, u.updated_at, r.test_id, u.test_data, u.label, u.batch_size, 
-    extract(minute from (u.batch_end_time - u.batch_start_time)) as test_duration_minutes, batch_start_time, batch_end_time 
-    from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s and u.batch_end_time is not null
+    extract(minute from (u.batch_end_time - u.batch_start_time)) as test_duration_minutes, u.batch_start_time, u.batch_end_time,
+    u.num_screens from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s and u.batch_end_time is not null
     {pagination_clause} order by u.id desc limit 50;"""
     params = (g.user_id,) if pagination == 0 else (g.user_id, int(pagination))
     res = select(dashboard_sql, params)
@@ -316,7 +318,7 @@ def user_dashboard():
         return jsonify(data=[], pagination=last_pag)
     results = [{"test_id" : r[0], "updated_at" : r[1], "results_available" : r[2] != None, 
         "test_data": r[3], "label" : r[4], "batch" : r[5], "duration_minutes" : r[6],
-        "test_start_time" : r[7], "test_end_time" : r[8]} for r in res]
+        "test_start_time" : r[7], "test_end_time" : r[8], "num_samples" : r[9]} for r in res]
     if len(results) >= 50:
         last_pag = str(results[-1]["test_id"])
     return jsonify(data=results, pagination=last_pag)
@@ -370,37 +372,41 @@ def upload_test_data():
         return err_json(err_msg)
     if num_samples is None:
         num_samples = ns
-    test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s, num_screens = %s where id = %s and user_id = %s returning id;"
-    res = execute_sql(test_uploads_sql, (test_data, num_samples, test_id, g.user_id))
+    test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s, num_screens = %s, batch_size = %s where id = %s and user_id = %s returning id;"
+    res = execute_sql(test_uploads_sql, (test_data, num_samples, batch, test_id, g.user_id))
     if not res or len(res) == 0:
         return err_json(f"Test id not found {test_id}")
     updated_id = res[0][0]
-    mresults = process_test_upload(test_id, batch, test_data)
-    return post_process_results(test_id, batch, mresults, test_data)
+    mresults = process_test_upload(test_id, batch, test_data, num_samples)
+    return post_process_results(test_id, batch, mresults, test_data, num_samples)
 
 @app.route('/results/<test_id>', methods=['GET'])
 @requires_auth
 def fetch_test_results(test_id):
     test_id = int(test_id)
-    result_sql = "select r.test_id, r.result_data, r.matrix_label, u.batch_size, u.label from test_results r, test_uploads u where r.test_id = u.id and u.user_id = %s and u.id = %s"
+    result_sql = "select r.test_id, r.result_data, r.matrix_label, u.batch_size, u.label, u.num_screens from test_results r, test_uploads u where r.test_id = u.id and u.user_id = %s and u.id = %s"
     res = select(result_sql, (g.user_id, test_id))
     if not res or len(res) == 0:
         return err_json(f"Test not found for test_id : {test_id}")
     result = res[0]
     app.logger.info(f'Result: {result}')
-    return jsonify(test_id=test_id, result=result[1]["result_string"], matrix=result[2], batch=result[3], label=result[4])
+    return jsonify(test_id=test_id, result=result[1]["result_string"], matrix=result[2], batch=result[3], label=result[4], num_samples=result[5])
 
 @app.route('/batch_data', methods=['GET'])
 def batch_data():
     return ACTIVE_BATCH_JSON, 200, {CONTENT_TYPE : CONTENT_JSON}
 
-@app.route('/grid_data/<batch_size>', methods=['GET'])
-def screen_data(batch_size):
-    return GRID_JSON.get(batch_size.strip(), "{}"), 200, {CONTENT_TYPE : CONTENT_JSON}
+@app.route('/grid_data/<batch>', methods=['GET'])
+def screen_data(batch):
+    return GRID_JSON.get(batch.strip(), "{}"), 200, {CONTENT_TYPE : CONTENT_JSON}
 
-@app.route('/cell_data/<batch_size>', methods=['GET'])
-def cell_data(batch_size):
-    return GRID_JSON.get(batch_size.strip(), "{}"), 200, {CONTENT_TYPE : CONTENT_JSON}
+@app.route('/cell_data/<batch>', methods=['GET'])
+def cell_data(batch):
+    return GRID_JSON.get(batch.strip(), "{}"), 200, {CONTENT_TYPE : CONTENT_JSON}
+
+@app.route('/available_matrices/<batch>', methods=['GET'])
+def all_available_batches(batch):
+    return jsonify(matrices=BATCH_SIZE_TO_BATCH_NAME.get(batch_size_from_batch_name(batch), []))
 
 """
     Main
