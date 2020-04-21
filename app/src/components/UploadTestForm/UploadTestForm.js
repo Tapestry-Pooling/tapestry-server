@@ -48,19 +48,27 @@ CTInput.defaultProps = {
 
 const UploadTestForm = (props) => {
   console.log('props: ', props);
-  const { cellData, handleChangeCellValue } = props;
-  const options = [
-    { value: 'chocolate', label: 'Chocolate' },
-    { value: 'strawberry', label: 'Strawberry' },
-    { value: 'vanilla', label: 'Vanilla' },
-  ];
+  const {
+    cellData, handleChangeCellValue, availableMatrices, selectedMatrix,
+    handleMatrixChange, handleSampleSizeChange, selectedSampleSize,
+  } = props;
+  const options = availableMatrices.map((matrixObj) => {
+    const value = Object.keys(matrixObj)[0];
+    const label = matrixObj[value];
+    return {
+      label,
+      value,
+    };
+  });
   return (
     <div className="upload-test-form">
       <div className="upload-test-form__matrix-dropdown">
         <div className="upload-test-form__matrix-dropdown-label">Select Matrix</div>
-        <div className="upload-test-form__matrix-dropdown-select">
+        <div className="upload-test-form__matrix-dropdown-input">
           <Select
             options={options}
+            value={selectedMatrix}
+            onChange={handleMatrixChange}
             components={{
               IndicatorSeparator: () => null,
             }}
@@ -72,10 +80,33 @@ const UploadTestForm = (props) => {
               control: (provided) => ({
                 ...provided,
                 boxShadow: 'none',
-                borderColor: '#ccc',
+                borderRadius: '10px',
+                border: '2px solid #eee',
+              }),
+              menu: (provided) => ({
+                ...provided,
+                marginTop: '0px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '98%',
+                borderRadius: '10px',
+                borderTopLeftRadius: '5px',
+                borderTopRightRadius: '5px',
+              }),
+              option: (provided) => ({
+                ...provided,
+                backgroundColor: '#fff',
+                color: '#777',
+                borderRadius: '10px',
               }),
             }}
           />
+        </div>
+      </div>
+      <div className="upload-test-form__samples">
+        <div className="upload-test-form__samples-label">No. of Samples</div>
+        <div className="upload-test-form__samples-input">
+          <input type="tel" value={selectedSampleSize} onChange={handleSampleSizeChange} />
         </div>
       </div>
       <div className="upload-test-form__title">
@@ -94,11 +125,19 @@ const UploadTestForm = (props) => {
 
 UploadTestForm.propTypes = {
   cellData: PropTypes.arrayOf(PropTypes.shape({})),
+  availableMatrices: PropTypes.arrayOf(PropTypes.shape({})),
+  selectedMatrix: PropTypes.shape({}),
+  selectedSampleSize: PropTypes.string,
   handleChangeCellValue: PropTypes.func.isRequired,
+  handleMatrixChange: PropTypes.func.isRequired,
+  handleSampleSizeChange: PropTypes.func.isRequired,
 };
 
 UploadTestForm.defaultProps = {
   cellData: [],
+  availableMatrices: [],
+  selectedMatrix: {},
+  selectedSampleSize: '',
 };
 
 export default UploadTestForm;

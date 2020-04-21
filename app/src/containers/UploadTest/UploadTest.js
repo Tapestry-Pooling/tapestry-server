@@ -4,6 +4,7 @@ import { Route, Switch } from 'react-router-dom';
 import {
   getDashboardDataAPI, getCellDataAPI,
   uploadTestDataAPI, getResultAPI,
+  getAvailableMatricesAPI,
 } from 'api/test';
 import UploadTestLandingPage from 'components/UploadTestLandingPage';
 import UploadTestForm from 'components/UploadTestForm';
@@ -23,6 +24,9 @@ class UploadTest extends React.Component {
       phone: urlParams.get('phone') || sessionStorage.getItem('phone'),
       email: urlParams.get('email') || sessionStorage.getItem('email'),
       isCtaDisabled: true,
+      availableMatrices: [],
+      selectedMatrix: {},
+      selectedSampleSize: '',
     };
   }
 
@@ -55,8 +59,25 @@ class UploadTest extends React.Component {
           this.setState({
             cellData: response.data.cellData.map((label, index) => ({ label, isChecked: (testData.test_data === undefined || testData.test_data === null || testData.test_data[index] === 100), value: testData.test_data ? testData.test_data[index].toString() : '100' })),
             testId,
+            selectedSampleSize: testData.num_samples,
             testsData: testsDataLocal,
           }, this.checkCtaDisabled);
+          return getAvailableMatricesAPI(authToken, testData.batch);
+        })
+        .then((response) => {
+          this.setState({
+            availableMatrices: response.data.matrices,
+            selectedMatrix: response.data.matrices
+              .filter((matrixObj) => (Object.keys(matrixObj)[0] === testData.batch))
+              .map((matrixObj) => {
+                const value = Object.keys(matrixObj)[0];
+                const label = matrixObj[value];
+                return {
+                  label,
+                  value,
+                };
+              })[0],
+          });
         });
     } else if (pathname === '/app/upload-test/result') {
       const testsDataLocal = JSON.parse(sessionStorage.getItem('testsData'));
@@ -95,8 +116,25 @@ class UploadTest extends React.Component {
           .then((response) => {
             this.setState({
               testId,
+              selectedSampleSize: testData.num_samples,
               cellData: response.data.cellData.map((label, index) => ({ label, isChecked: (testData.test_data === undefined || testData.test_data === null || testData.test_data[index] === 100), value: testData.test_data ? testData.test_data[index].toString() : '100' })),
             }, this.checkCtaDisabled);
+            return getAvailableMatricesAPI(authToken, testData.batch);
+          })
+          .then((response) => {
+            this.setState({
+              availableMatrices: response.data.matrices,
+              selectedMatrix: response.data.matrices
+                .filter((matrixObj) => (Object.keys(matrixObj)[0] === testData.batch))
+                .map((matrixObj) => {
+                  const value = Object.keys(matrixObj)[0];
+                  const label = matrixObj[value];
+                  return {
+                    label,
+                    value,
+                  };
+                })[0],
+            });
           });
       } else if (/upload-test\/result/.test(pathname)) {
         getResultAPI(authToken, email, testId)
@@ -139,11 +177,11 @@ class UploadTest extends React.Component {
 
   checkCtaDisabled = () => {
     const { location: { pathname } } = this.props;
-    const { cellData } = this.state;
+    const { cellData, selectedSampleSize } = this.state;
     let flag = true;
     if (/upload-test\/form/.test(pathname)) {
       const numValues = cellData.filter((cell) => (cell.value)).length;
-      if (numValues === cellData.length) {
+      if (numValues === cellData.length && selectedSampleSize) {
         flag = false;
       }
     } else {
@@ -157,13 +195,13 @@ class UploadTest extends React.Component {
   submitCtValues = () => {
     const {
       testId, testsData, authToken, cellData,
-      email,
+      email, selectedSampleSize,
     } = this.state;
     const { history } = this.props;
     const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
     const { batch } = testData;
     uploadTestDataAPI(authToken, email, testId,
-      batch, cellData.map((cell) => (parseFloat(cell.value))))
+      batch, parseInt(selectedSampleSize, 10), cellData.map((cell) => (parseFloat(cell.value))))
       .then((response) => {
         console.log('data uploaded! ', response.data);
         if (response.status === 200) {
@@ -174,12 +212,41 @@ class UploadTest extends React.Component {
       });
   }
 
+  handleMatrixChange = (option) => {
+    this.setState({
+      selectedMatrix: option,
+    });
+    const { authToken, testsData, testId } = this.state;
+    const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
+    getCellDataAPI(authToken, option.value)
+      .then((response) => {
+        this.setState({
+          testId,
+          cellData: response.data.cellData.map((label, index) => ({ label, isChecked: (testData.test_data === undefined || testData.test_data === null || testData.test_data[index] === 100), value: testData.test_data ? testData.test_data[index].toString() : '100' })),
+        }, this.checkCtaDisabled);
+      });
+  }
+
+  handleSampleSizeChange = (e) => {
+    const { value } = e.target;
+    const { testsData, testId } = this.state;
+    const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
+    if (!value || (/^\d+$/.test(value) && (parseInt(value, 10) <= testData.num_samples))) {
+      this.setState({
+        selectedSampleSize: value,
+      }, this.checkCtaDisabled);
+    }
+  }
+
   render() {
     const {
       testsData,
       cellData,
       isCtaDisabled,
       result,
+      availableMatrices,
+      selectedMatrix,
+      selectedSampleSize,
     } = this.state;
     const { location: { pathname } } = this.props;
     return (
@@ -194,6 +261,11 @@ class UploadTest extends React.Component {
             <UploadTestForm
               cellData={cellData}
               handleChangeCellValue={this.handleChangeCellValue}
+              availableMatrices={availableMatrices}
+              selectedMatrix={selectedMatrix}
+              handleMatrixChange={this.handleMatrixChange}
+              selectedSampleSize={selectedSampleSize}
+              handleSampleSizeChange={this.handleSampleSizeChange}
             />
           </Route>
           <Route exact path="/app/upload-test/result">
