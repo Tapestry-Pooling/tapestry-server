@@ -41,9 +41,10 @@ export const getCellDataAPI = (authToken, batchSize) => {
     });
 };
 
-export const uploadTestDataAPI = (authToken, email, testId, batch, testData) => {
+export const uploadTestDataAPI = (authToken, email, testId, batch, numSamples, testData) => {
   const data = {
     test_id: testId,
+    num_samples: numSamples,
     batch,
     test_data: testData,
   };
@@ -88,8 +89,29 @@ export const getResultAPI = (authToken, email, testId) => {
     });
 };
 
+export const getAvailableMatricesAPI = (authToken, batchSize) => {
+  const options = {
+    headers: {
+      'X-Auth': authToken,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  };
+  return request.get(`/available_matrices/${batchSize}`, options)
+    .then((response) => {
+      if (response.status === 200) {
+        console.log('response data: ', response.data);
+      }
+      return response;
+    }, (err) => (err.response))
+    .catch((err) => {
+      console.log('Caught in api chain: ', err.message);
+    });
+};
+
 export default {
   getDashboardDataAPI,
   getCellDataAPI,
   uploadTestDataAPI,
+  getAvailableMatricesAPI,
 };
