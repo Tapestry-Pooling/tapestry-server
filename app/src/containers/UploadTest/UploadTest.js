@@ -194,14 +194,13 @@ class UploadTest extends React.Component {
 
   submitCtValues = () => {
     const {
-      testId, testsData, authToken, cellData,
-      email, selectedSampleSize,
+      testId, authToken, cellData,
+      email, selectedSampleSize, selectedMatrix,
     } = this.state;
     const { history } = this.props;
-    const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
-    const { batch } = testData;
     uploadTestDataAPI(authToken, email, testId,
-      batch, parseInt(selectedSampleSize, 10), cellData.map((cell) => (parseFloat(cell.value))))
+      selectedMatrix.value,
+      parseInt(selectedSampleSize, 10), cellData.map((cell) => (parseFloat(cell.value))))
       .then((response) => {
         console.log('data uploaded! ', response.data);
         if (response.status === 200) {
