@@ -12,6 +12,13 @@
     font-weight: 500;
   }
   margin-bottom: 70px;
+
+  &__matrix-dropdown {
+    &-label, &-select {
+      display: inline-block;
+      width: 50%;
+    }
+  }
 }
 
 .ct-input-box {

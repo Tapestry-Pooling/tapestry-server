@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Select from 'react-select';
 import './UploadTestForm.scss';
 
 const CTInput = (props) => {
@@ -48,8 +49,35 @@ CTInput.defaultProps = {
 const UploadTestForm = (props) => {
   console.log('props: ', props);
   const { cellData, handleChangeCellValue } = props;
+  const options = [
+    { value: 'chocolate', label: 'Chocolate' },
+    { value: 'strawberry', label: 'Strawberry' },
+    { value: 'vanilla', label: 'Vanilla' },
+  ];
   return (
     <div className="upload-test-form">
+      <div className="upload-test-form__matrix-dropdown">
+        <div className="upload-test-form__matrix-dropdown-label">Select Matrix</div>
+        <div className="upload-test-form__matrix-dropdown-select">
+          <Select
+            options={options}
+            components={{
+              IndicatorSeparator: () => null,
+            }}
+            styles={{
+              dropdownIndicator: (provided) => ({
+                ...provided,
+                color: '#00cc92',
+              }),
+              control: (provided) => ({
+                ...provided,
+                boxShadow: 'none',
+                borderColor: '#ccc',
+              }),
+            }}
+          />
+        </div>
+      </div>
       <div className="upload-test-form__title">
         Input Cycle Time
       </div>
