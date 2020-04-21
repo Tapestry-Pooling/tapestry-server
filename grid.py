@@ -40,3 +40,7 @@ def parse_batch(batch):
     if mat:
         return int(mat[1]),int(mat[2])
     return None
+
+def batch_size_from_batch_name(batch):
+    m,n = parse_batch(batch)
+    return f'{m}x{n}'

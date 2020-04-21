@@ -97,7 +97,12 @@ def load_cache():
     # Active batches to be sorted by number of samples
     sorted_bnames = sorted((grid.parse_batch(b)[1], b) for b in active_batches)
     sorted_active_batches = {b : active_batches[b] for n, b in sorted_bnames}
-    return sorted_active_batches, all_batches
+    bbs = {b : grid.batch_size_from_batch_name(b) for b in all_batches}
+    batch_size_to_batch = {}
+    for bn, bs in bbs.items():
+        batch_size_to_batch[bs] = batch_size_to_batch.get(bs, [])
+        batch_size_to_batch[bs].append({bn : all_batches[bn]["codename"]})
+    return sorted_active_batches, all_batches, batch_size_to_batch
 
 if __name__ == '__main__':
     # Load the matrices from "compute" folder
