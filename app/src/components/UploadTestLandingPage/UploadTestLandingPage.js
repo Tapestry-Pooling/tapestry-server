@@ -19,6 +19,7 @@ const CTCard = (props) => {
   };
 
   const getFormattedDate = (dateString) => {
+    console.log('dateString: ', dateString);
     const dateObj = new Date(dateString);
     const hours = dateObj.getHours();
     const minutes = dateObj.getMinutes();
