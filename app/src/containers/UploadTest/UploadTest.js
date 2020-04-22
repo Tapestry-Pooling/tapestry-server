@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch } from 'react-router-dom';
+import { throttle } from 'underscore';
 import {
   getDashboardDataAPI, getCellDataAPI,
   uploadTestDataAPI, getResultAPI,
@@ -27,14 +28,17 @@ class UploadTest extends React.Component {
       availableMatrices: [],
       selectedMatrix: {},
       selectedSampleSize: '',
+      offset: 0,
     };
   }
 
   componentDidMount() {
-    const { authToken, phone, email } = this.state;
+    const {
+      authToken, phone, email, offset,
+    } = this.state;
     const { location: { pathname } } = this.props;
     if (pathname === '/app/upload-test') {
-      getDashboardDataAPI(authToken, email)
+      getDashboardDataAPI(authToken, email, offset)
         .then((response) => {
           console.log('response: ', response.data.data);
           sessionStorage.setItem('authToken', authToken);
@@ -45,9 +49,13 @@ class UploadTest extends React.Component {
           sessionStorage.setItem('testsData', JSON.stringify(response.data.data));
           this.setState({
             testsData: response.data.data,
+            offset: response.data.pagination,
             cellData: [],
             result: '',
           });
+          if (response.data.pagination) {
+            window.addEventListener('scroll', throttle(this.loadMore, 100));
+          }
         });
     } else if (pathname === '/app/upload-test/form') {
       const testsDataLocal = JSON.parse(sessionStorage.getItem('testsData'));
@@ -95,17 +103,20 @@ class UploadTest extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { authToken, testsData, email } = this.state;
+    const {
+      authToken, testsData, email, offset,
+    } = this.state;
     const { location: { pathname } } = this.props;
     const { location: { pathname: prevPathname } } = prevProps;
     if (pathname !== prevPathname) {
       const urlParams = new URLSearchParams(window.location.search);
       const testId = urlParams.get('testId');
       if (/upload-test\/?$/.test(pathname)) {
-        getDashboardDataAPI(authToken, email)
+        getDashboardDataAPI(authToken, email, offset)
           .then((response) => {
             this.setState({
               testsData: response.data.data,
+              offset: response.data.pagination,
               cellData: [],
               result: '',
             });
@@ -230,10 +241,36 @@ class UploadTest extends React.Component {
     const { value } = e.target;
     const { testsData, testId } = this.state;
     const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
-    if (!value || (/^\d+$/.test(value) && (parseInt(value, 10) <= testData.num_samples))) {
+    const maxVal = testData.batch.replace(/^\d+x(\d+)_v\d+$/, '$1');
+    if (!value || (/^\d+$/.test(value) && (parseInt(value, 10) <= maxVal))) {
       this.setState({
         selectedSampleSize: value,
       }, this.checkCtaDisabled);
+    }
+  }
+
+  loadMore = () => {
+    if (window.scrollY + window.innerHeight === document.body.scrollHeight) {
+      const {
+        offset, authToken, email, isLoading,
+        testsData,
+      } = this.state;
+      if (offset && !isLoading) {
+        this.setState({
+          isLoading: true,
+        });
+        getDashboardDataAPI(authToken, email, offset || 0)
+          .then((response) => {
+            sessionStorage.setItem('testsData', JSON.stringify([...testsData, ...response.data.data]));
+            this.setState((state) => ({
+              testsData: [...state.testsData, ...response.data.data],
+              offset: response.data.pagination,
+              cellData: [],
+              result: '',
+              isLoading: false,
+            }));
+          });
+      }
     }
   }
 
