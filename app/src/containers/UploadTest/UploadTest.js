@@ -241,7 +241,8 @@ class UploadTest extends React.Component {
     const { value } = e.target;
     const { testsData, testId } = this.state;
     const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
-    if (!value || (/^\d+$/.test(value) && (parseInt(value, 10) <= testData.num_samples))) {
+    const maxVal = testData.batch.replace(/^\d+x(\d+)_v\d+$/, '$1');
+    if (!value || (/^\d+$/.test(value) && (parseInt(value, 10) <= maxVal))) {
       this.setState({
         selectedSampleSize: value,
       }, this.checkCtaDisabled);
