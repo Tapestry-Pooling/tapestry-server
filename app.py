@@ -92,7 +92,7 @@ def err_json(msg):
     return jsonify(error=msg),500
 
 def app_version_check(version):
-    if version is None or version == "" or version.isspace() or version.count(".") != 1:
+    if version is None or version == "" or version.isspace() or version.count(".") < 1:
         return False
     vs = tuple(int(x) for x in version.split("."))
     return vs >= MIN_VERSION_INTS
