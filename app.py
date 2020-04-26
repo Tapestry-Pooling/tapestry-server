@@ -59,7 +59,7 @@ for k in ALL_BATCHES:
        "cellData" :  ALL_BATCHES[k]["cellData"]["cellData"], "codename" :  ALL_BATCHES[k]["codename"] })
 
 # App Version
-MIN_VERSION = "1.0"
+MIN_VERSION = "1.0.0"
 MIN_VERSION_INTS = tuple(int(x) for x in MIN_VERSION.split("."))
 APP_UPDATE_URL = "https://play.google.com/store/apps/details?id=com.app.byom"
 
