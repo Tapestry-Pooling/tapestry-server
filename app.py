@@ -61,7 +61,7 @@ for k in ALL_BATCHES:
 # App Version
 MIN_VERSION = "1.0"
 MIN_VERSION_INTS = tuple(int(x) for x in MIN_VERSION.split("."))
-APP_UPDATE_URL = "https://play.google.com/store/apps/details?id=com.o1"
+APP_UPDATE_URL = "https://play.google.com/store/apps/details?id=com.app.byom"
 
 # Auth
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', 'dummy')
