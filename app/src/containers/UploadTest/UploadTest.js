@@ -81,7 +81,7 @@ class UploadTest extends React.Component {
                 const value = Object.keys(matrixObj)[0];
                 const label = matrixObj[value];
                 return {
-                  label,
+                  label: `${value.split('_')[0]} ${label}`,
                   value,
                 };
               })[0],
@@ -141,7 +141,7 @@ class UploadTest extends React.Component {
                   const value = Object.keys(matrixObj)[0];
                   const label = matrixObj[value];
                   return {
-                    label,
+                    label: `${value.split('_')[0]} ${label}`,
                     value,
                   };
                 })[0],

@@ -7,6 +7,7 @@
   margin: -20px;
   background: #eee;
   height: calc(100% + 40px);
+  overflow-y: scroll;
   &-empty {
     text-align: center;
     margin-top: 30px;
