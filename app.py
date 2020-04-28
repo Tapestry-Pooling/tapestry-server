@@ -322,6 +322,7 @@ def user_dashboard():
         "test_start_time" : r[7], "test_end_time" : r[8], "num_samples" : r[9]} for r in res]
     if len(results) >= 50:
         last_pag = str(results[-1]["test_id"])
+    app.logger.info(f"Dashboard: \n\t{results}")
     return jsonify(data=results, pagination=last_pag)
 
 @app.route('/start_test', methods=['POST'])
@@ -374,6 +375,7 @@ def upload_test_data():
         return err_json(err_msg)
     if num_samples is None:
         num_samples = ns
+    test_id = int(test_id)
     test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s, num_screens = %s, batch_size = %s where id = %s and user_id = %s returning id;"
     res = execute_sql(test_uploads_sql, (test_data, num_samples, batch, test_id, g.user_id))
     if not res or len(res) == 0:
