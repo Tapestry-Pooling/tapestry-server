@@ -394,7 +394,7 @@ def fetch_test_results(test_id):
         return err_json(f"Test not found for test_id : {test_id}")
     result = res[0]
     app.logger.info(f'Result: {result}')
-    return jsonify(test_id=test_id, result=result[1]["result_string"], matrix=result[2], batch=result[3], label=result[4], num_samples=result[5])
+    return jsonify(test_id=str(test_id), result=result[1]["result_string"], matrix=result[2], batch=result[3], label=result[4], num_samples=result[5])
 
 @app.route('/batch_data', methods=['GET'])
 def batch_data():
