@@ -317,7 +317,7 @@ def user_dashboard():
     last_pag = False
     if not res or len(res) == 0:
         return jsonify(data=[], pagination=last_pag)
-    results = [{"test_id" : r[0], "updated_at" : r[1], "results_available" : r[2] != None, 
+    results = [{"test_id" : str(r[0]), "updated_at" : r[1], "results_available" : r[2] != None, 
         "test_data": r[3], "label" : r[4], "batch" : r[5], "duration_minutes" : r[6],
         "test_start_time" : r[7], "test_end_time" : r[8], "num_samples" : r[9]} for r in res]
     if len(results) >= 50:
