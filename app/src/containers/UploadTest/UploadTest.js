@@ -61,7 +61,7 @@ class UploadTest extends React.Component {
       const testsDataLocal = JSON.parse(sessionStorage.getItem('testsData'));
       const urlParams = new URLSearchParams(window.location.search);
       const testId = urlParams.get('testId');
-      const testData = testsDataLocal.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
+      const testData = testsDataLocal.filter((data) => (data.test_id === testId))[0];
       getCellDataAPI(authToken, testData.batch)
         .then((response) => {
           this.setState({
@@ -122,7 +122,7 @@ class UploadTest extends React.Component {
             });
           });
       } else if (/upload-test\/form/.test(pathname)) {
-        const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
+        const testData = testsData.filter((data) => (data.test_id === testId))[0];
         getCellDataAPI(authToken, testData.batch)
           .then((response) => {
             this.setState({
@@ -227,7 +227,7 @@ class UploadTest extends React.Component {
       selectedMatrix: option,
     });
     const { authToken, testsData, testId } = this.state;
-    const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
+    const testData = testsData.filter((data) => (data.test_id === testId))[0];
     getCellDataAPI(authToken, option.value)
       .then((response) => {
         this.setState({
@@ -240,7 +240,7 @@ class UploadTest extends React.Component {
   handleSampleSizeChange = (e) => {
     const { value } = e.target;
     const { testsData, testId } = this.state;
-    const testData = testsData.filter((data) => (data.test_id === parseInt(testId, 10)))[0];
+    const testData = testsData.filter((data) => (data.test_id === testId))[0];
     const maxVal = testData.batch.replace(/^\d+x(\d+)_v\d+$/, '$1');
     if (!value || (/^\d+$/.test(value) && (parseInt(value, 10) <= maxVal))) {
       this.setState({
