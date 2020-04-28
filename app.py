@@ -89,6 +89,7 @@ def curr_epoch():
     return int(time.time())
 
 def err_json(msg):
+    app.logger.error(f"Error occured {msg}")
     return jsonify(error=msg),500
 
 def app_version_check(version):
