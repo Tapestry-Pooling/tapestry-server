@@ -54,7 +54,7 @@ const UploadTestForm = (props) => {
   } = props;
   const options = availableMatrices.map((matrixObj) => {
     const value = Object.keys(matrixObj)[0];
-    const label = matrixObj[value];
+    const label = `${value.split('_')[0]} ${matrixObj[value]}`;
     return {
       label,
       value,
@@ -63,7 +63,7 @@ const UploadTestForm = (props) => {
   return (
     <div className="upload-test-form">
       <div className="upload-test-form__matrix-dropdown">
-        <div className="upload-test-form__matrix-dropdown-label">Select Matrix</div>
+        <div className="upload-test-form__matrix-dropdown-label">Matrix Used</div>
         <div className="upload-test-form__matrix-dropdown-input">
           <Select
             options={options}
