@@ -322,7 +322,6 @@ def user_dashboard():
         "test_start_time" : r[7], "test_end_time" : r[8], "num_samples" : r[9]} for r in res]
     if len(results) >= 50:
         last_pag = str(results[-1]["test_id"])
-    app.logger.info(f"Dashboard: \n\t{results}")
     return jsonify(data=results, pagination=last_pag)
 
 @app.route('/start_test', methods=['POST'])
