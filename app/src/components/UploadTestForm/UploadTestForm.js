@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
 import './UploadTestForm.scss';
@@ -60,53 +60,75 @@ const UploadTestForm = (props) => {
       value,
     };
   });
+  const [isUsingPdf, setIsUsingPdf] = useState(false);
   return (
     <div className="upload-test-form">
-      <div className="upload-test-form__matrix-dropdown">
-        <div className="upload-test-form__matrix-dropdown-label">Matrix Used</div>
-        <div className="upload-test-form__matrix-dropdown-input">
-          <Select
-            options={options}
-            value={selectedMatrix}
-            onChange={handleMatrixChange}
-            components={{
-              IndicatorSeparator: () => null,
-            }}
-            styles={{
-              dropdownIndicator: (provided) => ({
-                ...provided,
-                color: '#00cc92',
-              }),
-              control: (provided) => ({
-                ...provided,
-                boxShadow: 'none',
-                borderRadius: '10px',
-                border: '2px solid #eee',
-              }),
-              menu: (provided) => ({
-                ...provided,
-                marginTop: '0px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '98%',
-                borderRadius: '10px',
-                borderTopLeftRadius: '5px',
-                borderTopRightRadius: '5px',
-              }),
-              option: (provided) => ({
-                ...provided,
-                backgroundColor: '#fff',
-                color: '#777',
-                borderRadius: '10px',
-              }),
-            }}
-          />
+      <div className="upload-test-form-test-mode">
+        <div className="upload-test-form-test-mode-title">Test Mode</div>
+        <div className="upload-test-form-test-mode-radio-group">
+          <div>
+            <label htmlFor="appguide">
+              <input type="radio" id="appguide" checked={!isUsingPdf} onClick={() => { setIsUsingPdf(false); }} />
+              <b>Using app guide</b>
+            </label>
+          </div>
+          <div>
+            <label htmlFor="pdfprintout">
+              <input type="radio" id="pdfprintout" checked={isUsingPdf} onClick={() => { setIsUsingPdf(true); }} />
+              Offline Test with PDF printout
+            </label>
+          </div>
         </div>
-      </div>
-      <div className="upload-test-form__samples">
-        <div className="upload-test-form__samples-label">No. of Samples</div>
-        <div className="upload-test-form__samples-input">
-          <input type="tel" value={selectedSampleSize} onChange={handleSampleSizeChange} />
+        {isUsingPdf
+          ? (
+            <div className="upload-test-form__matrix-dropdown">
+              <div className="upload-test-form__matrix-dropdown-label">Matrix Used</div>
+              <div className="upload-test-form__matrix-dropdown-input">
+                <Select
+                  options={options}
+                  value={selectedMatrix}
+                  onChange={handleMatrixChange}
+                  components={{
+                    IndicatorSeparator: () => null,
+                  }}
+                  styles={{
+                    dropdownIndicator: (provided) => ({
+                      ...provided,
+                      color: '#00cc92',
+                    }),
+                    control: (provided) => ({
+                      ...provided,
+                      boxShadow: 'none',
+                      borderRadius: '10px',
+                      border: '2px solid #eee',
+                    }),
+                    menu: (provided) => ({
+                      ...provided,
+                      marginTop: '0px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: '98%',
+                      borderRadius: '10px',
+                      borderTopLeftRadius: '5px',
+                      borderTopRightRadius: '5px',
+                    }),
+                    option: (provided) => ({
+                      ...provided,
+                      backgroundColor: '#fff',
+                      color: '#777',
+                      borderRadius: '10px',
+                    }),
+                  }}
+                />
+              </div>
+            </div>
+          )
+          : ''}
+        <div className="upload-test-form__samples">
+          <div className="upload-test-form__samples-label">No. of Samples</div>
+          <div className="upload-test-form__samples-input">
+            <input type="tel" value={selectedSampleSize} onChange={handleSampleSizeChange} />
+          </div>
         </div>
       </div>
       <div className="upload-test-form__title">
