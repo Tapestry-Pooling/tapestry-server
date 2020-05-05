@@ -66,9 +66,11 @@ APP_UPDATE_URL = "https://play.google.com/store/apps/details?id=com.app.byom"
 # Auth
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', 'dummy')
 GOOGLE_OLD_CLIENT_ID = os.getenv('GOOGLE_OLD_CLIENT_ID', 'old-dummy')
+VALID_CLIENTS = {GOOGLE_CLIENT_ID, GOOGLE_OLD_CLIENT_ID}
 CACHED_SESSION = CacheControl(requests.session())
 TOK_INFO_KEYS = {'aud', 'iss', 'email', 'sub', 'iat', 'exp'}
 VALID_ISSUERS = {'accounts.google.com', 'https://accounts.google.com'}
+NEW_APP_USER_AGENT_FRAGMENT = 'BYOM Smart Testing'
 AUTH_TOKEN_VALIDITY = 90 * 24 * 60 * 60 # 90 days validity of auth token
 
 # Postgres related
@@ -120,12 +122,12 @@ def parse_lmdb_auth_data(raw_data):
     # user_id:auth_token:timestamp
     return raw_data.decode('utf8').split(':')
 
-def retrieve_auth_token_info(token):
+def retrieve_auth_token_info(token, client_id):
     try:
         # According to https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.id_token.html#module-google.oauth2.id_token
-        return id_token.verify_oauth2_token(token, google.auth.transport.requests.Request(session=CACHED_SESSION), GOOGLE_CLIENT_ID)
+        return id_token.verify_oauth2_token(token, google.auth.transport.requests.Request(session=CACHED_SESSION), client_id)
     except Exception as e:
-        app.logger.info(f"Google auth token retrieval failed for {token} with error {e}")
+        app.logger.info(f"Google auth token retrieval failed for {token} and clientid {client_id} with error {e}")
     return {}
 
 def validate_token_info(tok_info, email):
@@ -135,14 +137,14 @@ def validate_token_info(tok_info, email):
     reg_email = normalize_email(email)
     if reg_email is None or tok_info['email'] != reg_email:
         return {"error" : f"Invalid email supplied: {email}"}
-    if tok_info['aud'] != GOOGLE_CLIENT_ID or tok_info['iss'] not in VALID_ISSUERS:
+    if tok_info['aud'] not in VALID_CLIENTS or tok_info['iss'] not in VALID_ISSUERS:
         return {"error" : f"Invalid client id / issuer"}
     # Is an expiry check necessary?
     if curr_epoch() > tok_info['exp'] + 60:
         return {"error" : f"Expired token"}
     return tok_info
 
-def save_login_callback(tok_info):
+def save_login_callback(tok_info, user_agent):
     email = tok_info['email']
     # Saving email : authToken in LMDB
     curr_time = curr_epoch()
@@ -152,8 +154,9 @@ def save_login_callback(tok_info):
     auth_value = str(user_id) + ":" + token + ":" + str(curr_time)
     with lmdb_write_env.begin(write=True) as txn:
         txn.put(email.encode('utf8'), auth_value.encode('utf8'))
-    user_auth_sql = 'insert into user_auth(user_id, token_info, auth_token) values (%s, %s, %s) on conflict(user_id) do update set token_info = excluded.token_info, auth_token = excluded.auth_token returning user_id;'
-    execute_sql(user_auth_sql, (user_id, Json(tok_info), token))
+    user_auth_sql = """insert into user_auth(user_id, token_info, auth_token, user_agent) values (%s, %s, %s, %s) on conflict(user_id) do
+        update set token_info = excluded.token_info, auth_token = excluded.auth_token, user_agent = excluded.user_agent returning user_id;"""
+    execute_sql(user_auth_sql, (user_id, Json(tok_info), token, user_agent))
     return jsonify(user_id=user_id, token=token, email=email)
 
 def check_auth(request):
@@ -285,14 +288,16 @@ def login_sucess():
     app.logger.info(f'Google Auth Callback: {payload}')
     token = payload['token']
     email = payload['email']
-    tok_info = retrieve_auth_token_info(token)
+    user_agent = request.headers.get('User-Agent', "")
+    client_id = GOOGLE_CLIENT_ID if user_agent.startswith(NEW_APP_USER_AGENT_FRAGMENT) else GOOGLE_OLD_CLIENT_ID
+    tok_info = retrieve_auth_token_info(token, client_id)
     if not tok_info:
         return jsonify(error="Invalid token"), 401
     app.logger.info(f'Validated with Google {tok_info}')
     val_tok_info = validate_token_info(tok_info, email)
     if "error" in val_tok_info:
         return jsonify(val_tok_info), 401
-    return save_login_callback(val_tok_info)
+    return save_login_callback(val_tok_info, user_agent)
 
 @app.route('/app_version_check', methods=['GET'])
 def app_version_check_endpoint():
