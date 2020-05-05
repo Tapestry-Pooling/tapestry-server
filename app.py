@@ -65,6 +65,7 @@ APP_UPDATE_URL = "https://play.google.com/store/apps/details?id=com.app.byom"
 
 # Auth
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', 'dummy')
+GOOGLE_OLD_CLIENT_ID = os.getenv('GOOGLE_OLD_CLIENT_ID', 'old-dummy')
 CACHED_SESSION = CacheControl(requests.session())
 TOK_INFO_KEYS = {'aud', 'iss', 'email', 'sub', 'iat', 'exp'}
 VALID_ISSUERS = {'accounts.google.com', 'https://accounts.google.com'}
@@ -310,7 +311,7 @@ def user_dashboard():
         pagination = 0
     dashboard_sql = f"""select u.id as test_id, u.updated_at, r.test_id, u.test_data, u.label, u.batch_size, 
     extract(minute from (u.batch_end_time - u.batch_start_time)) as test_duration_minutes, u.batch_start_time, u.batch_end_time,
-    u.num_screens from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s and u.batch_end_time is not null
+    u.num_screens, u.test_mode from test_uploads u left join test_results r on u.id = r.test_id where u.user_id = %s and u.batch_end_time is not null
     {pagination_clause} order by u.id desc limit 50;"""
     params = (g.user_id,) if pagination == 0 else (g.user_id, int(pagination))
     res = select(dashboard_sql, params)
@@ -319,7 +320,7 @@ def user_dashboard():
         return jsonify(data=[], pagination=last_pag)
     results = [{"test_id" : str(r[0]), "updated_at" : r[1], "results_available" : r[2] != None, 
         "test_data": r[3], "label" : r[4], "batch" : r[5], "duration_minutes" : r[6],
-        "test_start_time" : r[7], "test_end_time" : r[8], "num_samples" : r[9]} for r in res]
+        "test_start_time" : r[7], "test_end_time" : r[8], "num_samples" : r[9], "test_mode" : r[10]} for r in res]
     if len(results) >= 50:
         last_pag = str(results[-1]["test_id"])
     return jsonify(data=results, pagination=last_pag)
@@ -363,6 +364,7 @@ def upload_test_data():
         return err_json(f"Invalid test id {test_id}")
     test_data = payload_json.get('test_data', [])
     batch = payload_json.get('batch', "").strip()
+    test_mode = payload_json.get('test_mode', "app").strip()
     num_samples = payload_json.get('num_samples', None)
     if batch == "" or batch.isspace() or batch not in ALL_BATCHES:
         return err_json(f"Invalid batch size : {batch}")
@@ -375,8 +377,8 @@ def upload_test_data():
     if num_samples is None:
         num_samples = ns
     test_id = int(test_id)
-    test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s, num_screens = %s, batch_size = %s where id = %s and user_id = %s returning id;"
-    res = execute_sql(test_uploads_sql, (test_data, num_samples, batch, test_id, g.user_id))
+    test_uploads_sql ="update test_uploads set updated_at = now(), test_data = %s, num_screens = %s, batch_size = %s, test_mode = %s where id = %s and user_id = %s returning id;"
+    res = execute_sql(test_uploads_sql, (test_data, num_samples, batch, test_mode, test_id, g.user_id))
     if not res or len(res) == 0:
         return err_json(f"Test id not found {test_id}")
     updated_id = res[0][0]
@@ -387,13 +389,13 @@ def upload_test_data():
 @requires_auth
 def fetch_test_results(test_id):
     test_id = int(test_id)
-    result_sql = "select r.test_id, r.result_data, r.matrix_label, u.batch_size, u.label, u.num_screens from test_results r, test_uploads u where r.test_id = u.id and u.user_id = %s and u.id = %s"
+    result_sql = "select r.test_id, r.result_data, r.matrix_label, u.batch_size, u.label, u.num_screens, u.test_mode from test_results r, test_uploads u where r.test_id = u.id and u.user_id = %s and u.id = %s"
     res = select(result_sql, (g.user_id, test_id))
     if not res or len(res) == 0:
         return err_json(f"Test not found for test_id : {test_id}")
     result = res[0]
     app.logger.info(f'Result: {result}')
-    return jsonify(test_id=str(test_id), result=result[1]["result_string"], matrix=result[2], batch=result[3], label=result[4], num_samples=result[5])
+    return jsonify(test_id=str(test_id), result=result[1]["result_string"], matrix=result[2], batch=result[3], label=result[4], num_samples=result[5], test_mode = result[6])
 
 @app.route('/batch_data', methods=['GET'])
 def batch_data():

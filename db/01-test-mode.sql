@@ -1,0 +1,1 @@
+ALTER TABLE test_uploads ADD COLUMN test_mode text default 'app';
