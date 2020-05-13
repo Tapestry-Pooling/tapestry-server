@@ -20,6 +20,7 @@ jedi==0.17.0
 Jinja2==2.11.1
 jmespath==0.9.5
 joblib==0.14.1
+kmeans1d==0.2.0
 llvmlite==0.31.0
 lmdb==0.98
 MarkupSafe==1.1.1
