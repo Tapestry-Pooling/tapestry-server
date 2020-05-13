@@ -17,7 +17,7 @@ ipython==7.13.0
 ipython-genutils==0.2.0
 itsdangerous==1.1.0
 jedi==0.17.0
-Jinja2==2.11.1
+Jinja2==2.11.2
 jmespath==0.9.5
 joblib==0.14.1
 kmeans1d==0.2.0
