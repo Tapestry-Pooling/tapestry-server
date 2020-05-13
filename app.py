@@ -104,7 +104,7 @@ def app_version_check(version):
 @app.errorhandler(Exception)
 def error_handler(error):
     app.logger.error(f"Error occured {error}")
-    return err_json("Unhandled error!!")
+    return err_json(f"Unhandled error!! {error}")
 
 def normalize_email(email):
     if email is None or email == "" or email.isspace() or email.count("@") != 1 or email.count(":") != 0:
@@ -224,9 +224,11 @@ def publish_message(topic, message, subject=None):
 
 def process_test_upload(test_id, batch, vector, num_samples):
     try:
+        app.logger.info(f'Starting processing of test uploads for test id {test_id}')
         return expt.get_test_results(MLABELS[batch], np.float32(vector), num_samples)
+        app.logger.info(f'Finished processing of test uploads for test id {test_id}')
     except Exception as e:
-        app.logger.error("Error occured" + str(e))
+        app.logger.error(f"Error occured {e}")
         return {"error" : str(e)}
 
 def notify_test_success(test_id, batch, mresults, test_data, num_samples):
