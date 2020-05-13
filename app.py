@@ -17,6 +17,7 @@ import secrets
 from sentry_sdk import init as sentry_init
 import sys
 import time
+from traceback import format_exc
 
 import matrix_manager
 from pdf_maker import get_pdf_name
@@ -229,7 +230,7 @@ def process_test_upload(test_id, batch, vector, num_samples):
         app.logger.info(f'Finished processing of test uploads for test id {test_id}')
     except Exception as e:
         app.logger.error(f"Error occured {e}", exc_info=True)
-        return {"error" : str(e)}
+        return {"error" : f'Error: {e}, Trace: {format_exc(e)}'}
 
 def notify_test_success(test_id, batch, mresults, test_data, num_samples):
     succ_msg = f"""
@@ -252,6 +253,8 @@ def notify_test_failure(test_id, batch, mresults, test_data, num_samples):
     Number of samples: {num_samples}
     Error summary:
     {mresults["error"]}
+    Raw results value:
+    {mresults}
     """
     publish_message(PROD_ARN, err_msg, "Test upload failure")
 
@@ -259,9 +262,6 @@ def post_process_results(test_id, batch, mresults, test_data, num_samples):
     if "error" in mresults:
         notify_test_failure(test_id, batch, mresults, test_data, num_samples)
         return err_json("Error occured while processing test upload. Don't worry! We will try again soon!")
-    if "x" in mresults:
-        if type(mresults["x"]) != list:
-            mresults["x"] = mresults["x"].tolist()
     app.logger.info(f'{mresults}')
     test_results_sql = """insert into test_results (test_id, matrix_label, result_data ) values (%s, %s, %s) on conflict(test_id) 
     do update set updated_at = now(), matrix_label=excluded.matrix_label, result_data=excluded.result_data returning test_id;"""
