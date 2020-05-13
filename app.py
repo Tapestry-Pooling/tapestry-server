@@ -260,7 +260,8 @@ def post_process_results(test_id, batch, mresults, test_data, num_samples):
         notify_test_failure(test_id, batch, mresults, test_data, num_samples)
         return err_json("Error occured while processing test upload. Don't worry! We will try again soon!")
     if "x" in mresults:
-        mresults["x"] = mresults["x"].tolist()
+        if type(mresults["x"]) != list:
+            mresults["x"] = mresults["x"].tolist()
     app.logger.info(f'{mresults}')
     test_results_sql = """insert into test_results (test_id, matrix_label, result_data ) values (%s, %s, %s) on conflict(test_id) 
     do update set updated_at = now(), matrix_label=excluded.matrix_label, result_data=excluded.result_data returning test_id;"""
