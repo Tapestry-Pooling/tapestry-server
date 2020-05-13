@@ -103,7 +103,7 @@ def app_version_check(version):
 
 @app.errorhandler(Exception)
 def error_handler(error):
-    app.logger.error(f"Error occured {error}")
+    app.logger.error(f"Error occured {error}", exc_info=True)
     return err_json(f"Unhandled error!! {error}")
 
 def normalize_email(email):
@@ -228,7 +228,7 @@ def process_test_upload(test_id, batch, vector, num_samples):
         return expt.get_test_results(MLABELS[batch], np.float32(vector), num_samples)
         app.logger.info(f'Finished processing of test uploads for test id {test_id}')
     except Exception as e:
-        app.logger.error(f"Error occured {e}")
+        app.logger.error(f"Error occured {e}", exc_info=True)
         return {"error" : str(e)}
 
 def notify_test_success(test_id, batch, mresults, test_data, num_samples):
