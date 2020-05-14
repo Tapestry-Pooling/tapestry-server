@@ -5,6 +5,7 @@ source $ENV_FILE
 cd $REPO
 # Activate virtualenv
 source env/bin/activate
+git submodule update
 echo "Checking for updated pip requirements"
 pip install -r requirements.txt
 echo "Regenerate versioning.json"
