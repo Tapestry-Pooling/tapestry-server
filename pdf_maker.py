@@ -4,7 +4,7 @@ import sys
 import requests
 # https://pyfpdf.readthedocs.io
 from fpdf import FPDF
-from grid import parse_batch
+from grid import parse_batch, generate_grid_and_cell_data
 
 PDF_ROOT = f"{os.path.expanduser('~')}/pdfs"
 # COLORS
@@ -108,10 +108,27 @@ def generate_pdfs():
         print(f'Batch : {b}')
         create_pdf(b)
 
+def generate_pdfs_locally(base_dir, batch_names):
+    from compute_wrapper import get_matrix_sizes_and_labels, get_matrix_labels_and_matrices
+    mlabels = get_matrix_sizes_and_labels()
+    matrices = get_matrix_labels_and_matrices()
+    for b in batch_names:
+        m, n, i = mlabels[b]
+        mat = matrices[m]
+        g, c = generate_grid_and_cell_data(b, mat)
+        grid_resp = {"gridData" : g["gridData"], "cellData" : c["cellData"], "codename" : "LOCAL"}
+        pdf = CustomPDF(b, grid_resp)
+        pdf.output(f'workdir/LOCAL_{b}.pdf')
+
 if __name__ == "__main__":
     args = sys.argv
     if len(args) < 2:
         generate_pdfs()
     else:
-        # TODO Generate PDFs for specific batches locally
-        matrix_names = argv[1:]
+        # workdir is in .gitignore, so generating local pdfs there
+        pdf_dir = "workdir"
+        if not os.path.exists(pdf_dir):
+            print(f"Creating {pdf_dir} as it does not exist")
+            os.makedirs(pdf_dir)
+        generate_pdfs_locally(pdf_dir, args[1:])
+
