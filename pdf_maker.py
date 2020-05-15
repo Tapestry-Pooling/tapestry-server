@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import requests
 # https://pyfpdf.readthedocs.io
 from fpdf import FPDF
@@ -108,4 +109,9 @@ def generate_pdfs():
         create_pdf(b)
 
 if __name__ == "__main__":
-    generate_pdfs()
+    args = sys.argv
+    if len(args) < 2:
+        generate_pdfs()
+    else:
+        # TODO Generate PDFs for specific batches locally
+        matrix_names = argv[1:]

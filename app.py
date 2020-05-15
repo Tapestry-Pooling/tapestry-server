@@ -24,11 +24,7 @@ from pdf_maker import get_pdf_name
 from grid import parse_batch, batch_size_from_batch_name
 sentry_init('https://e615dd3448f9409293c2f50a7c0d85a7@sentry.zyxw365.in/8', environment= os.getenv('SENTRY_ENV', 'dev'), release=os.getenv('SENTRY_RELEASE', 'unknown'))
 
-EXPT_DIR="./compute/"
-sys.path.append(EXPT_DIR)
-from core import config
-config.set_root_dir(EXPT_DIR)
-from core import get_test_results as expt
+from compute_wrapper import get_test_results
 
 """
     App setup, teardown and constants
@@ -226,7 +222,7 @@ def publish_message(topic, message, subject=None):
 def process_test_upload(test_id, batch, vector, num_samples):
     try:
         app.logger.info(f'Starting processing of test uploads for test id {test_id}')
-        return expt.get_test_results(MLABELS[batch], np.float32(vector), num_samples)
+        return get_test_results(MLABELS[batch], np.float32(vector), num_samples)
         app.logger.info(f'Finished processing of test uploads for test id {test_id}')
     except Exception as e:
         app.logger.error(f"Error occured {e}", exc_info=True)

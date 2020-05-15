@@ -105,10 +105,5 @@ def load_cache():
     return sorted_active_batches, all_batches, batch_size_to_batch
 
 if __name__ == '__main__':
-    # Load the matrices from "compute" folder
-    EXPT_DIR="./compute/"
-    sys.path.append(EXPT_DIR)
-    from core import config
-    config.set_root_dir(EXPT_DIR)
-    from core import get_test_results as expt
-    update_cache(expt.get_matrix_sizes_and_labels(), expt.get_matrix_labels_and_matrices(), expt.get_matrix_codenames(), VERSION_FILE)
+    from compute_wrapper import get_matrix_sizes_and_labels, get_matrix_labels_and_matrices, get_matrix_codenames
+    update_cache(get_matrix_sizes_and_labels(), get_matrix_labels_and_matrices(), get_matrix_codenames(), VERSION_FILE)

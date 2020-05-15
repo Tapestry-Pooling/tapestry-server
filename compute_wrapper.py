@@ -18,22 +18,10 @@ def import_compute():
     config.set_root_dir(EXPT_DIR)
     print("Imported compute submodule")
 
-def get_matrix_sizes_and_labels(*args, **kwargs):
-    import_compute()
-    from core import get_test_results as expt
-    return expt.get_matrix_sizes_and_labels(*args, **kwargs)
+import_compute()
+from core import get_test_results as expt
+get_test_results = expt.get_test_results
+get_matrix_sizes_and_labels = expt.get_matrix_sizes_and_labels
+get_matrix_labels_and_matrices = expt.get_matrix_labels_and_matrices
+get_matrix_codenames = expt.get_matrix_codenames
 
-def get_test_results(*args, **kwargs):
-    import_compute()
-    from core import get_test_results as expt
-    return expt.get_test_results(*args, **kwargs)
-
-def get_matrix_labels_and_matrices(*args, **kwargs):
-    import_compute()
-    from core import get_test_results as expt
-    return expt.get_matrix_labels_and_matrices(*args, **kwargs)
-
-def get_matrix_codenames(*args, **kwargs):
-    import_compute()
-    from core import get_test_results as expt
-    return expt.get_matrix_codenames(*args, **kwargs)
