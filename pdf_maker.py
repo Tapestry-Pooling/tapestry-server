@@ -22,6 +22,7 @@ class CustomPDF(FPDF):
         # Landscape mode
         FPDF.__init__(self, orientation='L', unit='mm', format='A4')
         self.grid_data = grid_data['gridData']
+        self.cell_data = grid_data['cellData']
         self.code_name = grid_data['codename']
         self.batch = batch
         self.num_wells, self.num_samples = parse_batch(batch)
@@ -47,6 +48,8 @@ class CustomPDF(FPDF):
     
     def make_table(self):
         g = [a['screenData'] for a in self.grid_data]
+        # TODO Add all cells to be used in the first page
+        c = self.cell_data
         samples = list(range(1, len(g)+1))
         max_l = max(len(c) for c in g)
         tables_per_page = 3 if max_l < 4 else 2
@@ -131,4 +134,3 @@ if __name__ == "__main__":
             print(f"Creating {pdf_dir} as it does not exist")
             os.makedirs(pdf_dir)
         generate_pdfs_locally(pdf_dir, args[1:])
-
