@@ -40,7 +40,7 @@ CONTENT_JSON = "application/json"
 # Using lmdb as a simple K/V store for storing auth tokens and OTP for mobile numbers. Can be replaced by redis once requirements get more complex
 # Max lmdb size
 LMDB_SIZE = 16 * 1024 * 1024
-LMDB_PATH = './workdir/db'
+LMDB_PATH = './workdir/prod.lmdb'
 lmdb_write_env = lmdb.open(LMDB_PATH, map_size=LMDB_SIZE)
 lmdb_read_env = lmdb.open(LMDB_PATH, readonly=True)
 
@@ -111,10 +111,6 @@ def normalize_email(email):
         return None
     return email.strip()
 
-def parse_lmdb_otp_data(raw_data):
-    # otp:current time
-    return raw_data.decode('utf8').split(':')
-
 def parse_lmdb_auth_data(raw_data):
     # user_id:auth_token:timestamp
     return raw_data.decode('utf8').split(':')
@@ -148,9 +144,9 @@ def save_login_callback(tok_info, user_agent):
     token = secrets.token_urlsafe(16)
     upsert_sql = "insert into users(email, name) values (%s,%s) on conflict(email) do update set name=excluded.name returning id;"
     user_id = execute_sql(upsert_sql, (email, tok_info.get('name', '')), one_row=True)[0]
-    auth_value = str(user_id) + ":" + token + ":" + str(curr_time)
+    stored_value = str(user_id) + ":" + email + ":" + str(curr_time)
     with lmdb_write_env.begin(write=True) as txn:
-        txn.put(email.encode('utf8'), auth_value.encode('utf8'))
+        txn.put(token.encode('utf8'), stored_value.encode('utf8'))
     user_auth_sql = """insert into user_auth(user_id, token_info, auth_token, user_agent) values (%s, %s, %s, %s) on conflict(user_id) do
         update set token_info = excluded.token_info, auth_token = excluded.auth_token, user_agent = excluded.user_agent returning user_id;"""
     execute_sql(user_auth_sql, (user_id, Json(tok_info), token, user_agent))
@@ -167,12 +163,12 @@ def check_auth(request):
         return False
     raw_data = None
     with lmdb_read_env.begin() as txn:
-        raw_data = txn.get(reg_email.encode('utf8'))
+        raw_data = txn.get(auth_token.encode('utf8'))
     if raw_data is None:
         return False
     data = parse_lmdb_auth_data(raw_data)
-    saved_token = data[1]
-    if saved_token == auth_token and curr_epoch() - int(data[2]) < AUTH_TOKEN_VALIDITY:
+    saved_email = data[1]
+    if saved_email == reg_email and curr_epoch() - int(data[2]) < AUTH_TOKEN_VALIDITY:
         g.user_id = int(data[0])
         return True
     return False
