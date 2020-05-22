@@ -1,6 +1,6 @@
 backcall==0.1.0
 boto3==1.13.15
-botocore==1.15.38
+botocore==1.16.15
 CacheControl==0.12.6
 cachetools==4.1.0
 certifi==2020.4.5.1
