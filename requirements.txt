@@ -54,6 +54,6 @@ sentry-sdk==0.14.3
 six==1.14.0
 spgl1==0.0.1
 traitlets==4.3.3
-urllib3==1.25.8
+urllib3==1.25.9
 wcwidth==0.1.9
 Werkzeug==1.0.1
