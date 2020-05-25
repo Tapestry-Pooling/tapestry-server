@@ -50,6 +50,7 @@ flask run
 systemctl --user start covid.service
 # Auto deployed on git push using webhook
 # See ~/deploy folder
+# Using webhook example from https://github.com/adnanh/webhook/blob/master/docs/Hook-Examples.md
 ```
 #### Instance provisioning steps
 ```sh
