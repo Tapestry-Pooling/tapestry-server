@@ -21,7 +21,7 @@ curl -XPOST -H "Authorization: Bearer $SENTRY_TOKEN" -H 'Content-Type: applicati
 #sentry-cli releases finalize "$SENTRY_VERSION"
 echo "Sentry version created: $SENTRY_VERSION"
 start=$(date +%s)
-sudo systemctl restart covid.service
+systemctl --user restart covid.service
 echo "App restarted, sleeping 1 sec"
 sleep 1
 echo "Generating HTML files for batch sizes"
