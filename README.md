@@ -44,8 +44,10 @@ flask run
 
 ### Production
 ```sh
-gunicorn -w 2 app:app
-# TODO : integrate with systemd
+# gunicorn -w 2 app:app
+# Integrated with systemd as a user service
+# First time, run `systemctl --user enable covid.service` to enable the app to start when machine boots
+systemctl --user start covid.service
 ```
 #### Instance provisioning steps
 ```sh
