@@ -48,6 +48,8 @@ flask run
 # Integrated with systemd as a user service
 # First time, run `systemctl --user enable covid.service` to enable the app to start when machine boots
 systemctl --user start covid.service
+# Auto deployed on git push using webhook
+# See ~/deploy folder
 ```
 #### Instance provisioning steps
 ```sh
