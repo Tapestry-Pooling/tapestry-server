@@ -1,8 +1,22 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## To install node and npm
+
+Follow this guuide
+https://nodesource.com/blog/installing-node-js-tutorial-using-nvm-on-mac-os-x-and-ubuntu/
+
+At the end of it, you should be able to see node and npm versions using the commands:
+
+### `node -v`
+### `npm -v`
+
 ## Available Scripts
 
 In the project directory, you can run:
+
+### `npm install`
+
+To install dependencies before running the app, when running the app for the first time or after somebody has installed any new dependencies.
 
 ### `npm start`
 
