@@ -7,8 +7,8 @@ https://nodesource.com/blog/installing-node-js-tutorial-using-nvm-on-mac-os-x-an
 
 At the end of it, you should be able to see node and npm versions using the commands:
 
-`node -v`
-`npm -v`
+### `node -v`
+### `npm -v`
 
 ## Available Scripts
 
