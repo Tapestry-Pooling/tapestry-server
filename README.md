@@ -1,3 +1,7 @@
+# tapestry-server
+The REST API server for the Tapestry Pooling Apps
+
+
 # Backend for Covid-19 testing data manager
 
 - Uses Python 3.6
@@ -15,9 +19,8 @@ Python libraries used for scientific computation:
 
 ```sh
 # Clone
-git clone https://github.com/rrampage/covid-test-py.git ~/covid
-cd covid
-mkdir workdir
+git clone https://github.com/Tapestry-Pooling/tapestry-server.git
+cd tapestry-server
 # Create virtual environment:
 python3 -m venv env
 # activate
@@ -86,5 +89,3 @@ curl -XPUT -d '{"test_id": "TEST_ID", "test_data" : [0.01, 0.01, 0.01, 0.01, 0.0
 ### Requirements:
 
 [doc](https://docs.google.com/document/d/1SlwcXj-hDZjgEOiGL999BB13Yn8m4bD6RN5SUEPQ2Vo/edit)
-
-
