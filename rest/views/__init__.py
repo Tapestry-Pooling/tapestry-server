@@ -1,3 +1,3 @@
-from .machine_type_view import *
-from .test_kit_view import *
-from .lab_configuration_view import *
+from .machine_type import *
+from .test_kit import *
+from .lab_configuration import *

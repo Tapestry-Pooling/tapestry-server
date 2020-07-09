@@ -1,6 +1,6 @@
 from django.db import models
-from .machine_type_model import MachineType
-from .test_kit_model import TestKit
+from .machine_type import MachineType
+from .test_kit import TestKit
 
 class LabConfiguration(models.Model) :
 	lab_id = models.SmallIntegerField()

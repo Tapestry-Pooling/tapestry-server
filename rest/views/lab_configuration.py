@@ -5,8 +5,8 @@ from rest_framework.decorators import api_view
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 
-from rest.models.lab_configuration_model import LabConfiguration
-from rest.serializers.lab_configuration_serializer import LabConfigurationSerializer
+from rest.models.lab_configuration import LabConfiguration
+from rest.serializers.lab_configuration import LabConfigurationSerializer
 
 class LabConfigurationViewset(viewsets.ModelViewSet):
     queryset = LabConfiguration.objects.all()
