@@ -1,9 +1,5 @@
 from django.contrib import admin
-from .models import Lab, LabMember
-
-
-class LabAdmin(admin.ModelAdmin):
-    list_display = ('name', 'city', 'country')
+from rest.models import Lab, LabMember
 
 
 class LabMemberAdmin(admin.ModelAdmin):
@@ -14,5 +10,4 @@ class LabMemberAdmin(admin.ModelAdmin):
     lab.admin_order_field = 'lab_id__name'
 
 
-admin.site.register(Lab, LabAdmin)
 admin.site.register(LabMember, LabMemberAdmin)

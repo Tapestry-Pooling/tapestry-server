@@ -33,4 +33,31 @@ class Migration(migrations.Migration):
                 ('lab_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rest.Lab')),
             ],
         ),
+        migrations.CreateModel(
+            name='MachineType',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(default='PCR machine', max_length=60)),
+                ('no_of_wells', models.SmallIntegerField()),
+                ('plate_x', models.SmallIntegerField(default=12)),
+                ('plate_y', models.SmallIntegerField(default=8)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='TestKit',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(default='', max_length=50)),
+                ('description', models.TextField()),
+            ],
+        ),
+        migrations.CreateModel(
+            name='LabConfiguration',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('lab_id', models.SmallIntegerField()),
+                ('machine_type', models.ManyToManyField(to='rest.MachineType')),
+                ('test_kit', models.ManyToManyField(to='rest.TestKit')),
+            ],
+        ),
     ]
