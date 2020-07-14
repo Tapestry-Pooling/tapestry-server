@@ -1,0 +1,5 @@
+djangorestframework-simplejwt
+postgres
+djangorestframework-jsonapi
+django-phonenumber-field[phonenumbers]
+django-filter
