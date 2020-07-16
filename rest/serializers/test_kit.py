@@ -4,4 +4,4 @@ from rest.models.test_kit import TestKit
 class TestKitSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TestKit
-		fields = ['id', 'name', 'description']
+		fields = ['id', 'name', 'kit_maker', 'gene_type', 'test_type']

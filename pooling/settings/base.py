@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     'languages',
     'phonenumber_field',
     'rest',
-    'django_filters'
+    'django_filters',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -144,6 +145,17 @@ REST_FRAMEWORK = {
         'rest_framework_json_api.renderers.JSONRenderer',
     ),
     'TEST_REQUEST_DEFAULT_FORMAT': 'vnd.api+json'
+}
+
+SWAGGER_SETTINGS = {
+   'SECURITY_DEFINITIONS': {
+      'Simple JWT': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'bearerFormat': 'JWT'
+      }
+   }
 }
 
 JSON_API_FORMAT_FIELD_NAMES = 'camelize'
