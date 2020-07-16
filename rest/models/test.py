@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.postgres import fields
-from .labmember import LabMember
+from .user import User
 from .status import Status
 from .test_kit import TestKit
 from .machine_type import MachineType
@@ -8,7 +8,7 @@ from .file import File
 from .matrix import Matrix
 
 class Test(models.Model):
-    assigned_to = models.ForeignKey(LabMember, on_delete = models.CASCADE)
+    assigned_to = models.ForeignKey(User, on_delete = models.CASCADE)
     status = models.ForeignKey(Status, on_delete = models.CASCADE)
     samples = models.SmallIntegerField()
     suspected_samples = models.SmallIntegerField()

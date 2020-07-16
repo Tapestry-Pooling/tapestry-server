@@ -2,8 +2,10 @@ from .machine_type import *
 from .test_kit import *
 from .lab_configuration import *
 from .lab import *
-from .labmember import *
-from .test import *
-from .file import *
-from .status import *
-from .matrix import *
+from .user import User
+from .test import Test
+from .file import File
+from .status import Status
+from .matrix import Matrix
+
+
