@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'languages',
     'phonenumber_field',
     'rest',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
