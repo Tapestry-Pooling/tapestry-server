@@ -7,5 +7,3 @@ class TestKit(models.Model) :
 	gene_type = ArrayField(base_field=models.CharField(max_length=10), size=6)
 	test_type = models.CharField(max_length=20, blank=False, default='')
 	resource_name = 'testKit'
-
-
