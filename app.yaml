@@ -7,8 +7,8 @@ handlers:
 # - url: /static
 #   static_dir: static/
 
-# env_variables:
-#   DOMAIN: 'staging.mydomain.com'
+env_variables:
+  DJANGO_SETTINGS_MODULE: 'stage'
 #   DEBUG_MODE: true
 
 # This handler routes all requests not caught above to your main app. It is
