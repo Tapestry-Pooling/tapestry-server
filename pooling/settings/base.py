@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'rest',
     'django_filters',
     'drf_yasg',
+    'django_rest_passwordreset',
 ]
 
 MIDDLEWARE = [
