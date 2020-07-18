@@ -15,7 +15,7 @@ DATABASES = {
         'NAME': 'pooling',
         'USER': 'tapestry-staging',
         'PASSWORD': 'pooling@123',
-        'HOST': '127.0.0.1',
+        'HOST': '/cloudsql/tapestry-pooling:europe-west4:pooling',
         'PORT': '5432',
     }
 }

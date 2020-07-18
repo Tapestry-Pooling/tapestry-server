@@ -198,3 +198,8 @@ JSON_API_FORMAT_TYPES = 'camelize'
 
 JSON_API_PLURALIZE_TYPES = False
 
+
+STATIC_URL = '/static/'
+STATIC_ROOT = 'static'
+
+
