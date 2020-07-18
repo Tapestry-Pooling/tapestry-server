@@ -12,5 +12,5 @@ handlers:
   - url: /.*
     script: auto
 
-  beta_settings:
-    cloud_sql_instances: tapestry-pooling:europe-west4:pooling
+beta_settings:
+  cloud_sql_instances: tapestry-pooling:europe-west4:pooling
