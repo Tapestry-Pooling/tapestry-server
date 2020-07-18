@@ -13,7 +13,7 @@ DATABASES = {
         'NAME': 'pooling',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': '/cloudsql/[tapestry-pooling:europe-west4:postgres]',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
     }
 }
