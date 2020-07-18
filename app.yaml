@@ -13,4 +13,4 @@ handlers:
     script: auto
 
 beta_settings:
-  cloud_sql_instances: tapestry-pooling:europe-west4:pooling
+  cloud_sql_instances: tapestry-pooling:europe-west4-c:postgres
