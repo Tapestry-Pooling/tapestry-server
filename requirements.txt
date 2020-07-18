@@ -3,5 +3,7 @@ postgres
 djangorestframework-jsonapi
 django-phonenumber-field[phonenumbers]
 django-filter
-pip install -U drf-yasg[validation]
-pip install django-rest-passwordreset
+drf-yasg[validation]
+drf_yasg_json_api
+django-rest-auth
+

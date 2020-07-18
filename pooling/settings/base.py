@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'rest',
     'django_filters',
     'drf_yasg',
-    'django_rest_passwordreset',
+    'rest_auth',
 ]
 
 MIDDLEWARE = [
@@ -121,6 +121,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+REST_USE_JWT = True
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES' : ['rest_framework.permissions.IsAuthenticated',],
     'DEFAULT_AUTHENTICATION_CLASSES' : ['rest_framework_simplejwt.authentication.JWTAuthentication'],
@@ -158,7 +160,36 @@ SWAGGER_SETTINGS = {
             'in': 'header',
             'bearerFormat': 'JWT'
       }
-   }
+   },
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg_json_api.inspectors.SwaggerAutoSchema',  # Overridden
+
+    'DEFAULT_FIELD_INSPECTORS': [
+        'drf_yasg_json_api.inspectors.NamesFormatFilter',  # Replaces CamelCaseJSONFilter
+        'drf_yasg.inspectors.RecursiveFieldInspector',
+        'drf_yasg_json_api.inspectors.XPropertiesFilter',  # Added
+        'drf_yasg_json_api.inspectors.InlineSerializerSmartInspector',  # Replaces ReferencingSerializerInspector
+        'drf_yasg_json_api.inspectors.IntegerIDFieldInspector',  # Added
+        'drf_yasg.inspectors.ChoiceFieldInspector',
+        'drf_yasg.inspectors.FileFieldInspector',
+        'drf_yasg.inspectors.DictFieldInspector',
+        'drf_yasg.inspectors.JSONFieldInspector',
+        'drf_yasg.inspectors.HiddenFieldInspector',
+        'drf_yasg_json_api.inspectors.ManyRelatedFieldInspector',  # Added
+        'drf_yasg_json_api.inspectors.IntegerPrimaryKeyRelatedFieldInspector',  # Added
+        'drf_yasg.inspectors.RelatedFieldInspector',
+        'drf_yasg.inspectors.SerializerMethodFieldInspector',
+        'drf_yasg.inspectors.SimpleFieldInspector',
+        'drf_yasg.inspectors.StringDefaultFieldInspector',
+    ],
+    'DEFAULT_FILTER_INSPECTORS': [
+        'drf_yasg_json_api.inspectors.DjangoFilterInspector',  # Added (optional), requires django_filter
+        'drf_yasg.inspectors.CoreAPICompatInspector',
+    ],
+    'DEFAULT_PAGINATOR_INSPECTORS': [
+        'drf_yasg_json_api.inspectors.DjangoRestResponsePagination',  # Added
+        'drf_yasg.inspectors.DjangoRestResponsePagination',
+        'drf_yasg.inspectors.CoreAPICompatInspector',
+    ],
 }
 
 JSON_API_FORMAT_FIELD_NAMES = 'camelize'
