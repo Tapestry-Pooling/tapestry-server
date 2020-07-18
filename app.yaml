@@ -1,7 +1,7 @@
 # [START django_app]
-runtime: python3
+runtime: python38
 
-handlers:
+# handlers:
 # This configures Google App Engine to serve the files in the app's static
 # directory.
 # - url: /static
