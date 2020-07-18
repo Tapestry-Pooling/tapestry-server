@@ -3,3 +3,7 @@ postgres
 djangorestframework-jsonapi
 django-phonenumber-field[phonenumbers]
 django-filter
+drf-yasg[validation]
+drf_yasg_json_api
+django-rest-auth
+

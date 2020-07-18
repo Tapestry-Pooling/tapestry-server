@@ -13,6 +13,7 @@ router.register(r'api/test', views.TestViewset)
 router.register(r'api/status', views.StatusViewset)
 router.register(r'api/matrix',views.MatrixViewset)
 router.register(r'api/file', views.FileViewset)
+router.register(r'api/user', views.UserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
