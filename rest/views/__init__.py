@@ -7,4 +7,4 @@ from .test import *
 from .file import *
 from .status import *
 from .matrix import *
-
+from .auth_view import *

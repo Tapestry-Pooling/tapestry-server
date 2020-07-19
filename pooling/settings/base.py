@@ -72,13 +72,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pooling.wsgi.application'
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-    }
-}
-
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -121,36 +114,44 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-REST_USE_JWT = True
+
 
 REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
     'DEFAULT_PAGINATION_CLASS':
-        'rest_framework_json_api.pagination.JsonApiPageNumberPagination',
+        'rest_framework_json_api.pagination.PageNumberPagination',
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework_json_api.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser'
+        'rest_framework.parsers.JSONParser',
+        # 'rest_framework.parsers.FormParser',
+        # 'rest_framework.parsers.MultiPartParser'
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
         'rest_framework_json_api.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
+
     'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
-    'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework_json_api.filters.QueryParameterValidationFilter',
-        'rest_framework_json_api.filters.OrderingFilter',
-        'rest_framework_json_api.django_filters.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
     ),
-    'SEARCH_PARAM': 'filter[search]',
-    'TEST_REQUEST_RENDERER_CLASSES': (
-        'rest_framework_json_api.renderers.JSONRenderer',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'rest.auth.CustomJWTAuthentication',
+        'django.contrib.auth.backends.ModelBackend',
     ),
-    'TEST_REQUEST_DEFAULT_FORMAT': 'vnd.api+json'
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '4000/day',
+        'user': '10000/day'
+    }
 }
+
+REST_USE_JWT = True
 
 SWAGGER_SETTINGS = {
    'SECURITY_DEFINITIONS': {
@@ -161,35 +162,8 @@ SWAGGER_SETTINGS = {
             'bearerFormat': 'JWT'
       }
    },
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg_json_api.inspectors.SwaggerAutoSchema',  # Overridden
-
-    'DEFAULT_FIELD_INSPECTORS': [
-        'drf_yasg_json_api.inspectors.NamesFormatFilter',  # Replaces CamelCaseJSONFilter
-        'drf_yasg.inspectors.RecursiveFieldInspector',
-        'drf_yasg_json_api.inspectors.XPropertiesFilter',  # Added
-        'drf_yasg_json_api.inspectors.InlineSerializerSmartInspector',  # Replaces ReferencingSerializerInspector
-        'drf_yasg_json_api.inspectors.IntegerIDFieldInspector',  # Added
-        'drf_yasg.inspectors.ChoiceFieldInspector',
-        'drf_yasg.inspectors.FileFieldInspector',
-        'drf_yasg.inspectors.DictFieldInspector',
-        'drf_yasg.inspectors.JSONFieldInspector',
-        'drf_yasg.inspectors.HiddenFieldInspector',
-        'drf_yasg_json_api.inspectors.ManyRelatedFieldInspector',  # Added
-        'drf_yasg_json_api.inspectors.IntegerPrimaryKeyRelatedFieldInspector',  # Added
-        'drf_yasg.inspectors.RelatedFieldInspector',
-        'drf_yasg.inspectors.SerializerMethodFieldInspector',
-        'drf_yasg.inspectors.SimpleFieldInspector',
-        'drf_yasg.inspectors.StringDefaultFieldInspector',
-    ],
-    'DEFAULT_FILTER_INSPECTORS': [
-        'drf_yasg_json_api.inspectors.DjangoFilterInspector',  # Added (optional), requires django_filter
-        'drf_yasg.inspectors.CoreAPICompatInspector',
-    ],
-    'DEFAULT_PAGINATOR_INSPECTORS': [
-        'drf_yasg_json_api.inspectors.DjangoRestResponsePagination',  # Added
-        'drf_yasg.inspectors.DjangoRestResponsePagination',
-        'drf_yasg.inspectors.CoreAPICompatInspector',
-    ],
+    'USE_SESSION_AUTH':False,
+    'PERSIST_AUTH':True
 }
 
 JSON_API_FORMAT_FIELD_NAMES = 'camelize'

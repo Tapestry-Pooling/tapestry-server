@@ -1,7 +1,8 @@
 from django.urls import path, include
 from rest_framework import routers
-
+from django.conf.urls import url
 from . import views
+
 
 router = routers.DefaultRouter()
 
@@ -17,4 +18,5 @@ router.register(r'user', views.UserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    url(r'^login/$', views.LoginView.as_view(), name='rest_login'),
 ]
