@@ -6,6 +6,7 @@ chardet==3.0.4
 coreapi==2.3.3
 coreschema==0.0.4
 Django==3.0.8
+django-allauth==0.42.0
 django-filter==2.3.0
 django-phonenumber-field==4.0.0
 django-rest-auth==0.9.5
@@ -71,7 +72,6 @@ djangorestframework==3.11.0
 djangorestframework-jsonapi==3.1.0
 djangorestframework-jwt==1.11.0
 djangorestframework-simplejwt==4.4.0
--e git+git@github.com:sunscrapers/djoser.git@786edc2bb129d7343e54d59b15b682689f534e46#egg=djoser
 docopt==0.6.2
 drf-yasg==1.17.1
 drf-yasg-json-api==0.7.1
@@ -87,7 +87,6 @@ jinja2-time==0.2.0
 jsonschema==3.2.0
 MarkupSafe==1.1.1
 mock==4.0.2
-mysqlclient==1.4.6
 numpy==1.18.4
 packaging==20.4
 pendulum==2.0.5
@@ -163,7 +162,6 @@ djangorestframework==3.11.0
 djangorestframework-jsonapi==3.1.0
 djangorestframework-jwt==1.11.0
 djangorestframework-simplejwt==4.4.0
--e git+git@github.com:sunscrapers/djoser.git@786edc2bb129d7343e54d59b15b682689f534e46#egg=djoser
 docopt==0.6.2
 drf-yasg==1.17.1
 drf-yasg-json-api==0.7.1
@@ -179,7 +177,6 @@ jinja2-time==0.2.0
 jsonschema==3.2.0
 MarkupSafe==1.1.1
 mock==4.0.2
-mysqlclient==1.4.6
 numpy==1.18.4
 packaging==20.4
 pendulum==2.0.5

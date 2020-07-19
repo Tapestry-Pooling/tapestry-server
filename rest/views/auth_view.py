@@ -115,6 +115,7 @@ class LogoutView(APIView):
 
     Accepts/Returns nothing.
     """
+    renderer_classes = [JSONRenderer]
     permission_classes = (AllowAny,)
 
     def get(self, request, *args, **kwargs):
@@ -178,6 +179,7 @@ class PasswordResetView(GenericAPIView):
     Accepts the following POST parameters: email
     Returns the success/fail message.
     """
+    renderer_classes = [JSONRenderer]
     serializer_class = PasswordResetSerializer
     permission_classes = (AllowAny,)
 
@@ -203,6 +205,7 @@ class PasswordResetConfirmView(GenericAPIView):
         new_password1, new_password2
     Returns the success/fail message.
     """
+    renderer_classes = [JSONRenderer]
     serializer_class = PasswordResetConfirmSerializer
     permission_classes = (AllowAny,)
 
@@ -226,6 +229,7 @@ class PasswordChangeView(GenericAPIView):
     Accepts the following POST parameters: new_password1, new_password2
     Returns the success/fail message.
     """
+    renderer_classes = [JSONRenderer]
     serializer_class = PasswordChangeSerializer
     permission_classes = (IsAuthenticated,)
 

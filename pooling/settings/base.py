@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
+
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
     
 ]
 
@@ -166,6 +170,12 @@ SWAGGER_SETTINGS = {
     'PERSIST_AUTH':True
 }
 
+AUTH_USER_MODEL = 'rest.User'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
 JSON_API_FORMAT_FIELD_NAMES = 'camelize'
 
 JSON_API_FORMAT_TYPES = 'camelize'
@@ -175,5 +185,7 @@ JSON_API_PLURALIZE_TYPES = False
 
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
+
+SITE_ID=1
 
 

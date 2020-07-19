@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework import routers
 from django.conf.urls import url
 from . import views
+from django.views.generic import TemplateView
 
 
 router = routers.DefaultRouter()
@@ -18,5 +19,21 @@ router.register(r'user', views.UserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    url(r'^login/$', views.LoginView.as_view(), name='rest_login'),
+    url(r'^auth/login/$', views.LoginView.as_view(), name='rest_login'),
+    url(r'^auth/password/reset/$', views.PasswordResetView.as_view(),
+        name='rest_password_reset'),
+    url(r'^auth/password/reset/confirm/$', views.PasswordResetConfirmView.as_view(),
+        name='rest_password_reset_confirm'),
+    url(r'^auth/login/$', views.LoginView.as_view(), name='rest_login'),
+    # URLs that require a user to be logged in with a valid session / token.
+    url(r'^auth/logout/$', views.LogoutView.as_view(), name='rest_logout'),
+    url(r'^user/$', views.UserDetailsView.as_view(), name='rest_user_details'),
+    url(r'^auth/password/change/$', views.PasswordChangeView.as_view(),
+        name='rest_password_change'),
+
+    url(r'^auth/register/', views.RegisterView.as_view(), name='rest_register'),
+    url(r'^auth/verify-email/$', views.VerifyEmailView.as_view(), name='rest_verify_email'),
+
+    url(r'^auth/account-confirm-email/(?P<key>[-:\w]+)/$', TemplateView.as_view(),
+        name='account_confirm_email'),
 ]
