@@ -2,7 +2,7 @@ runtime: python38
 # entrypoint: gunicorn -b :$PORT pooling.wsgi
 
 env_variables:
-  DJANGO_SETTINGS_MODULE: "stage"
+  DJANGO_ENV: "stage"
   # the secret key used for the Django app (from PROJECT-DIRECTORY/settings.py)
   SECRET_KEY: "e008b206-806b-433d-99b2-e4cffea8f69f"
   DEBUG: "False" # always False for deployment

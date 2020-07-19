@@ -5,15 +5,15 @@ from . import views
 
 router = routers.DefaultRouter()
 
-router.register(r'api/lab', views.LabViewSet)
-router.register(r'api/machine-type', views.MachineTypeViewset)
-router.register(r'api/test-kit', views.TestKitViewset)
-router.register(r'api/lab-configuration', views.LabConfigurationViewset)
-router.register(r'api/test', views.TestViewset)
-router.register(r'api/status', views.StatusViewset)
-router.register(r'api/matrix',views.MatrixViewset)
-router.register(r'api/file', views.FileViewset)
-router.register(r'api/user', views.UserViewSet)
+router.register(r'lab', views.LabViewSet)
+router.register(r'machine-type', views.MachineTypeViewset)
+router.register(r'test-kit', views.TestKitViewset)
+router.register(r'lab-configuration', views.LabConfigurationViewset)
+router.register(r'test', views.TestViewset)
+router.register(r'status', views.StatusViewset)
+router.register(r'matrix',views.MatrixViewset)
+router.register(r'file', views.FileViewset)
+router.register(r'user', views.UserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
