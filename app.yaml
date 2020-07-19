@@ -1,5 +1,18 @@
 runtime: python38
 # entrypoint: gunicorn -b :$PORT pooling.wsgi
+
+env_variables:
+  DJANGO_SETTINGS_MODULE: "stage"
+  # the secret key used for the Django app (from PROJECT-DIRECTORY/settings.py)
+  SECRET_KEY: "e008b206-806b-433d-99b2-e4cffea8f69f"
+  DEBUG: "False" # always False for deployment
+
+  DB_HOST: "/cloudsql/tapestry-pooling:europe-west4:postgres"
+  DB_PORT: "5432" # PostgreSQL port
+  DB_NAME: "pooling"
+  DB_USER: "tapestry-staging" # either 'postgres' (default) or one you created on the PostgreSQL instance page
+  DB_PASSWORD: "pooling@123"
+
 handlers:
   # This configures Google App Engine to serve the files in the app's static
   # directory.
@@ -13,4 +26,4 @@ handlers:
     script: auto
 
 beta_settings:
-  cloud_sql_instances: tapestry-pooling:europe-west4-c:postgres
+  cloud_sql_instances: tapestry-pooling:europe-west4:postgres

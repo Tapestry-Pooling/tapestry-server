@@ -1,6 +1,7 @@
 from .base import *
 
-DEBUG = True
+DEBUG = os.environ['DEBUG']
+SECRET_KEY = os.environ['SECRET_KEY']
 
 ALLOWED_HOSTS = ['127.0.0.1','localhost','tapestry-pooling.el.r.appspot.com']
 
@@ -12,10 +13,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pooling',
-        'USER': 'tapestry-staging',
-        'PASSWORD': 'pooling@123',
-        'HOST': '/cloudsql/tapestry-pooling:europe-west4:pooling',
-        'PORT': '5432',
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['DB_PASSWORD'],
+        'HOST': os.environ['DB_HOST'],
+        'PORT': os.environ['DB_PORT'],
     }
 }

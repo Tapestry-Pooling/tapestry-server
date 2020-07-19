@@ -5,7 +5,7 @@ from .base import *
 
 if os.environ['DJANGO_SETTINGS_MODULE'] == 'prod':
   	from .prod import *
-elif os.environ['DJANGO_SETTINGS_MODULE'] == 'dev':
-  	from .dev import *
+elif os.environ['DJANGO_SETTINGS_MODULE'] == 'stage':
+  	from .stage import *
 else :
-	from .stage import *
+	from .dev import *
