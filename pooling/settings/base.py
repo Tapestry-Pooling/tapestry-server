@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
+
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
     
 ]
 
@@ -122,12 +126,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework_json_api.pagination.PageNumberPagination',
     'DEFAULT_PARSER_CLASSES': (
-        'rest_framework_json_api.parsers.JSONParser',
         'rest_framework.parsers.JSONParser',
+        'rest_framework_json_api.parsers.JSONParser',
         # 'rest_framework.parsers.FormParser',
         # 'rest_framework.parsers.MultiPartParser'
     ),
     'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
         'rest_framework_json_api.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
@@ -166,6 +171,12 @@ SWAGGER_SETTINGS = {
     'PERSIST_AUTH':True
 }
 
+AUTH_USER_MODEL = 'rest.User'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
 JSON_API_FORMAT_FIELD_NAMES = 'camelize'
 
 JSON_API_FORMAT_TYPES = 'camelize'
@@ -175,5 +186,10 @@ JSON_API_PLURALIZE_TYPES = False
 
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
+
+SITE_ID=1
+
+
+
 
 

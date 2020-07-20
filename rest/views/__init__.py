@@ -8,3 +8,4 @@ from .file import *
 from .status import *
 from .matrix import *
 from .auth_view import *
+from .register_view import *
