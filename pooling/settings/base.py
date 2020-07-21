@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -136,14 +137,14 @@ REST_FRAMEWORK = {
         'rest_framework_json_api.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
-
     'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest.auth.CustomJWTAuthentication',
-        'django.contrib.auth.backends.ModelBackend',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        # 'django.contrib.auth.backends.ModelBackend',
     ),
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'DEFAULT_THROTTLE_CLASSES': (
@@ -154,6 +155,13 @@ REST_FRAMEWORK = {
         'anon': '4000/day',
         'user': '10000/day'
     }
+}
+
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(minutes=60),  # 60 mins
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=3),  # 3 days
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_ALLOW_REFRESH': True,
 }
 
 REST_USE_JWT = True
