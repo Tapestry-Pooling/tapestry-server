@@ -3,7 +3,7 @@ from rest_framework import routers
 from django.conf.urls import url
 from . import views
 from django.views.generic import TemplateView
-
+from rest_framework_jwt.views import refresh_jwt_token
 
 router = routers.DefaultRouter()
 
@@ -36,4 +36,6 @@ urlpatterns = [
 
     url(r'^auth/account-confirm-email/(?P<key>[-:\w]+)/$', TemplateView.as_view(),
         name='account_confirm_email'),
+
+    url(r'^auth/refresh/', refresh_jwt_token),
 ]
