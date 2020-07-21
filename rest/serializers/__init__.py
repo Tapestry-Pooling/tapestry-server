@@ -7,3 +7,5 @@ from .test import *
 from .file import *
 from .status import *
 from .matrix import *
+from .login_serializer import *
+from .register_serializer import *
