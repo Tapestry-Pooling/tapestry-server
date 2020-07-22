@@ -10,7 +10,7 @@ env_variables:
   SECRET_KEY: "e008b206-806b-433d-99b2-e4cffea8f69f"
   DEBUG: "False" # always False for deployment
 
-  DB_HOST: "/cloudsql/tapestry-pooling:europe-west4:postgres"
+  DB_HOST: "/cloudsql/tapestry-pooling-284109:europe-west1:postgres"
   DB_PORT: "5432" # PostgreSQL port
   DB_NAME: "pooling"
   DB_USER: "tapestry-staging" # either 'postgres' (default) or one you created on the PostgreSQL instance page
@@ -36,4 +36,4 @@ automatic_scaling:
 network: {}
 
 beta_settings:
-  cloud_sql_instances: tapestry-pooling:europe-west4:postgres
+  cloud_sql_instances: tapestry-pooling-284109:europe-west1:postgres
