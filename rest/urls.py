@@ -38,4 +38,5 @@ urlpatterns = [
         name='account_confirm_email'),
 
     url(r'^auth/refresh/', refresh_jwt_token),
+    url(r'^inactive', views.inactive_view, name='account_inactive'),
 ]

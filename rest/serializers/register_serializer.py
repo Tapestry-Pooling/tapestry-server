@@ -42,8 +42,6 @@ class RegisterSerializer(serializers.Serializer):
         return city
 
     def validate(self, data):
-        # if data['password1'] != data['password2']:
-        #     raise serializers.ValidationError(_("The two password fields didn't match."))
         return data
 
 
@@ -61,10 +59,11 @@ class RegisterSerializer(serializers.Serializer):
         user = adapter.new_user(request)
         self.cleaned_data = self.get_cleaned_data()
         adapter.save_user(request, user, self)
-        # save lab and add reference
+        # save lab, add reference and set user inactive
         lab = Lab(name=self.cleaned_data['lab'], city=self.cleaned_data['city'])
         lab.save()
         user.lab_id = lab
+        user.is_active = False
         user.save()
         setup_user_email(request, user, [])
         return user
