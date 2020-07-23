@@ -14,6 +14,15 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.6, 3.7, 3.8]
+    services:
+      postgres:
+        image: postgres:10.8
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        ports:
+          - 5432:5432
 
     steps:
     - uses: actions/checkout@v2
@@ -28,3 +37,5 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+    - name: Run migrations
+      run: python manage.py migrate
