@@ -30,6 +30,13 @@ sensitive_post_parameters_m = method_decorator(
     )
 )
 
+from django.utils.http import urlsafe_base64_decode as uid_decoder
+from django.utils.encoding import force_text
+from rest_framework.exceptions import ValidationError
+
+# Get the UserModel
+UserModel = get_user_model()
+
 
 class LoginView(GenericAPIView):
     """
@@ -217,9 +224,42 @@ class PasswordResetConfirmView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(
-            {"detail": _("Password has been reset with the new password.")}
-        )
+        # login after successful signup
+        # Decode the uidb64 to uid to get User object
+        try:
+            uid = force_text(uid_decoder(serializer.validated_data['uid']))
+            user = UserModel._default_manager.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, UserModel.DoesNotExist):
+            raise ValidationError({'uid': ['Invalid value']})
+
+        # generate token
+        if getattr(settings, 'REST_USE_JWT', False):
+            token = jwt_encode(user)
+        else:
+            token = create_token(TokenModel, user, serializer)
+
+        if getattr(settings, 'REST_USE_JWT', False):
+            data = {
+                'user': user,
+                'token': token
+            }
+            serializer = JWTSerializer(instance=data,
+                                       context={'request': self.request})
+        else:
+            serializer = TokenSerializer(instance=token,
+                                         context={'request': self.request})
+
+        response = Response(serializer.data, status=status.HTTP_200_OK)
+        if getattr(settings, 'REST_USE_JWT', False):
+            from rest_framework_jwt.settings import api_settings as jwt_settings
+            if jwt_settings.JWT_AUTH_COOKIE:
+                from datetime import datetime
+                expiration = (datetime.utcnow() + jwt_settings.JWT_EXPIRATION_DELTA)
+                response.set_cookie(jwt_settings.JWT_AUTH_COOKIE,
+                                    token,
+                                    expires=expiration,
+                                    httponly=True)
+        return response
 
 
 class PasswordChangeView(GenericAPIView):
