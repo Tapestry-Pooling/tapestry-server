@@ -28,16 +28,20 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
     
     def activate(self, obj):
+        if obj.is_staff:
+            return None
         return format_html(
-            '<a class="button" href="{}">View Token</a>&nbsp;',
-            reverse('admin:activate-user, args=[obj.pk]'),
+            '<a class="button" href="{}">Activate User</a>&nbsp;',
+            reverse('admin:activate-user', args=[obj.pk]),
         )
     activate.short_description = 'Activate User'
     activate.allow_tags = True
 
-    def handle_activate_uer(self, request, id, *args, **kwargs):
-        # app = Application.objects.get(id = application_id)
-        # AccessToken.objects.get(application = app).delete()
+    def handle_activate_user(self, request, id, *args, **kwargs):
+        
+
+
+        
         print("Custom code here...")
         return HttpResponseRedirect("../../")
 
@@ -46,7 +50,7 @@ class CustomUserAdmin(UserAdmin):
         custom_urls = [
             url(
                 r'^(?P<id>.+)/activate-user/$',
-                self.admin_site.admin_view(self.handle_activate_uer),
+                self.admin_site.admin_view(self.handle_activate_user),
                 name='activate-user'),
         ]
         return custom_urls + urls
