@@ -55,6 +55,8 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}
 
       # Deploy App to App Engine
+      - name: Collect Static Files
+        run: python manage.py collectstatic
       - name: Deploy
         run: |
           gcloud app deploy --quiet
