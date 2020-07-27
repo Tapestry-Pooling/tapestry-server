@@ -207,6 +207,7 @@ STATIC_ROOT = 'static'
 
 SITE_ID=1
 
+CORS_ORIGIN_ALLOW_ALL = True
 
 
 
