@@ -208,6 +208,18 @@ STATIC_ROOT = 'static'
 
 SITE_ID=1
 
+CORS_ALLOW_HEADERS = (
+    'x-requested-with',
+    'content-type',
+    'accept',
+    'origin',
+    'authorization',
+    'x-csrftoken',
+    'x-firephp-version',  # Added to default list
+)
+
+
+
 
 
 
