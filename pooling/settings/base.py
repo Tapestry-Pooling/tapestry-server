@@ -97,9 +97,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SENDGRID_API_KEY ='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'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.mailgun.org'
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey' # this is exactly the value 'apikey'
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL='Tapestry Pooling <algorithmicbiologics@gmail.com>'
 
 
 # Internationalization
@@ -194,6 +199,8 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
 
 OLD_PASSWORD_FIELD_ENABLED = True
 LOGOUT_ON_PASSWORD_CHANGE = False

@@ -1,9 +1,11 @@
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework import routers
 from django.conf.urls import url
 from . import views
 from django.views.generic import TemplateView
 from rest_framework_jwt.views import refresh_jwt_token
+
+from rest_auth.registration.views import VerifyEmailView, RegisterView
 
 router = routers.DefaultRouter()
 
@@ -39,4 +41,9 @@ urlpatterns = [
 
     url(r'^auth/refresh/', refresh_jwt_token),
     url(r'^inactive', views.inactive_view, name='account_inactive'),
+    
+    re_path(r'^account-confirm-email/', VerifyEmailView.as_view(),
+     name='account_email_verification_sent'),
+    re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/$', VerifyEmailView.as_view(),
+     name='account_confirm_email'),
 ]

@@ -5,7 +5,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 ALLOWED_HOSTS = ['127.0.0.1','localhost','tapestry-pooling-284109.ew.r.appspot.com']
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

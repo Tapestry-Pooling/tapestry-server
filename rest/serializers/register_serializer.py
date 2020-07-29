@@ -1,7 +1,8 @@
 from django.utils.translation import ugettext_lazy as _
-
+from django.core.mail import send_mail
 from rest.models import Lab
-
+from pooling import settings
+from django.contrib.auth.forms import PasswordResetForm
 try:
     from allauth.account import app_settings as allauth_settings
     from allauth.utils import (email_address_exists,
@@ -66,4 +67,11 @@ class RegisterSerializer(serializers.Serializer):
         user.is_active = False
         user.save()
         setup_user_email(request, user, [])
+        # send_mail(
+        #     'Email for Admin', 
+        #     'Alert for admin', 
+        #     'algorithmicbiologics@gmail.com', 
+        #     [ 'nileshbhosale215@gmail.com'], 
+        #     fail_silently=False
+        #     )
         return user
