@@ -105,6 +105,8 @@ EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL='Tapestry Pooling <algorithmicbiologics@gmail.com>'
+NEW_LAB_ALERT_EMAIL_TO='nileshbhosale215@gmail.com,nilesh@techinertia.com'
+#vyasakanksha@gmail.com
 
 
 # Internationalization

@@ -1,5 +1,5 @@
 from django.utils.translation import ugettext_lazy as _
-from django.core.mail import send_mail
+
 from rest.models import Lab
 from pooling import settings
 from django.contrib.auth.forms import PasswordResetForm
@@ -13,6 +13,7 @@ except ImportError:
     raise ImportError("allauth needs to be added to INSTALLED_APPS.")
 
 from rest_framework import serializers
+from rest.util.admin_alert import new_user_alert_email_admin
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -67,11 +68,8 @@ class RegisterSerializer(serializers.Serializer):
         user.is_active = False
         user.save()
         setup_user_email(request, user, [])
-        # send_mail(
-        #     'Email for Admin', 
-        #     'Alert for admin', 
-        #     'algorithmicbiologics@gmail.com', 
-        #     [ 'nileshbhosale215@gmail.com'], 
-        #     fail_silently=False
-        #     )
+
+        # Alert the admin about the new user.
+        new_user_alert_email_admin(lab.name)
+
         return user
