@@ -14,7 +14,7 @@ except ImportError:
 
 from rest_framework import serializers
 from rest.util.admin_alert import new_user_alert_email_admin
-
+from django.utils.crypto import get_random_string
 
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
@@ -66,6 +66,7 @@ class RegisterSerializer(serializers.Serializer):
         lab.save()
         user.lab_id = lab
         user.is_active = False
+        user.password = get_random_string(length=32)
         user.save()
         setup_user_email(request, user, [])
 

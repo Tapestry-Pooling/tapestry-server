@@ -6,6 +6,9 @@ from django.views.generic import TemplateView
 from rest_framework_jwt.views import refresh_jwt_token
 
 from rest_auth.registration.views import VerifyEmailView, RegisterView
+from rest_auth.views import (
+    PasswordResetView, PasswordResetConfirmView
+)
 
 router = routers.DefaultRouter()
 
@@ -46,4 +49,6 @@ urlpatterns = [
      name='account_email_verification_sent'),
     re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/$', VerifyEmailView.as_view(),
      name='account_confirm_email'),
+
+    url(r'^', include('django.contrib.auth.urls')),
 ]

@@ -7,6 +7,9 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.conf.urls import url
 from django.http import HttpResponseRedirect
+from allauth.account.utils import send_email_confirmation
+from django.contrib.auth.forms import PasswordResetForm
+from pooling import settings
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -38,11 +41,23 @@ class CustomUserAdmin(UserAdmin):
     activate.allow_tags = True
 
     def handle_activate_user(self, request, id, *args, **kwargs):
-        
 
+        user = User.objects.get(pk= id)
+        user.is_active = True
+        # user.password = get_random_string(length=32)
+        user.save(force_update=True)
 
+        # send_email_confirmation(request,user, False)
+        reset_form = PasswordResetForm(data={'email':user.email})
+        reset_form.is_valid()
+
+        opts = {
+            'use_https': request.is_secure(),
+            'from_email': settings.DEFAULT_FROM_EMAIL,
+            'request': request,
+        }
+        reset_form.save(**opts)
         
-        print("Custom code here...")
         return HttpResponseRedirect("../../")
 
     def get_urls(self):
