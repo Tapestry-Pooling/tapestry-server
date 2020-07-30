@@ -7,5 +7,6 @@ from .test import Test
 from .file import File
 from .status import Status
 from .matrix import Matrix
-
+from .country import Country
+from .city import City
 
