@@ -15,6 +15,7 @@ env_variables:
   DB_NAME: "pooling"
   DB_USER: "tapestry-staging" # either 'postgres' (default) or one you created on the PostgreSQL instance page
   DB_PASSWORD: "pooling@123"
+  SENDGRID_API_KEY: "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"
 
 handlers:
   # This configures Google App Engine to serve the files in the app's static
