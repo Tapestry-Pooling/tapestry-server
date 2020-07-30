@@ -3,8 +3,8 @@ from .base import *
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-
-
+SENDGRID_SANDBOX_MODE_IN_DEBUG = True
+SENDGRID_ECHO_TO_STDOUT=True
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -21,5 +21,5 @@ DATABASES = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
-SENDGRID_SANDBOX_MODE_IN_DEBUG=True
+
 
