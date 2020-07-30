@@ -61,6 +61,8 @@ class CustomUserAdmin(UserAdmin):
             'use_https': request.is_secure(),
             'from_email': settings.DEFAULT_FROM_EMAIL,
             'request': request,
+            'subject_template_name': 'registration/set_password_subject.txt',
+            'email_template_name': 'registration/set_password.html'
         }
         reset_form.save(**opts)
         
