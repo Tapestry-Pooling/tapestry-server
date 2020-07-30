@@ -37,7 +37,7 @@ urlpatterns = [
         name='rest_password_change'),
 
     url(r'^auth/register/', views.RegisterView.as_view(), name='rest_register'),
-    url(r'^auth/verify-email/$', views.VerifyEmailView.as_view(), name='rest_verify_email'),
+    # url(r'^auth/verify-email/$', views.VerifyEmailView.as_view(), name='rest_verify_email'),
 
     url(r'^auth/account-confirm-email/(?P<key>[-:\w]+)/$', TemplateView.as_view(),
         name='account_confirm_email'),
