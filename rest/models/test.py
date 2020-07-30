@@ -22,3 +22,5 @@ class Test(models.Model):
     patient_id_map = fields.JSONField()
     results_1 = models.TextField()
     results_2 = models.TextField()
+    prevalence = models.FloatField()
+    
