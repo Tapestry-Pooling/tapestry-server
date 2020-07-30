@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from allauth.account.utils import send_email_confirmation
 from django.contrib.auth.forms import PasswordResetForm
 from pooling import settings
+from allauth.account.models import EmailAddress
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -33,6 +34,11 @@ class CustomUserAdmin(UserAdmin):
     def activate(self, obj):
         if obj.is_staff:
             return None
+
+        email_address = EmailAddress.objects.get(email=obj.email)
+        if email_address.verified:
+            return None
+        
         return format_html(
             '<a class="button" href="{}">Activate User</a>&nbsp;',
             reverse('admin:activate-user', args=[obj.pk]),

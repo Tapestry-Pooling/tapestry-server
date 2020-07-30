@@ -34,6 +34,8 @@ from django.utils.http import urlsafe_base64_decode as uid_decoder
 from django.utils.encoding import force_text
 from rest_framework.exceptions import ValidationError
 
+from allauth.account.models import EmailAddress
+
 # Get the UserModel
 UserModel = get_user_model()
 
@@ -229,6 +231,12 @@ class PasswordResetConfirmView(GenericAPIView):
         try:
             uid = force_text(uid_decoder(serializer.validated_data['uid']))
             user = UserModel._default_manager.get(pk=uid)
+
+            # Update email address as verified for first time users.
+            email_address = EmailAddress.objects.get(email= user.email)
+            email_address.verified = True
+            email_address.save()
+
         except (TypeError, ValueError, OverflowError, UserModel.DoesNotExist):
             raise ValidationError({'uid': ['Invalid value']})
 
