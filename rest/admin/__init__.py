@@ -7,3 +7,5 @@ from .machine_type import MachineTypeAdmin
 from .matrix import MatrixAdmin
 from .test_kit import TestKitAdmin
 from .status import StatusAdmin
+from .city import CityAdmin
+from .country import CountryAdmin

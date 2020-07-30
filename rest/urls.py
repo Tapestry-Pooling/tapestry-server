@@ -21,6 +21,8 @@ router.register(r'status', views.StatusViewset)
 router.register(r'matrix',views.MatrixViewset)
 router.register(r'file', views.FileViewset)
 router.register(r'user', views.UserViewSet)
+router.register(r'city', views.CityViewSet)
+router.register(r'country', views.CountryViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

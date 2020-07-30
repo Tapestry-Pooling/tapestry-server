@@ -9,3 +9,5 @@ from .status import *
 from .matrix import *
 from .login_serializer import *
 from .register_serializer import *
+from .country import CountrySerializer
+from .city import CitySerializer
