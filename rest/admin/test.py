@@ -3,6 +3,6 @@ from rest.models import Test
 
 
 class TestAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'samples', 'assigned_to', 'status')
 
 admin.site.register(Test, TestAdmin)

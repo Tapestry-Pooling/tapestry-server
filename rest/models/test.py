@@ -7,18 +7,42 @@ from .machine_type import MachineType
 from .file import File
 from .matrix import Matrix
 
+
 class Test(models.Model):
-    assigned_to = models.ForeignKey(User, on_delete = models.CASCADE)
-    status = models.ForeignKey(Status, on_delete = models.CASCADE)
+    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.ForeignKey(
+        Status,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
     samples = models.SmallIntegerField()
-    suspected_samples = models.SmallIntegerField()
-    positive_samples = models.SmallIntegerField()
-    test_kit = models.ForeignKey(TestKit, on_delete = models.CASCADE)
-    machine_type = models.ForeignKey(MachineType, on_delete = models.CASCADE)
-    remark = models.TextField()
-    file = models.ForeignKey(File, on_delete = models.CASCADE)
-    pooling_matrix = models.ForeignKey(Matrix, on_delete = models.CASCADE, related_name='pooling_matrix')
-    mastermix_matrix = models.ForeignKey(Matrix, on_delete = models.CASCADE, related_name='mastermix_matrix')
+    inconclusive_samples = models.SmallIntegerField(blank=True, null=True)
+    positive_samples = models.SmallIntegerField(blank=True, null=True)
+    remark = models.TextField(blank=True)
+    test_kit = models.ForeignKey(TestKit, on_delete=models.CASCADE)
+    machine_type = models.ForeignKey(MachineType, on_delete=models.CASCADE)
+    file = models.ForeignKey(
+        File,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
+    pooling_matrix = models.ForeignKey(
+        Matrix,
+        on_delete=models.CASCADE,
+        related_name='pooling_matrix',
+        blank=True,
+        null=True
+    )
+    mastermix_matrix = models.ForeignKey(
+        Matrix,
+        on_delete=models.CASCADE,
+        related_name='mastermix_matrix',
+        blank=True,
+        null=True
+    )
     patient_id_map = fields.JSONField()
-    results_1 = models.TextField()
-    results_2 = models.TextField()
+    results_1 = models.TextField(blank=True)
+    results_2 = models.TextField(blank=True)
+    prevalence = models.FloatField()
