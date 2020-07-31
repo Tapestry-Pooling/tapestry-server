@@ -16,33 +16,13 @@ class Test(models.Model):
         blank=True,
         null=True
     )
-    samples = models.SmallIntegerField()
-    inconclusive_samples = models.SmallIntegerField(blank=True, null=True)
-    positive_samples = models.SmallIntegerField(blank=True, null=True)
+    nsamples = models.SmallIntegerField()
+    prevalence = models.FloatField()
     remark = models.TextField(blank=True)
     test_kit = models.ForeignKey(TestKit, on_delete=models.CASCADE)
     machine_type = models.ForeignKey(MachineType, on_delete=models.CASCADE)
-    file = models.ForeignKey(
-        File,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
-    pooling_matrix = models.ForeignKey(
-        Matrix,
-        on_delete=models.CASCADE,
-        related_name='pooling_matrix',
-        blank=True,
-        null=True
-    )
-    mastermix_matrix = models.ForeignKey(
-        Matrix,
-        on_delete=models.CASCADE,
-        related_name='mastermix_matrix',
-        blank=True,
-        null=True
-    )
-    patient_id_map = fields.JSONField()
-    results_1 = models.TextField(blank=True)
-    results_2 = models.TextField(blank=True)
-    prevalence = models.FloatField()
+    filename = models.TextField(blank=True)
+    ninconclusive = models.SmallIntegerField(blank=True, null=True)
+    npositive = models.SmallIntegerField(blank=True, null=True)
+    positive = fields.JSONField(null=True)
+    inconclusive = fields.JSONField(null=True)
