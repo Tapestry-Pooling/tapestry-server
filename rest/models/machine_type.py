@@ -9,4 +9,5 @@ class MachineType(models.Model) :
 	capacity = models.FloatField(null=True)
 	resource_name = 'machineType'
 
-
+	def __str__(self):
+		return self.name

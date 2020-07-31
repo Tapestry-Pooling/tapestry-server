@@ -3,6 +3,6 @@ from rest.models import TestKit
 
 
 class TestKitAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'name', 'kit_maker')
 
 admin.site.register(TestKit, TestKitAdmin)
