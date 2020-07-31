@@ -3,6 +3,6 @@ from rest.models import MachineType
 
 
 class MachineTypeAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'name', 'machine_maker')
 
 admin.site.register(MachineType, MachineTypeAdmin)

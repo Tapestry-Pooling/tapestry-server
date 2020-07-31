@@ -24,9 +24,11 @@ bucket_name = 'pooling_scheme_files'
 
 def pooling_matrix_gcf(payload):
     response = requests.request("POST", url, headers=headers, data=payload)
-    assert (response.status_code == 200)
-    object_name = json.loads(response.text.encode('utf8'))['filename']
-    return generate_signed_url(service_account_file, bucket_name, object_name)
+    pooling_matrix_signed_url = '#'
+    if response.status_code == 200:
+        object_name = json.loads(response.text.encode('utf8'))['filename']
+        pooling_matrix_signed_url = generate_signed_url(service_account_file, bucket_name, object_name)
+    return response.status_code, pooling_matrix_signed_url
 
 
 def generate_signed_url(service_account_file, bucket_name, object_name,

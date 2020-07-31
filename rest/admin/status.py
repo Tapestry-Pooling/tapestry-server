@@ -3,6 +3,6 @@ from rest.models import Status
 
 
 class StatusAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'name')
 
 admin.site.register(Status, StatusAdmin)
