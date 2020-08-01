@@ -20,7 +20,6 @@ headers = {
 
 
 service_account_file = os.path.join(
-    os.environ['HOME'],
     'secrets',
     'tapestry-pooling-service_account_credentials.json'
 )
