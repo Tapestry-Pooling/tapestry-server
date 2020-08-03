@@ -33,7 +33,7 @@ class Test(models.Model):
 
     def get_pooling_matrix_url(self):
         payload = {
-            "nsamples": self.samples,
+            "nsamples": self.nsamples,
             "prevalence": self.prevalence,
             "genes": ", ".join(self.test_kit.gene_type),
             "testid": self.id,
