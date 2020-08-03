@@ -5,6 +5,7 @@ import datetime
 import hashlib
 import sys
 import json
+import os
 
 from google.oauth2 import service_account
 
@@ -18,7 +19,10 @@ headers = {
 }
 
 
-service_account_file = 'tapestry-pooling-284109-d82c7249e632.json'
+service_account_file = os.path.join(
+    'secrets',
+    'tapestry-pooling-service_account_credentials.json'
+)
 bucket_name = 'pooling_scheme_files'
 
 
