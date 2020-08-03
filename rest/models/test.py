@@ -19,6 +19,7 @@ class Test(models.Model):
         blank=True,
         null=True
     )
+    lab_id = models.SmallIntegerField()
     nsamples = models.SmallIntegerField()
     prevalence = models.FloatField()
     remark = models.TextField(blank=True)
