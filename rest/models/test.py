@@ -6,8 +6,7 @@ from .test_kit import TestKit
 from .machine_type import MachineType
 from .file import File
 from .matrix import Matrix
-from .lab import Lab
-from rest.util.gcf_call import pooling_matrix_gcf
+from rest.util.gc_util import get_pooling_matrix_download_url, get_ct_value_upload_url
 import json
 
 
@@ -58,9 +57,9 @@ class Test(models.Model):
             "testid": self.id,
             "lab_name": self.assigned_to.lab_id.__str__()
         }
-        status_code, signed_url = pooling_matrix_gcf(payload=json.dumps(payload))
+        status_code, signed_url = get_pooling_matrix_download_url(payload=json.dumps(payload))
         return signed_url
 
     def save(self, *args, **kwargs):
         super(Test, self).save(*args, **kwargs)
-        self.pooling_matrix_url = self.get_pooling_matrix_url()
+        self.pooling_matrix_download_url = self.get_pooling_matrix_url()
