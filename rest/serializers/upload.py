@@ -2,6 +2,10 @@ from rest_framework import serializers
 from django.utils.translation import ugettext_lazy as _
 from rest.models import Test
 
+import re
+
+from rest.util.util import check_and_fix_upload_file_name
+
 
 class UploadUrlSerializer(serializers.Serializer):
     test_id = serializers.IntegerField()
@@ -15,6 +19,7 @@ class UploadUrlSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         test_id = attrs.get('test_id')
+        file_name = attrs.get('file_name')
 
         # check if test_id is valid
         try:
@@ -26,7 +31,16 @@ class UploadUrlSerializer(serializers.Serializer):
         if self.test.assigned_to.lab_id != self.user.lab_id:
             raise serializers.ValidationError(_('Invalid test_id'))
 
+        # validate file name
+        file_name_pattern = "^[\w,\s-]+\.xlsx$"
+        if not re.search(file_name_pattern, file_name):
+            raise serializers.ValidationError(_('only xlsx file accepted'))
+
         return attrs
 
     def save(self):
-        pass
+        self.test.testctresults_filename = check_and_fix_upload_file_name(
+            self.validated_data['test_id'],
+            self.validated_data['file_name']
+        )
+        self.test.save()

@@ -4,9 +4,7 @@ from .user import User
 from .status import Status
 from .test_kit import TestKit
 from .machine_type import MachineType
-from .file import File
-from .matrix import Matrix
-from rest.util.gc_util import get_pooling_matrix_download_url, get_ct_value_upload_url
+from rest.util.gc_util import get_pooling_matrix_download_url
 import json
 
 
@@ -18,48 +16,28 @@ class Test(models.Model):
         blank=True,
         null=True
     )
-    samples = models.SmallIntegerField()
-    inconclusive_samples = models.SmallIntegerField(blank=True, null=True)
-    positive_samples = models.SmallIntegerField(blank=True, null=True)
+    nsamples = models.SmallIntegerField()
+    prevalence = models.FloatField()
     remark = models.TextField(blank=True)
     test_kit = models.ForeignKey(TestKit, on_delete=models.CASCADE)
     machine_type = models.ForeignKey(MachineType, on_delete=models.CASCADE)
-    file = models.ForeignKey(
-        File,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
-    pooling_matrix = models.ForeignKey(
-        Matrix,
-        on_delete=models.CASCADE,
-        related_name='pooling_matrix',
-        blank=True,
-        null=True
-    )
-    mastermix_matrix = models.ForeignKey(
-        Matrix,
-        on_delete=models.CASCADE,
-        related_name='mastermix_matrix',
-        blank=True,
-        null=True
-    )
-    patient_id_map = fields.JSONField()
-    results_1 = models.TextField(blank=True)
-    results_2 = models.TextField(blank=True)
-    prevalence = models.FloatField()
+    poolingscheme_filename = models.TextField(blank=True)
+    testctresults_filename = models.TextField(blank=True)
+    ninconclusive = models.SmallIntegerField(blank=True, null=True)
+    npositive = models.SmallIntegerField(blank=True, null=True)
+    positive = fields.JSONField(blank=True, null=True)
+    inconclusive = fields.JSONField(blank=True, null=True)
 
     def get_pooling_matrix_url(self):
         payload = {
-            "nsamples": self.samples,
+            "nsamples": self.nsamples,
             "prevalence": self.prevalence,
             "genes": ", ".join(self.test_kit.gene_type),
             "testid": self.id,
             "lab_name": self.assigned_to.lab_id.__str__()
         }
-        status_code, signed_url = get_pooling_matrix_download_url(payload=json.dumps(payload))
-        return signed_url
+        return get_pooling_matrix_download_url(payload=json.dumps(payload))
 
     def save(self, *args, **kwargs):
+        self.poolingscheme_filename, self.pooling_matrix_download_url = self.get_pooling_matrix_url()
         super(Test, self).save(*args, **kwargs)
-        self.pooling_matrix_download_url = self.get_pooling_matrix_url()

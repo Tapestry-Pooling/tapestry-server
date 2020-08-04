@@ -26,6 +26,7 @@ def get_pooling_matrix_download_url(payload):
 
     response = requests.request("POST", url, headers=headers, data=payload)
     pooling_matrix_signed_url = '#'
+    object_name = '#'
     if response.status_code == 200:
         object_name = json.loads(response.text.encode('utf8'))['filename']
         pooling_matrix_signed_url = generate_signed_url(
@@ -34,7 +35,7 @@ def get_pooling_matrix_download_url(payload):
             object_name,
             expiration=86400,  # 1 day
         )
-    return response.status_code, pooling_matrix_signed_url
+    return object_name, pooling_matrix_signed_url
 
 
 def get_ct_value_upload_url(object_name):
