@@ -1,7 +1,6 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 
 from rest.util.gc_util import get_ct_value_upload_url
 from rest.util.util import check_and_fix_upload_file_name
@@ -10,7 +9,6 @@ from rest.serializers import UploadUrlSerializer
 
 class UploadUrlView(GenericAPIView):
     serializer_class = UploadUrlSerializer
-    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
