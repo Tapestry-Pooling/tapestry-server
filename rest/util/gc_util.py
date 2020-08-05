@@ -13,26 +13,50 @@ import six
 from six.moves.urllib.parse import quote
 
 
-url = "https://us-central1-tapestry-pooling-284109.cloudfunctions.net/tapestry-matrix-generation"
-headers = {
-  'Content-Type': 'application/json'
-}
+def get_pooling_matrix_download_url(payload):
+    url = "https://us-central1-tapestry-pooling-284109.cloudfunctions.net/tapestry-matrix-generation"
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    service_account_file = os.path.join(
+        'secrets',
+        'tapestry-pooling-storage-object-viewer-credentials.json'
+    )
+    bucket_name = 'pooling_scheme_files'
 
-
-service_account_file = os.path.join(
-    'secrets',
-    'tapestry-pooling-service_account_credentials.json'
-)
-bucket_name = 'pooling_scheme_files'
-
-
-def pooling_matrix_gcf(payload):
     response = requests.request("POST", url, headers=headers, data=payload)
     pooling_matrix_signed_url = '#'
+    object_name = '#'
     if response.status_code == 200:
         object_name = json.loads(response.text.encode('utf8'))['filename']
-        pooling_matrix_signed_url = generate_signed_url(service_account_file, bucket_name, object_name)
-    return response.status_code, pooling_matrix_signed_url
+        pooling_matrix_signed_url = generate_signed_url(
+            service_account_file,
+            bucket_name,
+            object_name,
+            expiration=86400,  # 1 day
+        )
+    return object_name, pooling_matrix_signed_url
+
+
+def get_ct_value_upload_url(object_name):
+    service_account_file = os.path.join(
+        'secrets',
+        'tapestry-pooling-storage-object-creator-credentials.json'
+    )
+    headers = {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    }
+    bucket_name = 'pooling_results'
+
+    upload_signed_url = generate_signed_url(
+        service_account_file,
+        bucket_name,
+        object_name,
+        expiration=86400, # 1 day
+        http_method='PUT',
+        headers=headers
+    )
+    return upload_signed_url
 
 
 def generate_signed_url(service_account_file, bucket_name, object_name,
@@ -128,5 +152,6 @@ if __name__ == '__main__':
         "testid": 23432,
         "lab_name": "test_lab"
     }
-    payload = json.dumps(payload)
-    print(pooling_matrix_gcf(payload))
+    # payload = json.dumps(payload)
+    # print(get_pooling_matrix_download_url(payload))
+    print(get_ct_value_upload_url("Tapestry-pooling-Lab-2.xlsx"))

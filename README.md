@@ -101,5 +101,3 @@ curl -XPUT -d '{"test_id": "TEST_ID", "test_data" : [0.01, 0.01, 0.01, 0.01, 0.0
 
 [doc](https://docs.google.com/document/d/1SlwcXj-hDZjgEOiGL999BB13Yn8m4bD6RN5SUEPQ2Vo/edit)
 
-
-

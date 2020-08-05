@@ -37,7 +37,8 @@ jobs:
     - name: Decrypt service account secret
       run: ./.github/scripts/decrypt_secrets.sh
       env:
-        LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
+        CLOUD_STORAGE_VIEW_SECRET: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
+        CLOUD_STORAGE_CREATE_SECRET: ${{ secrets.CLOUD_STORAGE_CREATE_SECRET }}
     - name: Run migrations
       run: python manage.py migrate
     - name: Collect Static Files
