@@ -39,13 +39,11 @@ jobs:
       env:
         CLOUD_STORAGE_VIEW_SECRET: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
         CLOUD_STORAGE_CREATE_SECRET: ${{ secrets.CLOUD_STORAGE_CREATE_SECRET }}
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
     - name: Run migrations
       run: python manage.py migrate
     - name: Collect Static Files
       run: python manage.py collectstatic --noinput
-    - name: Add SendGrid enviornment variable
-      env:
-        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
 
     #Setup and configure gcloud CLI
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
