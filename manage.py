@@ -6,11 +6,7 @@ import sys
 
 def main():
     ### DEBUG PRINTS FOR DEPLOYMENT BUG FIX ###
-    print("env vars")
-    print('DB_HOST', os.environ['DB_HOST'])
-    print('DB_NAME', os.environ['DB_NAME'])
-    print('DB_USER', os.environ['DB_USER'])
-    print('DB_PASSWORD', os.environ['DB_PASSWORD'])
+    print("env vars", os.environ)
     ### DEBUG PRINTS FOR DEPLOYMENT BUG FIX ###
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pooling.settings')
     try:
