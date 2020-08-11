@@ -3,8 +3,6 @@ name: Build and Deploy
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build-deploy:
@@ -13,15 +11,6 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.8]
-    services:
-      postgres:
-        image: postgres:10.8
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        ports:
-          - 5432:5432
 
     steps:
     - uses: actions/checkout@v2
@@ -41,6 +30,11 @@ jobs:
         CLOUD_STORAGE_VIEW_SECRET: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
         CLOUD_STORAGE_CREATE_SECRET: ${{ secrets.CLOUD_STORAGE_CREATE_SECRET }}
         SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        DJANGO_ENV: stage
+        DB_NAME: ${{ secrets.POSTGRES_DB }}
+        DB_USER: ${{ secrets.POSTGRES_USER }}
+        DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        DB_HOST: ${{ secrets.POSTGRES_HOST }}
     - name: Run migrations
       run: python manage.py migrate
     - name: Collect Static Files
