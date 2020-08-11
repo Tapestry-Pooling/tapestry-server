@@ -98,7 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-SENDGRID_API_KEY ='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'
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 # EMAIL_HOST = 'smtp.sendgrid.net'
 # EMAIL_HOST_USER = 'apikey' # this is exactly the value 'apikey'
@@ -134,7 +134,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
     'DEFAULT_PAGINATION_CLASS':
-        'rest_framework_json_api.pagination.PageNumberPagination',
+        'rest_framework_json_api.pagination.JsonApiPageNumberPagination',
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
         'rest_framework_json_api.parsers.JSONParser',

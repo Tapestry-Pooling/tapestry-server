@@ -38,6 +38,9 @@ jobs:
       run: ./.github/scripts/decrypt_secrets.sh
       env:
         LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
+        CLOUD_STORAGE_VIEW_SECRET: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
+        CLOUD_STORAGE_CREATE_SECRET: ${{ secrets.CLOUD_STORAGE_CREATE_SECRET }}
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
     - name: Run migrations
       run: python manage.py migrate
     - name: Collect Static Files
