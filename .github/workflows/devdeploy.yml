@@ -38,6 +38,7 @@ jobs:
         DB_USER: ${{ secrets.POSTGRES_USER }}
         DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         DB_HOST: ${{ secrets.POSTGRES_HOST }}
+        DB_PORT: 5432
         DEBUG: False
         SECRET_KEY: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
         SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }} 
