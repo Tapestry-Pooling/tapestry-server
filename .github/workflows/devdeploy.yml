@@ -29,6 +29,7 @@ jobs:
         CLOUD_STORAGE_VIEW_SECRET: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
         CLOUD_STORAGE_CREATE_SECRET: ${{ secrets.CLOUD_STORAGE_CREATE_SECRET }}
         SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        DJANGO_ENV: stage
     - name: Run migrations
       run: python manage.py migrate
     - name: Collect Static Files
