@@ -13,3 +13,5 @@ from .inactive_view import *
 from .country import CountryViewSet
 from .city import CityViewSet
 from .upload import *
+from .labmember import *
+from .labtest import *
