@@ -1,7 +1,7 @@
 from .base import *
 
 DEBUG = os.environ['DEBUG']
-SECRET_KEY = os.environ['SECRET_KEY']
+# SECRET_KEY = os.environ['SECRET_KEY']
 
 ALLOWED_HOSTS = ['127.0.0.1','localhost','tapestry-pooling-284109.ew.r.appspot.com']
 
