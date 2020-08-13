@@ -44,6 +44,8 @@ jobs:
         DB_HOST: ${{ secrets.POSTGRES_HOST }}
         DB_PORT: 5432
         DEBUG: False
+        SECRET_KEY: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
     - name: Collect Static Files
       run: python manage.py collectstatic --noinput
 
