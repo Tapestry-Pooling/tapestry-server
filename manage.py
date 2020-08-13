@@ -6,7 +6,7 @@ import sys
 
 def main():
     ### DEBUG PRINTS FOR DEPLOYMENT BUG FIX ###
-    print("env vars", os.environ)
+    # print("env vars", os.environ)
     ### DEBUG PRINTS FOR DEPLOYMENT BUG FIX ###
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pooling.settings')
     try:
