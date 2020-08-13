@@ -31,9 +31,6 @@ jobs:
         CLOUD_STORAGE_CREATE_SECRET: ${{ secrets.CLOUD_STORAGE_CREATE_SECRET }}
         CLOUD_SQL_PROXY_SECRET: ${{ secrets.CLOUD_SQL_PROXY_SECRET }}
         SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-    - uses: actions/checkout@v2
-    - name: Start cloudsql proxy
-      run: ./.github/scripts/sqlproxy.sh
     - name: Run migrations
       run: python manage.py migrate
       env:
@@ -44,6 +41,7 @@ jobs:
         DB_HOST: ${{ secrets.POSTGRES_HOST }}
         DB_PORT: 5432
         DEBUG: False
+        SECRET_KEY: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
         SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
     - name: Collect Static Files
       run: python manage.py collectstatic --noinput
