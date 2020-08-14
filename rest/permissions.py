@@ -10,7 +10,7 @@ class IsLabOwnerOrAdmin(permissions.BasePermission):
 class IsTestOwnerOrAdmin(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return obj.assigned.lab_id == request.user.lab_id or request.user.is_staff
+        return obj.assigned_to.lab_id == request.user.lab_id or request.user.is_staff
 
 
 class IsUserOwnerOrAdmin(permissions.BasePermission):
