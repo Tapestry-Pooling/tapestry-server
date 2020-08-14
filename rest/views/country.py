@@ -7,3 +7,4 @@ class CountryViewSet(ModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
     permission_classes = (AllowAny,)
+    pagination_class = None
