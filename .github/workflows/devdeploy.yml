@@ -47,8 +47,10 @@ jobs:
       run: |
         gcloud sql instances patch postgres --authorized-networks=${{ steps.ip.outputs.ipv4 }}
     # run migrations
-    - name: Run migrations
-      run: python manage.py migrate
+    - name: Run migrations and collect static files
+      run: |
+        python manage.py migrate
+        python manage.py collectstatic --noinput
       env:
         DB_NAME: ${{ secrets.POSTGRES_DB }}
         DB_USER: ${{ secrets.POSTGRES_USER }}
@@ -59,9 +61,6 @@ jobs:
     - name: Clear Whitelist
       run: |
         gcloud sql instances patch postgres --clear-authorized-networks
-    # collect static files
-    - name: Collect Static Files
-      run: python manage.py collectstatic --noinput
     # Deploy App to App Engine
     - name: Deploy
       run: |
