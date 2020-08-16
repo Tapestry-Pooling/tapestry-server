@@ -5,7 +5,6 @@ on:
     branches: [ master ]
 
 env:
-  DJANGO_ENV: stage
   DEBUG: False
   SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
 
@@ -19,12 +18,6 @@ jobs:
     services:
       postgres:
         image: postgres:10.8
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        ports:
-          - 5432:5432
 
     steps:
     - uses: actions/checkout@v2
@@ -36,7 +29,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - uses: actions/checkout@v2
     - name: Decrypt service account secret
       run: ./.github/scripts/decrypt_secrets.sh
       env:
