@@ -1,11 +1,9 @@
 from .base import *
 
 DEBUG = os.environ['DEBUG']
-SECRET_KEY = os.environ['SECRET_KEY']
 
 ALLOWED_HOSTS = ['127.0.0.1','localhost','tapestry-pooling-284109.ew.r.appspot.com']
 
-SENDGRID_API_KEY = os.environ["SENDGRID_API_KEY"]
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 
 # Database
