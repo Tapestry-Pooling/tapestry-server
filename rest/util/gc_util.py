@@ -13,7 +13,7 @@ import six
 from six.moves.urllib.parse import quote
 
 
-def get_pooling_matrix_download_url(payload):
+def get_pooling_matrix_download_url(payload=None, object_name=None):
     url = "https://us-central1-tapestry-pooling-284109.cloudfunctions.net/tapestry-matrix-generation"
     headers = {
         'Content-Type': 'application/json'
@@ -24,17 +24,19 @@ def get_pooling_matrix_download_url(payload):
     )
     bucket_name = 'pooling_scheme_files'
 
-    response = requests.request("POST", url, headers=headers, data=payload)
-    pooling_matrix_signed_url = '#'
-    object_name = '#'
-    if response.status_code == 200:
-        object_name = json.loads(response.text.encode('utf8'))['filename']
-        pooling_matrix_signed_url = generate_signed_url(
-            service_account_file,
-            bucket_name,
-            object_name,
-            expiration=86400,  # 1 day
-        )
+    if object_name is None:
+        # request google cloud function
+        response = requests.request("POST", url, headers=headers, data=payload)
+        if response.status_code == 200:
+            object_name = json.loads(response.text.encode('utf8'))['filename']
+
+    # compute signed url
+    pooling_matrix_signed_url = generate_signed_url(
+        service_account_file,
+        bucket_name,
+        object_name,
+        expiration=86400,  # 1 day
+    )
     return object_name, pooling_matrix_signed_url
 
 
