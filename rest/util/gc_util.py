@@ -45,9 +45,9 @@ def get_ct_value_upload_url(object_name):
         'secrets',
         'tapestry-pooling-storage-object-creator-credentials.json'
     )
-    headers = {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    }
+    #headers = {
+    #    'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    #}
     bucket_name = 'pooling_results'
 
     upload_signed_url = generate_signed_url(
@@ -55,8 +55,9 @@ def get_ct_value_upload_url(object_name):
         bucket_name,
         object_name,
         expiration=86400, # 1 day
-        http_method='PUT',
-        headers=headers
+        http_method='PUT'
+     #  ,
+     #  headers=headers
     )
     return upload_signed_url
 
