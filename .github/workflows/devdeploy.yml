@@ -57,6 +57,7 @@ jobs:
         DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         DB_HOST: ${{ secrets.POSTGRES_HOST }}
         DB_PORT: 5432
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
     # clear Whitelist
     - name: Clear Whitelist
       run: |
