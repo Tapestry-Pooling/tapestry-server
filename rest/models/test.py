@@ -21,11 +21,15 @@ class Test(models.Model):
     remark = models.TextField(blank=True)
     test_kit = models.ForeignKey(TestKit, on_delete=models.CASCADE)
     machine_type = models.ForeignKey(MachineType, on_delete=models.CASCADE)
+    max_poolsize = models.SmallIntegerField()
+    poolingmatrix_filename = models.TextField(blank=True)
     poolingscheme_filename = models.TextField(blank=True)
     testctresults_filename = models.TextField(blank=True)
-    ninconclusive = models.SmallIntegerField(blank=True, null=True)
     npositive = models.SmallIntegerField(blank=True, null=True)
+    ninconclusive = models.SmallIntegerField(blank=True, null=True)
+    nnegative = models.SmallIntegerField(blank=True, null=True)
     positive = fields.JSONField(blank=True, null=True)
+    negative = fields.JSONField(blank=True, null=True)
     inconclusive = fields.JSONField(blank=True, null=True)
 
     def get_pooling_matrix_url(self):
