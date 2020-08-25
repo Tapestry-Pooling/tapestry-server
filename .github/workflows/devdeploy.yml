@@ -66,3 +66,9 @@ jobs:
     - name: Deploy
       run: |
         gcloud app deploy --quiet
+    - uses: actions/checkout@v1
+    - uses: ikuanyshbekov/app-yaml-env-compiler@v1.0
+      env:
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        
+    -  
