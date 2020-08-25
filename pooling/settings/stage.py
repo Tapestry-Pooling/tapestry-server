@@ -8,8 +8,6 @@ SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
