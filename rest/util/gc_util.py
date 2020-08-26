@@ -12,6 +12,20 @@ from google.oauth2 import service_account
 import six
 from six.moves.urllib.parse import quote
 
+from google.cloud import storage
+
+
+def get_object_list(bucket_name):
+    """Lists all the blobs in the bucket."""
+    # bucket_name = "your-bucket-name"
+
+    storage_client = storage.Client()
+    blobs = storage_client.list_blobs(bucket_name)
+
+    object_list = [(blob.name, blob.name) for blob in blobs]
+
+    return object_list
+
 
 def get_pooling_matrix_download_url(payload=None, object_name=None):
     url = "https://us-central1-tapestry-pooling-284109.cloudfunctions.net/tapestry-matrix-generation"
@@ -157,4 +171,5 @@ if __name__ == '__main__':
     }
     # payload = json.dumps(payload)
     # print(get_pooling_matrix_download_url(payload))
-    print(get_ct_value_upload_url("Tapestry-pooling-Lab-2.xlsx"))
+    # print(get_ct_value_upload_url("Tapestry-pooling-Lab-2.xlsx"))
+    print(get_object_list('kirkman_matrices'))
