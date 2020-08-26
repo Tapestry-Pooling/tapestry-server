@@ -40,9 +40,9 @@ jobs:
       env:
         CLOUD_STORAGE_VIEW_SECRET: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
         CLOUD_STORAGE_CREATE_SECRET: ${{ secrets.CLOUD_STORAGE_CREATE_SECRET }}
-    - name: Run migrations
-      run: python manage.py migrate
+    - name: Run migrations and collect static files
+      run: |
+        python manage.py migrate
+        python manage.py collectstatic --noinput
       env:
         GOOGLE_APPLICATION_CREDENTIALS: secrets/tapestry-pooling-storage-object-viewer-credentials.json
-    - name: Collect Static Files
-      run: python manage.py collectstatic --noinput
