@@ -3,8 +3,11 @@ name: Build and Deploy
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
+
+env:
+  DJANGO_ENV: stage
+  DEBUG: False
+  SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
 
 jobs:
   build-deploy:
@@ -13,15 +16,6 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.8]
-    services:
-      postgres:
-        image: postgres:10.8
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        ports:
-          - 5432:5432
 
     steps:
     - uses: actions/checkout@v2
@@ -33,24 +27,46 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - uses: actions/checkout@v2
     - name: Decrypt service account secret
       run: ./.github/scripts/decrypt_secrets.sh
       env:
-        LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
-    - name: Run migrations
-      run: python manage.py migrate
-    - name: Collect Static Files
-      run: python manage.py collectstatic --noinput
-
+        CLOUD_STORAGE_VIEW_SECRET: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
+        CLOUD_STORAGE_CREATE_SECRET: ${{ secrets.CLOUD_STORAGE_CREATE_SECRET }}
+    # get the IP address of hosted-runner
+    - name: Public IP
+      id: ip
+      uses: haythem/public-ip@v1
     #Setup and configure gcloud CLI
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
         project_id: ${{ secrets.PROJECT_ID }}
         service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}
+    # whitelist the hosted-runner IP address
+    - name: Whitelist IP
+      run: |
+        gcloud sql instances patch postgres --authorized-networks=${{ steps.ip.outputs.ipv4 }}
+    # run migrations
+    - name: Run migrations and collect static files
+      run: |
+        python manage.py migrate
+        python manage.py collectstatic --noinput
+      env:
+        DB_NAME: ${{ secrets.POSTGRES_DB }}
+        DB_USER: ${{ secrets.POSTGRES_USER }}
+        DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        DB_HOST: ${{ secrets.POSTGRES_HOST }}
+        DB_PORT: 5432
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+    # clear Whitelist
+    - name: Clear Whitelist
+      run: |
+        gcloud sql instances patch postgres --clear-authorized-networks
     # Deploy App to App Engine
     - name: Deploy
       run: |
         gcloud app deploy --quiet
-      
+    - uses: actions/checkout@v1
+    - uses: ikuanyshbekov/app-yaml-env-compiler@v1.0
+      env:
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}

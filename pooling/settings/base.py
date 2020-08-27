@@ -98,17 +98,16 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-SENDGRID_API_KEY ='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'
+SENDGRID_API_KEY = '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'
 EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 # EMAIL_HOST = 'smtp.sendgrid.net'
 # EMAIL_HOST_USER = 'apikey' # this is exactly the value 'apikey'
 # EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 # EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL='Tapestry Pooling <algorithmicbiologics@gmail.com>'
-NEW_LAB_ALERT_EMAIL_TO='nileshbhosale215@gmail.com,nilesh@techinertia.com'
-#vyasakanksha@gmail.com
-
+DEFAULT_FROM_EMAIL = 'Tapestry Pooling <algorithmicbiologics@gmail.com>'
+NEW_LAB_ALERT_EMAIL_TO = 'nileshbhosale215@gmail.com,nilesh@techinertia.com'
+# vyasakanksha@gmail.com
 
 
 # Internationalization
@@ -129,12 +128,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 
-
 REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
     'DEFAULT_PAGINATION_CLASS':
-        'rest_framework_json_api.pagination.PageNumberPagination',
+        'rest_framework_json_api.pagination.JsonApiPageNumberPagination',
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
         'rest_framework_json_api.parsers.JSONParser',
@@ -185,16 +183,16 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 }
 
 SWAGGER_SETTINGS = {
-   'SECURITY_DEFINITIONS': {
-      'Simple JWT': {
+    'SECURITY_DEFINITIONS': {
+        'Simple JWT': {
             'type': 'apiKey',
             'name': 'Authorization',
             'in': 'header',
             'bearerFormat': 'JWT'
-      }
-   },
-    'USE_SESSION_AUTH':False,
-    'PERSIST_AUTH':True
+        }
+    },
+    'USE_SESSION_AUTH': False,
+    'PERSIST_AUTH': True
 }
 
 AUTH_USER_MODEL = 'rest.User'
@@ -217,7 +215,7 @@ JSON_API_PLURALIZE_TYPES = False
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 
-SITE_ID=1
+SITE_ID = 1
 
 CORS_ALLOW_HEADERS = (
     'x-requested-with',
@@ -228,10 +226,3 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-firephp-version',  # Added to default list
 )
-
-
-
-
-
-
-

@@ -13,3 +13,4 @@ class CityViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['country']
     search_fields = ['name']
+    pagination_class = None

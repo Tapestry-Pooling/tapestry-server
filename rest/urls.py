@@ -1,5 +1,5 @@
 from django.urls import path, include, re_path
-from rest_framework import routers
+from rest_framework_nested import routers
 from django.conf.urls import url
 from . import views
 from django.views.generic import TemplateView
@@ -10,7 +10,7 @@ from rest_auth.views import (
     PasswordResetView, PasswordResetConfirmView
 )
 
-router = routers.DefaultRouter()
+router = routers.SimpleRouter()
 
 router.register(r'lab', views.LabViewSet)
 router.register(r'machine-type', views.MachineTypeViewset)
@@ -24,8 +24,13 @@ router.register(r'user', views.UserViewSet)
 router.register(r'city', views.CityViewSet)
 router.register(r'country', views.CountryViewSet)
 
+lab_router = routers.NestedSimpleRouter(router, r'lab', lookup='lab')
+lab_router.register(r'member', views.LabMemberViewSet, basename='lab-member')
+lab_router.register(r'test', views.LabTestViewSet, basename='lab-test')
+
 urlpatterns = [
     path('', include(router.urls)),
+    path('', include(lab_router.urls)),
     url(r'^auth/login/$', views.LoginView.as_view(), name='rest_login'),
     url(r'^auth/password/reset/$', views.PasswordResetView.as_view(),
         name='rest_password_reset'),
@@ -51,6 +56,8 @@ urlpatterns = [
      name='account_email_verification_sent'),
     re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/$', VerifyEmailView.as_view(),
      name='account_confirm_email'),
+
+    url(r'upload/', views.UploadUrlView.as_view(), name='upload_url'),
 
     url(r'^', include('django.contrib.auth.urls')),
 ]
