@@ -57,7 +57,7 @@ urlpatterns = [
     re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/$', VerifyEmailView.as_view(),
      name='account_confirm_email'),
 
-    url(r'upload/', views.UploadUrlView.as_view(), name='upload_url'),
+    path('test/<int:id>/upload/', views.UploadUrlView.as_view(), name='upload_url'),
 
     url(r'^', include('django.contrib.auth.urls')),
 ]
