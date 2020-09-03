@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.utils.translation import ugettext_lazy as _
 from rest.models import Test
+from rest.util.admin_alert import test_review_alert_email_admin
 
 
 class TestWebhookSerializer(serializers.Serializer):
@@ -28,3 +29,6 @@ class TestWebhookSerializer(serializers.Serializer):
         self.test.inconclusive = self.validated_data['inconclusive']
         self.test.report_filename = self.validated_data['report_filename']
         self.test.save()
+        
+        # alert admin
+        test_review_alert_email_admin(test_id=self.test.pk)

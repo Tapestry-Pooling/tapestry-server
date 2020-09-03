@@ -59,7 +59,7 @@ urlpatterns = [
 
     path('test/<int:id>/upload/', views.UploadUrlView.as_view(), name='upload_url'),
 
-    path('test/webhook/', views.TestWebhookView.as_view(), name='test_webhook'),
+    path('test-webhook', views.TestWebhookView.as_view(), name='test_webhook'),
 
     url(r'^', include('django.contrib.auth.urls')),
 ]
