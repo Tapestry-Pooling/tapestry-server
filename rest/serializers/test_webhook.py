@@ -24,6 +24,9 @@ class TestWebhookSerializer(serializers.Serializer):
         return attrs
 
     def save(self):
+        self.test.npositive = len(self.validated_data['positive'])
+        self.test.nnegative = len(self.validated_data['negative'])
+        self.test.ninconclusive = len(self.validated_data['inconclusive'])
         self.test.positive = self.validated_data['positive']
         self.test.negative = self.validated_data['negative']
         self.test.inconclusive = self.validated_data['inconclusive']

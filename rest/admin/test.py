@@ -9,7 +9,7 @@ from django.contrib import messages
 
 
 class TestAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nsamples', 'assigned_to', 'npositive', 'ninconclusive', 'prevalence', 'status', 'set_completed', 'download_report', 'remark', )
+    list_display = ('id', 'assigned_to','nsamples', 'npositive', 'ninconclusive', 'prevalence', 'status', 'set_completed', 'download_report', )
 
     def download_report(self, obj):
         if obj.report_filename:
@@ -29,7 +29,7 @@ class TestAdmin(admin.ModelAdmin):
     def set_completed(self, obj):
         if obj.report_filename and obj.status.name != 'COMPLETED':
             return format_html(
-                '<a class="button" href="{}">SET COMPLETED</a>&nbsp;',
+                '<a class="button" href="{}">Approve</a>&nbsp;',
                 reverse('admin:set-completed', args=[obj.pk]),
             )
         return None
@@ -44,6 +44,7 @@ class TestAdmin(admin.ModelAdmin):
         )
         return HttpResponseRedirect("../../")
 
+    set_completed.short_description = "SET COMPLETED"
     set_completed.allow_tags = True
 
     def get_urls(self):

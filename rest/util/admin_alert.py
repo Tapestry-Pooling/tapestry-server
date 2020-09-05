@@ -28,4 +28,4 @@ def test_review_alert_email_admin(test_id):
             fail_silently=False
         )
     except Exception as exp:
-        logger.error('Error sending new lab alert to admin',exp)
+        logger.error('Error sending test review alert to admin',exp)
