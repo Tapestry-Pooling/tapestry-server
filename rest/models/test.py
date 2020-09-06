@@ -24,13 +24,14 @@ class Test(models.Model):
     max_poolsize = models.SmallIntegerField()
     poolingmatrix_filename = models.TextField(blank=True)
     poolingscheme_filename = models.TextField(blank=True)
-    testctresults_filename = models.TextField(blank=True)
+    testctresults_filename = models.TextField(blank=True, unique=True)
     npositive = models.SmallIntegerField(blank=True, null=True)
     ninconclusive = models.SmallIntegerField(blank=True, null=True)
     nnegative = models.SmallIntegerField(blank=True, null=True)
     positive = fields.JSONField(blank=True, null=True)
     negative = fields.JSONField(blank=True, null=True)
     inconclusive = fields.JSONField(blank=True, null=True)
+    report_filename = models.CharField(max_length=255, blank=True)
 
     def get_pooling_matrix_url(self):
         payload = {
