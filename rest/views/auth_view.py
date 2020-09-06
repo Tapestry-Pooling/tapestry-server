@@ -24,6 +24,8 @@ from rest_auth.app_settings import (
     PasswordResetSerializer, PasswordResetConfirmSerializer,
     PasswordChangeSerializer, JWTSerializer, create_token
 )
+
+from rest.models import User
 from rest_auth.models import TokenModel
 from rest_auth.utils import jwt_encode
 from rest_framework.renderers import JSONRenderer
@@ -201,6 +203,13 @@ class PasswordResetView(GenericAPIView):
         # Create a serializer with request.data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        user_count = User.object.filter(email=serializer.email).count()
+        if user_count == 0:
+            return Response(
+                {"detail": _("Email Address not registered.")},
+                status=status.DoesNotExist
+            )
 
         # serializer.save()
         opts = {
