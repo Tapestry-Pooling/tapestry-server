@@ -14,7 +14,10 @@ except ImportError:
 
 from rest_framework import serializers
 from rest.util.admin_alert import new_user_alert_email_admin
+from rest.util.user_alert import new_user_alert
+
 from django.utils.crypto import get_random_string
+
 
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
@@ -46,7 +49,6 @@ class RegisterSerializer(serializers.Serializer):
     def validate(self, data):
         return data
 
-
     def get_cleaned_data(self):
         return {
             'email': self.validated_data.get('email', ''),
@@ -62,7 +64,8 @@ class RegisterSerializer(serializers.Serializer):
         self.cleaned_data = self.get_cleaned_data()
         adapter.save_user(request, user, self)
         # save lab, add reference and set user inactive
-        lab = Lab(name=self.cleaned_data['lab'], city=self.cleaned_data['city'])
+        lab = Lab(name=self.cleaned_data['lab'],
+                  city=self.cleaned_data['city'])
         lab.save()
         user.lab_id = lab
         user.is_active = False
@@ -70,7 +73,9 @@ class RegisterSerializer(serializers.Serializer):
         user.save()
         setup_user_email(request, user, [])
 
+        # Alert the user
+        new_user_alert(user)
         # Alert the admin about the new user.
-        new_user_alert_email_admin(lab.name)
+        new_user_alert_email_admin(user)
 
         return user

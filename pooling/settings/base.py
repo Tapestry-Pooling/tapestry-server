@@ -97,7 +97,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 # EMAIL_HOST = 'smtp.sendgrid.net'
@@ -106,7 +105,7 @@ EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 # EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'Tapestry Pooling <algorithmicbiologics@gmail.com>'
-NEW_LAB_ALERT_EMAIL_TO = 'nileshbhosale215@gmail.com,nilesh@techinertia.com'
+NEW_LAB_ALERT_EMAIL_TO = 'nileshbhosale215@gmail.com'
 # vyasakanksha@gmail.com
 
 
