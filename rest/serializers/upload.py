@@ -8,7 +8,6 @@ from rest.util.util import check_and_fix_upload_file_name
 
 
 class UploadUrlSerializer(serializers.Serializer):
-    test_id = serializers.IntegerField()
     file_name = serializers.CharField(max_length=128)
 
     def __init__(self, *args, **kwargs):
@@ -18,18 +17,18 @@ class UploadUrlSerializer(serializers.Serializer):
         self.user = getattr(self.request, 'user', None)
 
     def validate(self, attrs):
-        test_id = attrs.get('test_id')
+        self.test_id = self.context.get('view').kwargs['id']
         file_name = attrs.get('file_name')
 
         # check if test_id is valid
         try:
-            self.test = Test.objects.get(pk=test_id)
+            self.test = Test.objects.get(pk=self.test_id)
         except Test.DoesNotExist:
-            raise serializers.ValidationError(_('Invalid test_id'))
+            raise serializers.ValidationError(_('Invalid test id'))
 
         # check if user and test belong to the same lab
-        if self.test.assigned_to.lab_id != self.user.lab_id:
-            raise serializers.ValidationError(_('Invalid test_id'))
+        if not self.user.is_staff and self.test.assigned_to.lab_id != self.user.lab_id:
+            raise serializers.ValidationError(_('Invalid test id'))
 
         # validate file name
         file_name_pattern = "^[\w,\s-]+\.xlsx$"
@@ -40,7 +39,7 @@ class UploadUrlSerializer(serializers.Serializer):
 
     def save(self):
         self.test.testctresults_filename = check_and_fix_upload_file_name(
-            self.validated_data['test_id'],
+            self.test_id,
             self.validated_data['file_name']
         )
         self.test.save()
