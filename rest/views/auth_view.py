@@ -208,7 +208,7 @@ class PasswordResetView(GenericAPIView):
         if user_count == 0:
             return Response(
                 {"detail": _("Email Address not registered.")},
-                status=status.DoesNotExist
+                status=status.HTTP_404_NOT_FOUND
             )
 
         # serializer.save()
