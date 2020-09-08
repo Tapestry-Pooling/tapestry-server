@@ -15,3 +15,4 @@ from .city import CityViewSet
 from .upload import *
 from .labmember import *
 from .labtest import *
+from .test_webhook import *

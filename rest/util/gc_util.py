@@ -15,6 +15,23 @@ from six.moves.urllib.parse import quote
 from google.cloud import storage
 
 
+def get_report_download_url(object_name):
+    service_account_file = os.path.join(
+        'secrets',
+        'tapestry-pooling-storage-object-viewer-credentials.json'
+    )
+    bucket_name = 'admin_results_report'
+
+    # compute signed url
+    report_download_url = generate_signed_url(
+        service_account_file,
+        bucket_name,
+        object_name,
+        expiration=86400,  # 1 day
+    )
+    return report_download_url
+
+
 def get_object_list(bucket_name):
     """Lists all the blobs in the bucket."""
     # bucket_name = "your-bucket-name"
