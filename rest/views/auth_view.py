@@ -204,7 +204,7 @@ class PasswordResetView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user_count = User.object.filter(email=serializer.email).count()
+        user_count = User.objects.filter(email=serializer.email).count()
         if user_count == 0:
             return Response(
                 {"detail": _("Email Address not registered.")},
