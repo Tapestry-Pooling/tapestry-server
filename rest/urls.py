@@ -18,7 +18,7 @@ router.register(r'test-kit', views.TestKitViewset)
 router.register(r'lab-configuration', views.LabConfigurationViewset)
 router.register(r'test', views.TestViewSet)
 router.register(r'status', views.StatusViewset)
-router.register(r'matrix',views.MatrixViewset)
+router.register(r'matrix', views.MatrixViewset)
 router.register(r'file', views.FileViewset)
 router.register(r'user', views.UserViewSet)
 router.register(r'city', views.CityViewSet)
@@ -51,11 +51,11 @@ urlpatterns = [
 
     url(r'^auth/refresh/', refresh_jwt_token),
     url(r'^inactive', views.inactive_view, name='account_inactive'),
-    
+
     re_path(r'^account-confirm-email/', VerifyEmailView.as_view(),
-     name='account_email_verification_sent'),
+            name='account_email_verification_sent'),
     re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/$', VerifyEmailView.as_view(),
-     name='account_confirm_email'),
+            name='account_confirm_email'),
 
     path('test/<int:id>/upload/', views.UploadUrlView.as_view(), name='upload_url'),
 

@@ -18,17 +18,20 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = User
-    list_display = ('email', 'is_staff', 'is_active', 'designation', 'lab_id', 'is_lab_config_added', 'activate')
+    list_display = ('email', 'is_staff', 'is_active', 'designation',
+                    'lab_id', 'is_lab_config_added', 'activate')
     list_filter = ('email', 'is_staff', 'is_active',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Permissions', {'fields': ('is_superuser', 'is_staff', 'is_active')}),
-        ('Details', {'fields': ('first_name', 'last_name', 'phone_number', 'designation', 'lab_id')})
+        ('Details', {'fields': ('first_name', 'last_name',
+                                'phone_number', 'designation', 'lab_id')})
     )
     add_fieldsets = (
         (None, {'fields': ('email', 'password1', 'password2')}),
         ('Permissions', {'fields': ('is_superuser', 'is_staff', 'is_active')}),
-        ('Details', {'fields': ('first_name', 'last_name', 'phone_number', 'designation', 'lab_id')})
+        ('Details', {'fields': ('first_name', 'last_name',
+                                'phone_number', 'designation', 'lab_id')})
     )
     search_fields = ('email',)
     ordering = ('email',)
@@ -74,7 +77,8 @@ class CustomUserAdmin(UserAdmin):
             'from_email': settings.DEFAULT_FROM_EMAIL,
             'request': request,
             'subject_template_name': 'registration/set_password_subject.txt',
-            'email_template_name': 'registration/set_password.html'
+            'email_template_name': 'registration/set_password.html',
+            'html_email_template_name': 'registration/set_password.html'
         }
         reset_form.save(**opts)
 

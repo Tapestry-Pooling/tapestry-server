@@ -364,7 +364,7 @@
                                               display: inline;
                                               font-size: 16px;
                                             "
-                                            >Dear {{ user.first_name }},</span
+                                            >Dear Admin,</span
                                           >
                                         </div>
                                         <div></div>
@@ -410,7 +410,7 @@
                                               white-space: pre-wrap;
                                               font-size: 24px;
                                             "
-                                            >Welcome to Tapestry Pooling!</span
+                                            >You've a new sign-up.</span
                                           >
                                         </div>
                                         <div></div>
@@ -452,8 +452,8 @@
                                           "
                                         >
                                           <span
-                                            >We have created your account with
-                                            following information</span
+                                            >The sign-up details are as follows
+                                            :</span
                                           >
                                         </div>
                                         <div
@@ -471,20 +471,23 @@
                                           "
                                         >
                                           <span style="white-space: pre-wrap"
-                                            >Lab Name:</span
+                                            >Email Address:</span
                                           >
+                                          <span>{{ user.email }}</span><br />
                                           <span style="white-space: pre-wrap"
-                                            >{{ user.lab_id.name }}</span
+                                            >Name:</span
+                                          >
+                                          <span>{{ user.first_name }}</span
                                           ><br />
                                           <span style="white-space: pre-wrap"
-                                            >Lab Manager: {{ user.first_name }}
-                                            <br /> </span
+                                            >Lab name:{{ user.lab_id.name }} </span
                                           ><br />
-                                          <span
-                                            >You can always add other members of
-                                            your lab from your profile, create a
-                                            pool test, view results.&nbsp;</span
-                                          >
+                                          <span style="white-space: pre-wrap"
+                                            >Lab City: {{ user.lab_id.city }} </span
+                                          ><br />
+                                          <span style="white-space: pre-wrap"
+                                            >Time stamp:{{ user.date_joined }} </span
+                                          ><br />
                                         </div>
                                         <div></div>
                                       </div>
@@ -533,7 +536,7 @@
                                               "
                                             >
                                               <a
-                                                href="{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}"
+                                                href="_blank"
                                                 style="
                                                   background-color: #1ec491;
                                                   border: 0px solid #333333;
@@ -552,57 +555,12 @@
                                                   border-style: solid;
                                                 "
                                                 target="_blank"
-                                                >Create password</a
+                                                >View All</a
                                               >
                                             </td>
                                           </tr>
                                         </tbody>
                                       </table>
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                              <table
-                                class="module"
-                                role="module"
-                                data-type="text"
-                                border="0"
-                                cellpadding="0"
-                                cellspacing="0"
-                                width="100%"
-                                style="table-layout: fixed"
-                                data-muid="a13a84a7-116d-4a93-8864-03f71f40865e.1.3"
-                                data-mc-module-version="2019-10-22"
-                              >
-                                <tbody>
-                                  <tr>
-                                    <td
-                                      style="
-                                        padding: 18px 46px 18px 46px;
-                                        line-height: 22px;
-                                        text-align: inherit;
-                                      "
-                                      height="100%"
-                                      valign="top"
-                                      bgcolor=""
-                                      role="module-content"
-                                    >
-                                      <div>
-                                        <div
-                                          style="
-                                            font-family: inherit;
-                                            text-align: inherit;
-                                          "
-                                        >
-                                          <span
-                                            >To sign-in use the registered email
-                                            {{ user.email }} Click on the link
-                                            below &nbsp;to set your password and
-                                            start using the App.</span
-                                          >
-                                        </div>
-                                        <div></div>
-                                      </div>
                                     </td>
                                   </tr>
                                 </tbody>

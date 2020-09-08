@@ -4,7 +4,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
-SENDGRID_ECHO_TO_STDOUT=False
+SENDGRID_ECHO_TO_STDOUT = False
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -21,5 +21,3 @@ DATABASES = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
-
-

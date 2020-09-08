@@ -1,3 +1,7 @@
+from allauth.account.models import EmailAddress
+from rest_framework.exceptions import ValidationError
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_decode as uid_decoder
 from django.contrib.auth import (
     login as django_login,
     logout as django_logout
@@ -20,6 +24,8 @@ from rest_auth.app_settings import (
     PasswordResetSerializer, PasswordResetConfirmSerializer,
     PasswordChangeSerializer, JWTSerializer, create_token
 )
+
+from rest.models import User
 from rest_auth.models import TokenModel
 from rest_auth.utils import jwt_encode
 from rest_framework.renderers import JSONRenderer
@@ -30,11 +36,6 @@ sensitive_post_parameters_m = method_decorator(
     )
 )
 
-from django.utils.http import urlsafe_base64_decode as uid_decoder
-from django.utils.encoding import force_text
-from rest_framework.exceptions import ValidationError
-
-from allauth.account.models import EmailAddress
 
 # Get the UserModel
 UserModel = get_user_model()
@@ -100,7 +101,8 @@ class LoginView(GenericAPIView):
             from rest_framework_jwt.settings import api_settings as jwt_settings
             if jwt_settings.JWT_AUTH_COOKIE:
                 from datetime import datetime
-                expiration = (datetime.utcnow() + jwt_settings.JWT_EXPIRATION_DELTA)
+                expiration = (datetime.utcnow() +
+                              jwt_settings.JWT_EXPIRATION_DELTA)
                 response.set_cookie(jwt_settings.JWT_AUTH_COOKIE,
                                     self.token,
                                     expires=expiration,
@@ -192,15 +194,36 @@ class PasswordResetView(GenericAPIView):
     serializer_class = PasswordResetSerializer
     permission_classes = (AllowAny,)
 
+    def get_email_options(self):
+        return {
+            "html_email_template_name": 'registration/password_reset_email_new.html'
+        }
+
     def post(self, request, *args, **kwargs):
         # Create a serializer with request.data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        serializer.save()
+        user_count = User.object.filter(email=serializer.email).count()
+        if user_count == 0:
+            return Response(
+                {"detail": _("Email Address not registered.")},
+                status=status.DoesNotExist
+            )
+
+        # serializer.save()
+        opts = {
+            'use_https': request.is_secure(),
+            'from_email': getattr(settings, 'DEFAULT_FROM_EMAIL'),
+            'request': request,
+            'subject_template_name': 'registration/reset_password_subject.txt',
+            'html_email_template_name': 'registration/reset_password_email.html'
+        }
+
+        serializer.reset_form.save(**opts)
         # Return the success message with OK HTTP status
         return Response(
-            {"detail": _("Password reset e-mail has been sent.")},
+            {"detail": _("Password reset e-mail has been sent 2.")},
             status=status.HTTP_200_OK
         )
 
@@ -233,7 +256,7 @@ class PasswordResetConfirmView(GenericAPIView):
             user = UserModel._default_manager.get(pk=uid)
 
             # Update email address as verified for first time users.
-            email_address = EmailAddress.objects.get(email= user.email)
+            email_address = EmailAddress.objects.get(email=user.email)
             email_address.verified = True
             email_address.save()
 
@@ -262,7 +285,8 @@ class PasswordResetConfirmView(GenericAPIView):
             from rest_framework_jwt.settings import api_settings as jwt_settings
             if jwt_settings.JWT_AUTH_COOKIE:
                 from datetime import datetime
-                expiration = (datetime.utcnow() + jwt_settings.JWT_EXPIRATION_DELTA)
+                expiration = (datetime.utcnow() +
+                              jwt_settings.JWT_EXPIRATION_DELTA)
                 response.set_cookie(jwt_settings.JWT_AUTH_COOKIE,
                                     token,
                                     expires=expiration,

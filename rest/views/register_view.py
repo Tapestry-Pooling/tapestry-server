@@ -29,6 +29,8 @@ from rest_auth.registration.serializers import (VerifyEmailSerializer,
                                                 SocialConnectSerializer)
 from rest_auth.utils import jwt_encode
 from rest_auth.views import LoginView
+
+
 from rest_auth.registration.app_settings import RegisterSerializer, register_permission_classes
 from rest_framework.renderers import JSONRenderer
 sensitive_post_parameters_m = method_decorator(
@@ -98,4 +100,3 @@ class VerifyEmailView(APIView, ConfirmEmailView):
         confirmation = self.get_object()
         confirmation.confirm(self.request)
         return Response({'detail': _('ok')}, status=status.HTTP_200_OK)
-
