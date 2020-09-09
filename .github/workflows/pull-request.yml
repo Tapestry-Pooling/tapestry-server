@@ -2,14 +2,14 @@ name: Build
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ develop ]
 
 env:
   DEBUG: False
   SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
 
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
