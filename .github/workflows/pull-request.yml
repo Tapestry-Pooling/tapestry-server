@@ -36,13 +36,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Decrypt service account secret
-      run: ./.github/scripts/decrypt_secrets.sh
+      run: |
+        mkdir secrets
+        gpg --quiet --batch --yes --decrypt --passphrase="$CLOUD_STORAGE_SECRET" \
+        --output secrets/tapestry-pooling-cloud-storage-credentials.json \
+        tapestry-pooling-cloud-storage-credentials-stage.json.gpg
       env:
-        CLOUD_STORAGE_VIEW_SECRET: ${{ secrets.CLOUD_STORAGE_VIEW_SECRET }}
-        CLOUD_STORAGE_CREATE_SECRET: ${{ secrets.CLOUD_STORAGE_CREATE_SECRET }}
+        CLOUD_STORAGE_SECRET: ${{ secrets.CLOUD_STORAGE_SECRET_STAGE }}
     - name: Run migrations and collect static files
       run: |
         python manage.py migrate
         python manage.py collectstatic --noinput
       env:
-        GOOGLE_APPLICATION_CREDENTIALS: secrets/tapestry-pooling-storage-object-viewer-credentials.json
+        GOOGLE_APPLICATION_CREDENTIALS: secrets/tapestry-pooling-cloud-storage-credentials.json

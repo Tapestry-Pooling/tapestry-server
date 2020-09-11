@@ -5,16 +5,16 @@ env: standard
 instance_class: F2
 
 env_variables:
-  DJANGO_ENV: "stage"
+  DJANGO_ENV: $DJANGO_ENV
   # the secret key used for the Django app (from PROJECT-DIRECTORY/settings.py)
-  SECRET_KEY: "e008b206-806b-433d-99b2-e4cffea8f69f"
-  DEBUG: "False" # always False for deployment
+  SECRET_KEY: $SECRET_KEY
+  DEBUG: False # always False for deployment
 
-  DB_HOST: "/cloudsql/tapestry-pooling-284109:europe-west1:postgres"
+  DB_HOST: /cloudsql/$CLOUD_SQL_INSTANCE
   DB_PORT: "5432" # PostgreSQL port
-  DB_NAME: "pooling"
-  DB_USER: "tapestry-staging" # either 'postgres' (default) or one you created on the PostgreSQL instance page
-  DB_PASSWORD: "pooling@123"
+  DB_NAME: $DB_NAME
+  DB_USER: $DB_USER # either 'postgres' (default) or one you created on the PostgreSQL instance page
+  DB_PASSWORD: $DB_PASSWORD
   SENDGRID_API_KEY: $SENDGRID_API_KEY
 
 handlers:
@@ -37,4 +37,4 @@ automatic_scaling:
 network: {}
 
 beta_settings:
-  cloud_sql_instances: tapestry-pooling-284109:europe-west1:postgres
+  cloud_sql_instances: $CLOUD_SQL_INSTANCE
