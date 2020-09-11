@@ -15,12 +15,13 @@ from six.moves.urllib.parse import quote
 from google.cloud import storage
 
 
+service_account_file = os.path.join(
+    'secrets',
+    'tapestry-pooling-cloud-storage-credentials.json'
+)
+
 def get_report_download_url(object_name):
-    service_account_file = os.path.join(
-        'secrets',
-        'tapestry-pooling-storage-object-viewer-credentials.json'
-    )
-    bucket_name = 'admin_results_report'
+    bucket_name = 'admin_results_report_prod' if os.environ.get('DJANGO_ENV') == 'prod' else 'admin_results_report'
 
     # compute signed url
     report_download_url = generate_signed_url(
@@ -45,15 +46,16 @@ def get_object_list(bucket_name):
 
 
 def get_pooling_matrix_download_url(payload=None, object_name=None):
-    url = "https://us-central1-tapestry-pooling-284109.cloudfunctions.net/tapestry-matrix-generation"
+    if os.environ.get('DJANGO_ENV') == 'prod':
+        url = 'https://us-central1-tapestry-pooling-f9f8e.cloudfunctions.net/tapestry-matrix-generation'
+    else:
+        url = 'https://us-central1-tapestry-pooling-284109.cloudfunctions.net/tapestry-matrix-generation'
+
     headers = {
         'Content-Type': 'application/json'
     }
-    service_account_file = os.path.join(
-        'secrets',
-        'tapestry-pooling-storage-object-viewer-credentials.json'
-    )
-    bucket_name = 'pooling_scheme_files'
+
+    bucket_name = 'pooling_scheme_files_prod' if os.environ.get('DJANGO_ENV') == 'prod' else 'pooling_scheme_files'
 
     if object_name is None:
         # request google cloud function
@@ -72,14 +74,10 @@ def get_pooling_matrix_download_url(payload=None, object_name=None):
 
 
 def get_ct_value_upload_url(object_name):
-    service_account_file = os.path.join(
-        'secrets',
-        'tapestry-pooling-storage-object-creator-credentials.json'
-    )
     #headers = {
     #    'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     #}
-    bucket_name = 'pooling_results'
+    bucket_name = 'pooling_results_prod' if os.environ.get('DJANGO_ENV') == 'prod' else 'pooling_results'
 
     upload_signed_url = generate_signed_url(
         service_account_file,
