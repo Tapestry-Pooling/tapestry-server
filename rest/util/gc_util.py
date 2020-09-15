@@ -21,7 +21,7 @@ service_account_file = os.path.join(
 )
 
 def get_report_download_url(object_name):
-    bucket_name = 'admin_results_report_prod' if os.environ.get('DJANGO_ENV') == 'prod' else 'admin_results_report'
+    bucket_name = os.environ.get('RESULT_REPORT_BUCKET')
 
     # compute signed url
     report_download_url = generate_signed_url(
@@ -46,20 +46,17 @@ def get_object_list(bucket_name):
 
 
 def get_pooling_matrix_download_url(payload=None, object_name=None):
-    if os.environ.get('DJANGO_ENV') == 'prod':
-        url = 'https://us-central1-tapestry-pooling-f9f8e.cloudfunctions.net/tapestry-matrix-generation'
-    else:
-        url = 'https://us-central1-tapestry-pooling-284109.cloudfunctions.net/tapestry-matrix-generation'
+    pooling_function_url = os.environ.get('POOLING_FUNCTION_URL')
 
     headers = {
         'Content-Type': 'application/json'
     }
 
-    bucket_name = 'pooling_scheme_files_prod' if os.environ.get('DJANGO_ENV') == 'prod' else 'pooling_scheme_files'
+    bucket_name = os.environ.get('POOLING_SCHEME_BUCKET')
 
     if object_name is None:
         # request google cloud function
-        response = requests.request("POST", url, headers=headers, data=payload)
+        response = requests.request("POST", pooling_function_url, headers=headers, data=payload)
         if response.status_code == 200:
             object_name = json.loads(response.text.encode('utf8'))['filename']
 
@@ -77,7 +74,7 @@ def get_ct_value_upload_url(object_name):
     #headers = {
     #    'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     #}
-    bucket_name = 'pooling_results_prod' if os.environ.get('DJANGO_ENV') == 'prod' else 'pooling_results'
+    bucket_name = os.environ.get('POOLING_RESULT_BUCKET')
 
     upload_signed_url = generate_signed_url(
         service_account_file,
@@ -174,17 +171,3 @@ def generate_signed_url(service_account_file, bucket_name, object_name,
         scheme_and_host, canonical_uri, canonical_query_string, signature)
 
     return signed_url
-
-
-if __name__ == '__main__':
-    payload = {
-        "nsamples": 100,
-        "prevalence": 7,
-        "genes": "orf, rdrp",
-        "testid": 23432,
-        "lab_name": "test_lab"
-    }
-    # payload = json.dumps(payload)
-    # print(get_pooling_matrix_download_url(payload))
-    # print(get_ct_value_upload_url("Tapestry-pooling-Lab-2.xlsx"))
-    print(get_object_list('kirkman_matrices'))
