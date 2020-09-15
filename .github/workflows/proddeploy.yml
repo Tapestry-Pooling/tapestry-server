@@ -2,17 +2,17 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ master ]
 
 env:
-  DJANGO_ENV: stage
+  DJANGO_ENV: prod
   DEBUG: False
   SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-  POOLING_SCHEME_BUCKET: pooling_scheme_files
-  POOLING_RESULT_BUCKET: pooling_results
-  KIRKMAN_MATRIX_BUCKET: kirkman_matrices
-  RESULT_REPORT_BUCKET: admin_results_report
-  POOLING_FUNCTION_URL: 'https://us-central1-tapestry-pooling-284109.cloudfunctions.net/tapestry-matrix-generation'
+  POOLING_SCHEME_BUCKET: pooling_scheme_files_prod
+  POOLING_RESULT_BUCKET: pooling_results_prod
+  KIRKMAN_MATRIX_BUCKET: kirkman_matrices_prod
+  RESULT_REPORT_BUCKET: admin_results_report_prod
+  POOLING_FUNCTION_URL: https://us-central1-tapestry-pooling-f9f8e.cloudfunctions.net/tapestry-matrix-generation
 
 jobs:
   build-deploy:
@@ -36,21 +36,21 @@ jobs:
       run: |
         echo "$(envsubst < app.yaml)" > app.yaml
       env:
-        DJANGO_ENV: stage
+        DJANGO_ENV: prod
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        CLOUD_SQL_INSTANCE: ${{ secrets.CLOUD_SQL_INSTANCE_STAGE }}
-        DB_NAME: ${{ secrets.DB_NAME_STAGE }}
-        DB_USER: ${{ secrets.DB_USER_STAGE }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD_STAGE }}
+        CLOUD_SQL_INSTANCE: ${{ secrets.CLOUD_SQL_INSTANCE }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
     - name: Decrypt service account secret
       run: |
         mkdir secrets
         gpg --quiet --batch --yes --decrypt --passphrase="$CLOUD_STORAGE_SECRET" \
         --output secrets/tapestry-pooling-cloud-storage-credentials.json \
-        tapestry-pooling-cloud-storage-credentials-stage.json.gpg
+        tapestry-pooling-cloud-storage-credentials.json.gpg
       env:
-        CLOUD_STORAGE_SECRET: ${{ secrets.CLOUD_STORAGE_SECRET_STAGE }}
+        CLOUD_STORAGE_SECRET: ${{ secrets.CLOUD_STORAGE_SECRET }}
     # get the IP address of hosted-runner
     - name: Public IP
       id: ip
@@ -59,8 +59,8 @@ jobs:
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
-        project_id: ${{ secrets.PROJECT_ID_STAGE }}
-        service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_STAGE }}
+        project_id: ${{ secrets.PROJECT_ID }}
+        service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
     # whitelist the hosted-runner IP address
     - name: Whitelist IP
       run: |
@@ -71,10 +71,10 @@ jobs:
         python manage.py migrate
         python manage.py collectstatic --noinput
       env:
-        DB_NAME: ${{ secrets.DB_NAME_STAGE }}
-        DB_USER: ${{ secrets.DB_USER_STAGE }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD_STAGE }}
-        DB_HOST: ${{ secrets.DB_HOST_STAGE }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_HOST: ${{ secrets.DB_HOST }}
         DB_PORT: 5432
         GOOGLE_APPLICATION_CREDENTIALS: secrets/tapestry-pooling-cloud-storage-credentials.json
     # clear Whitelist
