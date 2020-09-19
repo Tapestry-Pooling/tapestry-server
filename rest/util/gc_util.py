@@ -45,7 +45,7 @@ def get_object_list(bucket_name):
 
 
 def get_pooling_matrix_download_url(payload=None, object_name=None):
-    url = "https://us-central1-tapestry-pooling-284109.cloudfunctions.net/tapestry-matrix-generation"
+    url = "https://us-central1-tapestry-pooling-284109.cloudfunctions.net/generatePoolingMatrix"
     headers = {
         'Content-Type': 'application/json'
     }
