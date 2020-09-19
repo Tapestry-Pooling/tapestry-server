@@ -41,9 +41,10 @@ class Test(models.Model):
             "genes": ", ".join(self.test_kit.gene_type),
             "testid": self.id,
             "lab_name": self.assigned_to.lab_id.__str__()
+            "poolingscheme_filename": self.poolingscheme_filename
         }
         return get_pooling_matrix_download_url(payload=json.dumps(payload))
 
     def save(self, *args, **kwargs):
-        self.poolingscheme_filename, self.pooling_matrix_download_url = self.get_pooling_matrix_url()
+        self.poolingmatrix_filename, self.pooling_matrix_download_url = self.get_pooling_matrix_url()
         super(Test, self).save(*args, **kwargs)
