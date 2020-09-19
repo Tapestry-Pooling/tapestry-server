@@ -1,8 +1,8 @@
 from .base import *
 
 DEBUG = False
-
-ALLOWED_HOSTS = ['', ]
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'tapestry-pooling-f9f8e.ew.r.appspot.com']
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -10,13 +10,10 @@ ALLOWED_HOSTS = ['', ]
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pooling',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['DB_PASSWORD'],
+        'HOST': os.environ['DB_HOST'],
+        'PORT': os.environ['DB_PORT'],
     }
 }
-
-
-

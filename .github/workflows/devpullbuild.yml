@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+env:
+  DEBUG: False
+  SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+  POOLING_SCHEME_BUCKET: pooling_scheme_files
+  POOLING_RESULT_BUCKET: pooling_results
+  KIRKMAN_MATRIX_BUCKET: kirkman_matrices
+  RESULT_REPORT_BUCKET: admin_results_report
+  POOLING_FUNCTION_URL: 'https://us-central1-tapestry-pooling-284109.cloudfunctions.net/tapestry-matrix-generation'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8]
+    services:
+      postgres:
+        image: postgres:10.8
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: pooling
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Decrypt service account secret
+      run: |
+        mkdir secrets
+        gpg --quiet --batch --yes --decrypt --passphrase="$CLOUD_STORAGE_SECRET" \
+        --output secrets/tapestry-pooling-cloud-storage-credentials.json \
+        tapestry-pooling-cloud-storage-credentials-stage.json.gpg
+      env:
+        CLOUD_STORAGE_SECRET: ${{ secrets.CLOUD_STORAGE_SECRET_STAGE }}
+    - name: Run migrations and collect static files
+      run: |
+        python manage.py migrate
+        python manage.py collectstatic --noinput
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: secrets/tapestry-pooling-cloud-storage-credentials.json
