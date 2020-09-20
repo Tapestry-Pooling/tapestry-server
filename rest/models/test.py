@@ -40,7 +40,7 @@ class Test(models.Model):
             "prevalence": self.prevalence,
             "genes": ", ".join(self.test_kit.gene_type),
             "testid": self.id,
-            "lab_name": self.assigned_to.lab_id.__str__()
+            "lab_name": self.assigned_to.lab_id.__str__(),
             "poolingscheme_filename": self.poolingscheme_filename
         }
         return get_pooling_matrix_download_url(payload=json.dumps(payload))
