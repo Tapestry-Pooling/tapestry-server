@@ -46,5 +46,6 @@ class Test(models.Model):
         return get_pooling_matrix_download_url(payload=json.dumps(payload))
 
     def save(self, *args, **kwargs):
-        self.poolingmatrix_filename, self.pooling_matrix_download_url = self.get_pooling_matrix_url()
+        if not self.pk:
+            self.poolingmatrix_filename, self.pooling_matrix_download_url = self.get_pooling_matrix_url()
         super(Test, self).save(*args, **kwargs)
