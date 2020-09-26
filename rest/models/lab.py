@@ -7,4 +7,4 @@ class Lab(models.Model):
     country = models.CharField(max_length = 50)
 
     def __str__(self):
-        return "%s,%s,%s" %(self.name, self.city, self.country)
+        return "%s,%s" %(self.name, self.city)
