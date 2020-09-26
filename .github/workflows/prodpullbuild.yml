@@ -11,7 +11,7 @@ env:
   POOLING_RESULT_BUCKET: pooling_results_prod
   KIRKMAN_MATRIX_BUCKET: kirkman_matrices_prod
   RESULT_REPORT_BUCKET: admin_results_report_prod
-  POOLING_FUNCTION_URL: https://us-central1-tapestry-pooling-f9f8e.cloudfunctions.net/tapestry-matrix-generation
+  POOLING_FUNCTION_URL: https://us-central1-tapestry-pooling-284109.cloudfunctions.net/generatePoolingMatrix
 
 jobs:
   build:
