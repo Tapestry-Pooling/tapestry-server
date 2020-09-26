@@ -3,6 +3,7 @@ from django.contrib.postgres import fields
 from .user import User
 from .status import Status
 from .test_kit import TestKit
+from .lab_configuration import LabConfiguration
 from .machine_type import MachineType
 from rest.util.gc_util import get_pooling_matrix_download_url
 import json
@@ -40,11 +41,19 @@ class Test(models.Model):
             "prevalence": self.prevalence,
             "genes": ", ".join(self.test_kit.gene_type),
             "testid": self.id,
-            "lab_name": self.assigned_to.lab_id.__str__()
-            "poolingscheme_filename": self.poolingscheme_filename
+            "lab_name": self.assigned_to.lab_id.__str__(),
+            "poolingmatrix_filename": self.poolingmatrix_filename
         }
-        return get_pooling_matrix_download_url(payload=json.dumps(payload))
+        try:
+            resp = get_pooling_matrix_download_url(payload=json.dumps(payload))
+        except Exception as e:
+            raise(e)
+        return resp
 
     def save(self, *args, **kwargs):
-        self.poolingmatrix_filename, self.pooling_matrix_download_url = self.get_pooling_matrix_url()
+        if not self.poolingmatrix_filename or self.poolingmatrix_filename is "":
+            self.poolingmatrix_filename = LabConfiguration.objects.get(lab_id=self.assigned_to.lab_id).poolingmatrix_filename
+
+        self.poolingscheme_filename, self.pooling_matrix_download_url = self.get_pooling_matrix_url()
+        self.report_filename = self.poolingscheme_filename
         super(Test, self).save(*args, **kwargs)
