@@ -1,6 +1,7 @@
 from django.utils.html import format_html
 from django.contrib import admin
 from rest.models import Test, Status
+from rest.forms import TestForm
 from rest.util.gc_util import get_report_download_url
 from django.urls import reverse
 from django.conf.urls import url
@@ -9,6 +10,9 @@ from django.contrib import messages
 
 
 class TestAdmin(admin.ModelAdmin):
+    add_form = TestForm
+    form = TestForm
+    model = Test
     list_display = ('id', 'assigned_to','nsamples', 'npositive', 'ninconclusive', 'prevalence', 'status', 'set_completed', 'download_report', )
 
     def download_report(self, obj):
