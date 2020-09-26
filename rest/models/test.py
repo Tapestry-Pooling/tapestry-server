@@ -51,7 +51,7 @@ class Test(models.Model):
         return resp
 
     def save(self, *args, **kwargs):
-        if not self.poolingmatrix_filename or self.poolingmatrix_filename is "":
+        if not self.poolingmatrix_filename or self.poolingmatrix_filename == "":
             self.poolingmatrix_filename = LabConfiguration.objects.get(lab_id=self.assigned_to.lab_id).poolingmatrix_filename
 
         self.poolingscheme_filename, self.pooling_matrix_download_url = self.get_pooling_matrix_url()
