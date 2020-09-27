@@ -14,7 +14,7 @@ class Test(models.Model):
     status = models.ForeignKey(
         Status,
         on_delete=models.CASCADE,
-        default=Status.objects.get(pk=1),
+        default=Status.objects.get(name='qPCR result pending'),
         blank=True,
         null=True
     )
