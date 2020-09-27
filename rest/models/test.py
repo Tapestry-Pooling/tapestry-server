@@ -5,8 +5,6 @@ from .status import Status
 from .test_kit import TestKit
 from .lab_configuration import LabConfiguration
 from .machine_type import MachineType
-from rest.util.gc_util import get_pooling_matrix_download_url
-import json
 
 
 class Test(models.Model):
@@ -34,25 +32,9 @@ class Test(models.Model):
     negative = fields.JSONField(blank=True, null=True)
     inconclusive = fields.JSONField(blank=True, null=True)
     report_filename = models.CharField(max_length=255, blank=True)
-
-    def get_pooling_matrix_url(self):
-        payload = {
-            "nsamples": self.nsamples,
-            "prevalence": self.prevalence,
-            "genes": ", ".join(self.test_kit.gene_type),
-            "testid": self.id,
-            "lab_name": self.assigned_to.lab_id.__str__(),
-            "poolingmatrix_filename": self.poolingmatrix_filename
-        }
-        try:
-            resp = get_pooling_matrix_download_url(payload=json.dumps(payload))
-        except Exception as e:
-            raise(e)
-        return resp
+    pooling_matrix_download_url = None
 
     def save(self, *args, **kwargs):
         if not self.poolingmatrix_filename or self.poolingmatrix_filename == "":
             self.poolingmatrix_filename = LabConfiguration.objects.get(lab_id=self.assigned_to.lab_id).poolingmatrix_filename
-
-        self.poolingscheme_filename, self.pooling_matrix_download_url = self.get_pooling_matrix_url()
         super(Test, self).save(*args, **kwargs)
