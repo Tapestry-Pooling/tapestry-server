@@ -364,7 +364,7 @@
                                               display: inline;
                                               font-size: 16px;
                                             "
-                                            >Dear Admin,</span
+                                            >Dear {{ user.first_name }},</span
                                           >
                                         </div>
                                         <div></div>
@@ -405,12 +405,8 @@
                                             text-align: inherit;
                                           "
                                         >
-                                          <span
-                                            style="
-                                              white-space: pre-wrap;
-                                              font-size: 24px;
-                                            "
-                                            >You've a new sign-up.</span
+                                          <span style="font-size: 24px"
+                                            >Your results are Ready!</span
                                           >
                                         </div>
                                         <div></div>
@@ -452,9 +448,18 @@
                                           "
                                         >
                                           <span
-                                            >The sign-up details are as follows
-                                            :</span
-                                          >
+                                            >Positive: {positive}
+                                          </span>
+                                          <br />
+                                          <br />
+                                          <span
+                                            >Inconclusive: {inconclusive}
+                                          </span>
+                                          <br />
+                                          <br />
+                                          <span
+                                            >Click below to view detailed results:
+                                          </span>
                                         </div>
                                         <div
                                           style="
@@ -464,31 +469,7 @@
                                         >
                                           <br />
                                         </div>
-                                        <div
-                                          style="
-                                            font-family: inherit;
-                                            text-align: inherit;
-                                          "
-                                        >
-                                          <span style="white-space: pre-wrap"
-                                            >Email Address:</span
-                                          >
-                                          <span>{{ user.email }}</span><br />
-                                          <span style="white-space: pre-wrap"
-                                            >Name:</span
-                                          >
-                                          <span>{{ user.first_name }}</span
-                                          ><br />
-                                          <span style="white-space: pre-wrap"
-                                            >Lab name:{{ user.lab_id.name }} </span
-                                          ><br />
-                                          <span style="white-space: pre-wrap"
-                                            >Lab City: {{ user.lab_id.city }} </span
-                                          ><br />
-                                          <span style="white-space: pre-wrap"
-                                            >Time stamp:{{ user.date_joined }} </span
-                                          ><br />
-                                        </div>
+
                                         <div></div>
                                       </div>
                                     </td>
@@ -536,8 +517,8 @@
                                               "
                                             >
                                               <a
-                                                href="_blank"
-                                                style="
+                                              href=""
+                                              style="
                                                   background-color: #1ec491;
                                                   border: 0px solid #333333;
                                                   border-color: #333333;
@@ -555,7 +536,7 @@
                                                   border-style: solid;
                                                 "
                                                 target="_blank"
-                                                >View All</a
+                                                >View Results</a
                                               >
                                             </td>
                                           </tr>
@@ -641,14 +622,15 @@
                                             text-align: inherit;
                                           "
                                         >
-                                            <a
+                                          <a
                                             href="https://www.tapestry-pooling.com/"
                                             target="_blank"
                                             style="
                                               white-space: pre-wrap;
                                               color: #1ec491;
                                             "
-                                            >Visit Website</a>
+                                            >Visit Website</a
+                                          ><span>
                                             to learn more about Tapestry
                                             Pooling. Write to us at </span
                                           ><span style="color: #1ec491"
@@ -663,6 +645,7 @@
                                   </tr>
                                 </tbody>
                               </table>
+
                               <table
                                 class="wrapper"
                                 role="module"
