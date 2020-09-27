@@ -14,10 +14,10 @@ class Test(models.Model):
     status = models.ForeignKey(
         Status,
         on_delete=models.CASCADE,
+        default=1,
         blank=True,
         null=True
     )
-
     nsamples = models.SmallIntegerField()
     prevalence = models.FloatField()
     remark = models.TextField(blank=True)
