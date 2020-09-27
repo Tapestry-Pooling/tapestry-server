@@ -1,1 +1,1 @@
-Welcome to {{ site_name }}
+Welcome to Tapestry Pooling
