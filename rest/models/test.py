@@ -55,5 +55,4 @@ class Test(models.Model):
             self.poolingmatrix_filename = LabConfiguration.objects.get(lab_id=self.assigned_to.lab_id).poolingmatrix_filename
 
         self.poolingscheme_filename, self.pooling_matrix_download_url = self.get_pooling_matrix_url()
-        self.report_filename = self.poolingscheme_filename
         super(Test, self).save(*args, **kwargs)
