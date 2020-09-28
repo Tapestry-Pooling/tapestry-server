@@ -39,3 +39,17 @@ def test_review_alert_email_admin(test_id):
         )
     except Exception as exp:
         logger.error('Error sending test review alert to admin',exp)
+
+def file_error_alert_email_admin(filename, error):
+    logger = logging.getLogger(__name__)
+    try:
+        send_mail(
+            'File Upload Error',
+            'Please review the file: %d with' % filename ,
+            'Error: %d', file_error_alert_email_admin,
+            settings.DEFAULT_FROM_EMAIL,
+            settings.NEW_LAB_ALERT_EMAIL_TO.split(','),
+            fail_silently=False
+        )
+    except Exception as exp:
+        logger.error('Error sending test review alert to admin',exp)
