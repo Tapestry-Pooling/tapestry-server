@@ -29,7 +29,7 @@ def new_user_alert(user):
         logger.error('Error sending new user alert to user')
 
 
-def test_result_alert_user(user, positive, inconclusive):
+def test_result_alert_user(user, test_id, positive, inconclusive):
     logger = logging.getLogger(__name__)
     try:
         current_site = Site.objects.get_current()
