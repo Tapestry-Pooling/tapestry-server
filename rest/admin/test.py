@@ -47,7 +47,7 @@ class TestAdmin(admin.ModelAdmin):
         # alert user
         positive_sample_list = [entry['sample'] for entry in test.positive]
         inconclusive_sample_list = [entry['sample'] for entry in test.inconclusive]
-        test_result_alert_user(test.assigned_to, positive_sample_list, inconclusive_sample_list)
+        test_result_alert_user(test.assigned_to, test.pk, positive_sample_list, inconclusive_sample_list)
 
         messages.info(
             request,

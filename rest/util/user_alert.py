@@ -29,12 +29,12 @@ def new_user_alert(user):
         logger.error('Error sending new user alert to user')
 
 
-def test_result_alert_user(user, positive, inconclusive):
+def test_result_alert_user(user, test_id, positive, inconclusive):
     logger = logging.getLogger(__name__)
     try:
         subject = render_to_string('registration/results_email_subject.txt')
         html_body = render_to_string(
-            'registration/results_email.html', {'user': user, 'positive': positive, "inconclusive": inconclusive}
+            'registration/results_email.html', {'user': user, 'testID': test_id, 'positive': positive, "inconclusive": inconclusive}
         )
         send_mail(
             subject=subject,
