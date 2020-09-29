@@ -10,6 +10,7 @@ class TestWebhookSerializer(serializers.Serializer):
     inconclusive = serializers.JSONField()
     report_filename = serializers.CharField(max_length=255)
     status = serializers.JSONField()
+    message = serializers.CharField(max_length=255)
 
     def __init__(self, *args, **kwargs):
         super(TestWebhookSerializer, self).__init__(*args, **kwargs)
@@ -32,7 +33,7 @@ class TestWebhookSerializer(serializers.Serializer):
                 self.test.report_filename = self.validated_data['report_filename']
                 self.test.status = Status.objects.get(pk=2)
             else:
-                self.test.err_msg = attrs.get('status')['reason']
+                self.test.err_msg = attrs.get('message')
                 self.test.status = Status.objects.get(pk=3)
         except Test.DoesNotExist:
             print('Test ID does not exist')
