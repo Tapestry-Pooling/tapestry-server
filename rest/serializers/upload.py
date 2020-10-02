@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.utils.translation import ugettext_lazy as _
 from rest.models import Test
+from rest.models import Status
+
 
 import re
 
@@ -38,6 +40,7 @@ class UploadUrlSerializer(serializers.Serializer):
         return attrs
 
     def save(self):
+        self.test.status = Status.objects.get(pk=2)
         self.test.testctresults_filename = check_and_fix_upload_file_name(
             self.test_id,
             self.validated_data['file_name']

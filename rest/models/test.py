@@ -34,6 +34,7 @@ class Test(models.Model):
     negative = fields.JSONField(blank=True, null=True)
     inconclusive = fields.JSONField(blank=True, null=True)
     report_filename = models.CharField(max_length=255, blank=True)
+    err_msg = models.CharField(max_length=255, blank=True, default="none")
 
     def get_pooling_matrix_url(self):
         payload = {

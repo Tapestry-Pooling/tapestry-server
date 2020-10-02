@@ -11,4 +11,4 @@ class TestForm(forms.ModelForm):
     )
     class Meta:
         model = Test
-        fields = ('assigned_to', 'machine_type', 'test_kit', 'nsamples', 'prevalence', 'max_poolsize', 'poolingmatrix_filename', 'remark', 'npositive', 'ninconclusive', 'nnegative', 'positive', 'negative', 'inconclusive')
+        fields = ('assigned_to', 'status', 'machine_type', 'test_kit', 'nsamples', 'prevalence', 'max_poolsize', 'poolingmatrix_filename', 'remark', 'npositive', 'ninconclusive', 'nnegative', 'positive', 'negative', 'inconclusive')
