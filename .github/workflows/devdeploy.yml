@@ -51,10 +51,6 @@ jobs:
         tapestry-pooling-cloud-storage-credentials-stage.json.gpg
       env:
         CLOUD_STORAGE_SECRET: ${{ secrets.CLOUD_STORAGE_SECRET_STAGE }}
-    # get the IP address of hosted-runner
-    - name: Public IP
-      id: ip
-      uses: haythem/public-ip@v1
     #Setup and configure gcloud CLI
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
@@ -64,7 +60,7 @@ jobs:
     # whitelist the hosted-runner IP address
     - name: Whitelist IP
       run: |
-        gcloud sql instances patch postgres --authorized-networks=${{ steps.ip.outputs.ipv4 }}
+        gcloud sql instances patch postgres --authorized-networks=$(curl -s https://api.ipify.org/)
     # run migrations
     - name: Run migrations and collect static files
       run: |
