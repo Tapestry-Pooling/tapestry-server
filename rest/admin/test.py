@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.conf.urls import url
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+from rest.util.user_alert import test_result_alert_user
 
 
 class TestAdmin(admin.ModelAdmin):
@@ -42,6 +43,12 @@ class TestAdmin(admin.ModelAdmin):
         test = Test.objects.get(pk=id)
         test.status = Status.objects.get(name='COMPLETED')
         test.save()
+
+        # alert user
+        positive_sample_list = [entry['sample'] for entry in test.positive]
+        inconclusive_sample_list = [entry['sample'] for entry in test.inconclusive]
+        test_result_alert_user(test.assigned_to, test.pk, positive_sample_list, inconclusive_sample_list)
+
         messages.info(
             request,
             "Test {} status set to COMPLETED".format(id)

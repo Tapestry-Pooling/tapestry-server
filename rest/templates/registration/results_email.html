@@ -448,12 +448,12 @@
                                           "
                                         >
                                           <span
-                                            >Positive: {positive}
+                                            >Positive: {{positive}}
                                           </span>
                                           <br />
                                           <br />
                                           <span
-                                            >Inconclusive: {inconclusive}
+                                            >Inconclusive: {{inconclusive}}
                                           </span>
                                           <br />
                                           <br />
@@ -517,7 +517,8 @@
                                               "
                                             >
                                               <a
-                                              href=""
+                                              href="{{ protocol }}://{{ domain }}view-results/:{{ testID }}"
+
                                               style="
                                                   background-color: #1ec491;
                                                   border: 0px solid #333333;
