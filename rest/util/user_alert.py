@@ -35,7 +35,15 @@ def test_result_alert_user(user, test_id, positive, inconclusive):
         current_site = Site.objects.get_current()
         subject = render_to_string('registration/results_email_subject.txt')
         html_body = render_to_string(
-            'registration/results_email.html', {'user': user, 'positive': positive, "inconclusive": inconclusive, "domain": current_site.domain, "protocol": "https"}
+            'registration/results_email.html',
+            {
+                'user': user,
+                "testID" : test_id,
+                'positive': positive,
+                "inconclusive": inconclusive,
+                "domain": current_site.domain,
+                "protocol": "https"
+            }
         )
         send_mail(
             subject=subject,
