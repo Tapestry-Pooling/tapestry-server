@@ -7,6 +7,7 @@ from rest.permissions import IsLabMemberOwnerOrAdmin
 class LabMemberViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsLabMemberOwnerOrAdmin, )
+    pagination_class = None
 
     def get_queryset(self):
         return User.objects.filter(lab_id=self.kwargs['lab_pk'])
