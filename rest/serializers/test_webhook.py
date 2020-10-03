@@ -24,13 +24,13 @@ class TestWebhookSerializer(serializers.Serializer):
             self.test = Test.objects.get(pk=testID)
 
             if status == 200:
-                self.test.npositive = len(self.validated_data['positive'])
-                self.test.nnegative = len(self.validated_data['negative'])
-                self.test.ninconclusive = len(self.validated_data['inconclusive'])
-                self.test.positive = self.validated_data['positive']
-                self.test.negative = self.validated_data['negative']
-                self.test.inconclusive = self.validated_data['inconclusive']
-                self.test.report_filename = self.validated_data['report_filename']
+                self.test.npositive = len(attrs.get('positive'))
+                self.test.nnegative = len(attrs.get('negative'))
+                self.test.ninconclusive = len(attrs.get('inconclusive'))
+                self.test.positive = attrs.get('positive')
+                self.test.negative = attrs.get('negative')
+                self.test.inconclusive = attrs.get('inconclusive')
+                self.test.report_filename =attrs.get('report_filename')
                 self.test.status = Status.objects.get(pk=2)
             else:
                 self.test.err_msg = attrs.get('message')
