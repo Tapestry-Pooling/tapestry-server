@@ -14,4 +14,4 @@ class LabConfiguration(models.Model) :
 	nsamples = models.SmallIntegerField(default=64)
 	prevalence = models.FloatField(default=7.5)
 	max_poolsize = models.FloatField(default=8)
-	poolingmatrix_filename = models.TextField(blank=True)
+	poolingmatrix_filename = models.TextField(blank=True, default="Tapestry_Pooling_24x64.xlsx")
