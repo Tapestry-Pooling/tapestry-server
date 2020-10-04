@@ -1,3 +1,4 @@
+import os
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -12,6 +13,7 @@ from django.contrib.auth.forms import PasswordResetForm
 from pooling import settings
 from allauth.account.models import EmailAddress
 from django.contrib import messages
+from rest.util.gc_util import get_object_list
 
 
 class CustomUserAdmin(UserAdmin):
@@ -57,12 +59,18 @@ class CustomUserAdmin(UserAdmin):
         user = User.objects.get(pk=id)
 
         # check if lab configuration is added
-        if not LabConfiguration.objects.filter(lab_id=user.lab_id).exists():
-            messages.error(
-                request,
-                "Lab configuration is not added!"
-            )
-            return HttpResponseRedirect("../../")
+        # if not LabConfiguration.objects.filter(lab_id=user.lab_id).exists():
+        #     messages.error(
+        #         request,
+        #         "Lab configuration is not added!"
+        #     )
+        #     return HttpResponseRedirect("../../")
+
+        # create lab configuration
+        LabConfiguration.objects.create(
+            lab_id = user.lab_id,
+            poolingmatrix_filename = get_object_list(bucket_name=os.environ.get('KIRKMAN_MATRIX_BUCKET'))[0][0]
+        )
 
         user.is_active = True
         # user.password = get_random_string(length=32)

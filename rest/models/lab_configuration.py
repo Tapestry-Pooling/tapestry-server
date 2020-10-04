@@ -8,10 +8,10 @@ class LabConfiguration(models.Model) :
 		Lab,
 		on_delete=models.CASCADE
 	)
-	machine_type = models.ManyToManyField(MachineType)
-	test_kit = models.ManyToManyField(TestKit)
+	machine_type = models.ManyToManyField(MachineType, default=1)
+	test_kit = models.ManyToManyField(TestKit, default=1)
 	resource_name = 'labConfiguration'
-	nsamples = models.SmallIntegerField()
-	prevalence = models.FloatField()
-	max_poolsize = models.FloatField()
-	poolingmatrix_filename = models.TextField(blank=True)
+	nsamples = models.SmallIntegerField(default=64)
+	prevalence = models.FloatField(default=7.5)
+	max_poolsize = models.FloatField(default=8)
+	poolingmatrix_filename = models.TextField(blank=True, default="Tapestry_Pooling_24x64.xlsx")

@@ -1,15 +1,20 @@
 from django.utils.html import format_html
 from django.contrib import admin
 from rest.models import Test, Status
+from rest.forms import TestForm
 from rest.util.gc_util import get_report_download_url
 from django.urls import reverse
 from django.conf.urls import url
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+from rest.util.user_alert import test_result_alert_user
 
 
 class TestAdmin(admin.ModelAdmin):
-    list_display = ('id', 'assigned_to','nsamples', 'npositive', 'ninconclusive', 'prevalence', 'status', 'set_completed', 'download_report', )
+    add_form = TestForm
+    form = TestForm
+    model = Test
+    list_display = ('id', 'status', 'assigned_to','nsamples', 'npositive', 'ninconclusive', 'prevalence', 'report_filename', 'err_msg', 'set_completed', 'download_report', )
 
     def download_report(self, obj):
         if obj.report_filename:
@@ -38,6 +43,12 @@ class TestAdmin(admin.ModelAdmin):
         test = Test.objects.get(pk=id)
         test.status = Status.objects.get(name='COMPLETED')
         test.save()
+
+        # alert user
+        positive_sample_list = [entry['sample'] for entry in test.positive]
+        inconclusive_sample_list = [entry['sample'] for entry in test.inconclusive]
+        test_result_alert_user(test.assigned_to, test.pk, positive_sample_list, inconclusive_sample_list)
+
         messages.info(
             request,
             "Test {} status set to COMPLETED".format(id)
