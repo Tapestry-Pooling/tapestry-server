@@ -8,8 +8,8 @@ class LabConfiguration(models.Model) :
 		Lab,
 		on_delete=models.CASCADE
 	)
-	machine_type = models.ManyToManyField(MachineType, default=1)
-	test_kit = models.ManyToManyField(TestKit, default=1)
+	machine_type = models.ManyToManyField(MachineType, default=[0])
+	test_kit = models.ManyToManyField(TestKit, default=[0])
 	resource_name = 'labConfiguration'
 	nsamples = models.SmallIntegerField(default=64)
 	prevalence = models.FloatField(default=7.5)
