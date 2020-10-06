@@ -1,6 +1,6 @@
 from .base import *
 
-DEBUG = False
+DEBUG = True
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'tapestry-pooling-f9f8e.ew.r.appspot.com']
 
@@ -18,6 +18,7 @@ DATABASES = {
     }
 }
 
+SITE_ID = 3
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",

@@ -27,6 +27,8 @@ router.register(r'country', views.CountryViewSet)
 lab_router = routers.NestedSimpleRouter(router, r'lab', lookup='lab')
 lab_router.register(r'member', views.LabMemberViewSet, basename='lab-member')
 lab_router.register(r'test', views.LabTestViewSet, basename='lab-test')
+lab_router.register(r'config', views.LabConfigViewSet, basename='lab-config')
+
 
 urlpatterns = [
     path('', include(router.urls)),

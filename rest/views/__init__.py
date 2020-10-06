@@ -14,5 +14,6 @@ from .country import CountryViewSet
 from .city import CityViewSet
 from .upload import *
 from .labmember import *
+from .labconfig import *
 from .labtest import *
 from .test_webhook import *
