@@ -13,3 +13,4 @@ from .country import CountrySerializer
 from .city import CitySerializer
 from .upload import *
 from .test_webhook import *
+from .lab_configuration import *
