@@ -214,7 +214,7 @@ JSON_API_PLURALIZE_TYPES = False
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 
-SITE_ID = 1
+SITE_ID = 3
 
 CORS_ALLOW_HEADERS = (
     'x-requested-with',
