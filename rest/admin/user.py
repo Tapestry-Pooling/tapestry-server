@@ -58,19 +58,14 @@ class CustomUserAdmin(UserAdmin):
 
         user = User.objects.get(pk=id)
 
-        # check if lab configuration is added
-        # if not LabConfiguration.objects.filter(lab_id=user.lab_id).exists():
-        #     messages.error(
-        #         request,
-        #         "Lab configuration is not added!"
-        #     )
-        #     return HttpResponseRedirect("../../")
-
         # create lab configuration
-        LabConfiguration.objects.create(
-            lab_id = user.lab_id,
-            poolingmatrix_filename = get_object_list(bucket_name=os.environ.get('KIRKMAN_MATRIX_BUCKET'))[0][0]
-        )
+        if not LabConfiguration.objects.filter(lab_id=user.lab_id).exists():
+            lab_config = LabConfiguration.objects.create(
+                lab_id = user.lab_id,
+                poolingmatrix_filename = get_object_list(bucket_name=os.environ.get('KIRKMAN_MATRIX_BUCKET'))[0][0]
+            )
+            lab_config.machine_type.add(1)
+            lab_config.test_kit.add(1)
 
         user.is_active = True
         # user.password = get_random_string(length=32)
@@ -109,7 +104,7 @@ class CustomUserAdmin(UserAdmin):
 
     def is_lab_config_added(self, obj):
         if obj.is_staff:
-            return True
+            return None
         if LabConfiguration.objects.filter(lab_id=obj.lab_id).exists():
             return True
         return False
