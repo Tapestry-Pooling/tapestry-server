@@ -7,14 +7,14 @@ from django.urls import reverse
 from django.conf.urls import url
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from rest.util.user_alert import test_result_alert_user
+
 
 
 class TestAdmin(admin.ModelAdmin):
     add_form = TestForm
     form = TestForm
     model = Test
-    list_display = ('id', 'status', 'assigned_to','nsamples', 'npositive', 'ninconclusive', 'prevalence', 'report_filename', 'err_msg', 'set_completed', 'download_report', )
+    list_display = ('id', 'status', 'assigned_to','nsamples', 'npositive', 'ninconclusive', 'prevalence', 'report_filename', 'err_msg', 'download_report')
 
     def download_report(self, obj):
         if obj.report_filename:
@@ -31,41 +31,9 @@ class TestAdmin(admin.ModelAdmin):
 
     download_report.allow_tags = True
 
-    def set_completed(self, obj):
-        if obj.report_filename and obj.status.name != 'COMPLETED':
-            return format_html(
-                '<a class="button" href="{}">Approve</a>&nbsp;',
-                reverse('admin:set-completed', args=[obj.pk]),
-            )
-        return None
-
-    def handle_set_completed(self, request, id, *args, **kwargs):
-        test = Test.objects.get(pk=id)
-        test.status = Status.objects.get(name='COMPLETED')
-        test.save()
-
-        # alert user
-        positive_sample_list = [entry['sample'] for entry in test.positive]
-        inconclusive_sample_list = [entry['sample'] for entry in test.inconclusive]
-        test_result_alert_user(test.assigned_to, test.pk, positive_sample_list, inconclusive_sample_list)
-
-        messages.info(
-            request,
-            "Test {} status set to COMPLETED".format(id)
-        )
-        return HttpResponseRedirect("../../")
-
-    set_completed.short_description = "SET COMPLETED"
-    set_completed.allow_tags = True
-
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            url(
-                r'^(?P<id>.+)/set-completed/$',
-                self.admin_site.admin_view(self.handle_set_completed),
-                name='set-completed'
-            ),
             url(
                 r'^(?P<id>.+)/download-report/$',
                 self.admin_site.admin_view(self.handle_download_report),
