@@ -5,7 +5,7 @@ from .status import Status
 from .test_kit import TestKit
 from .lab_configuration import LabConfiguration
 from .machine_type import MachineType
-from rest.util.gc_util import get_pooling_matrix_download_url
+from rest.util.gc_util import get_pooling_matrix_download_url, get_report_download_url, get_result_download_url
 import json
 
 
@@ -47,6 +47,22 @@ class Test(models.Model):
         }
         try:
             resp = get_pooling_matrix_download_url(payload=json.dumps(payload))
+        except Exception as e:
+            raise(e)
+        return resp
+    
+    def get_report_url(self):
+        object_name = self.report_filename
+        try:
+            resp = get_report_download_url(object_name= object_name)
+        except Exception as e:
+            raise(e)
+        return resp
+    
+    def get_result_url(self):
+        object_name = self.testctresults_filename
+        try:
+            resp = get_result_download_url(object_name= object_name)
         except Exception as e:
             raise(e)
         return resp
