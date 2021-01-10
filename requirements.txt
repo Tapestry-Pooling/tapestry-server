@@ -82,7 +82,7 @@ setuptools-git==1.2
 simple-configparser==0.1.4.0
 six==1.15.0
 soupsieve==2.0.1
-sourcedefender==6.0.50
+
 spark-parser==1.8.9
 sqlparse==0.3.1
 starkbank-ecdsa==1.0.0
