@@ -6,7 +6,7 @@ from rest_framework.filters import SearchFilter
 from rest.permissions import IsTestOwnerOrAdmin
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import action
-from rest.util.gc_util import get_pooling_matrix_download_url
+from rest.util.gc_util import get_pooling_matrix_download_url, get_report_download_url, get_result_download_url
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -37,6 +37,38 @@ class TestViewSet(viewsets.ModelViewSet):
                 "pooling_matrix_download_url": get_pooling_matrix_download_url(
                     object_name=test.poolingscheme_filename
                 )[1]
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, permission_classes=(IsTestOwnerOrAdmin,))
+    def report(self, request, pk=None):
+        try:
+            test = Test.objects.get(pk=pk)
+        except Test.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(
+            {
+                "report_download_url": get_report_download_url(
+                    object_name=test.report_filename
+                )
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, permission_classes=(IsTestOwnerOrAdmin,))
+    def result(self, request, pk=None):
+        try:
+            test = Test.objects.get(pk=pk)
+        except Test.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(
+            {
+                "result_download_url": get_result_download_url(
+                    object_name=test.testctresults_filename
+                )
             },
             status=status.HTTP_200_OK
         )

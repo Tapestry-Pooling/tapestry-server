@@ -2,7 +2,8 @@ from rest_framework import serializers
 from django.utils.translation import ugettext_lazy as _
 from rest.models import Test, Status
 from rest.util.admin_alert import test_review_alert_email_admin, file_error_alert_email_admin
-
+from django.contrib import messages
+from rest.util.user_alert import test_result_alert_user
 
 class TestWebhookSerializer(serializers.Serializer):
     positive = serializers.JSONField()
@@ -31,7 +32,17 @@ class TestWebhookSerializer(serializers.Serializer):
                 self.test.negative = attrs.get('negative')
                 self.test.inconclusive = attrs.get('inconclusive')
                 self.test.report_filename =attrs.get('report_filename')
-                self.test.status = Status.objects.get(pk=2)
+                self.test.status = Status.objects.get(name='COMPLETED')
+
+                # alert user
+                positive_sample_list = [entry['sample'] for entry in self.test.positive]
+                inconclusive_sample_list = [entry['sample'] for entry in self.test.inconclusive]
+                test_result_alert_user(self.test.assigned_to, self.test.pk, positive_sample_list, inconclusive_sample_list)
+
+                # messages.info(
+                #     request,
+                #     "Test {} status set to COMPLETED".format(id)
+                # )
             else:
                 self.test.err_msg = attrs.get('message')
                 self.test.status = Status.objects.get(pk=3)
@@ -46,4 +57,4 @@ class TestWebhookSerializer(serializers.Serializer):
         self.test.save()
 
         # alert admin
-        test_review_alert_email_admin(test_id=self.test.pk)
+        test_review_alert_email_admin(test_id=self.test.pk, positive=self.test.positive, inconclusive=self.test.inconclusive)
