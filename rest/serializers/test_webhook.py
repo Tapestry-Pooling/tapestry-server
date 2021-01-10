@@ -57,4 +57,4 @@ class TestWebhookSerializer(serializers.Serializer):
         self.test.save()
 
         # alert admin
-        test_review_alert_email_admin(test_id=self.test.pk)
+        test_review_alert_email_admin(test_id=self.test.pk, positive=self.test.positive, inconclusive=self.test.inconclusive)
