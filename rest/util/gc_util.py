@@ -20,6 +20,18 @@ service_account_file = os.path.join(
     'tapestry-pooling-cloud-storage-credentials.json'
 )
 
+def get_result_download_url(object_name):
+    bucket_name = os.environ.get('POOLING_RESULT_BUCKET')
+
+    # compute signed url
+    result_download_url = generate_signed_url(
+        service_account_file,
+        bucket_name,
+        object_name,
+        expiration=86400,  # 1 day
+    )
+    return result_download_url
+
 def get_report_download_url(object_name):
     bucket_name = os.environ.get('RESULT_REPORT_BUCKET')
 

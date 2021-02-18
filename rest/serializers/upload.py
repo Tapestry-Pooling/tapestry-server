@@ -33,7 +33,7 @@ class UploadUrlSerializer(serializers.Serializer):
             raise serializers.ValidationError(_('Invalid test id'))
 
         # validate file name
-        file_name_pattern = "^[\w,\s-]+\.xlsx$"
+        file_name_pattern = "^.*.xlsx$"
         if not re.search(file_name_pattern, file_name):
             raise serializers.ValidationError(_('only xlsx file accepted'))
 

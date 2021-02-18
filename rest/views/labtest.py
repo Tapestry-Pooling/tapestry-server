@@ -14,4 +14,4 @@ class LabTestViewSet(viewsets.ModelViewSet):
     search_fields = ['=id', ]
 
     def get_queryset(self):
-        return Test.objects.filter(assigned_to__lab_id=self.kwargs['lab_pk'])
+        return Test.objects.filter(assigned_to__lab_id=self.kwargs['lab_pk']).order_by('-id')

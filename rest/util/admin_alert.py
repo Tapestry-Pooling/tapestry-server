@@ -2,7 +2,7 @@ from django.core.mail import send_mail
 from pooling import settings
 import logging
 from django.template.loader import render_to_string
-
+from django.contrib.sites.models import Site
 
 def new_user_alert_email_admin(user):
     logger = logging.getLogger(__name__)
@@ -27,18 +27,32 @@ def new_user_alert_email_admin(user):
 
 
 
-def test_review_alert_email_admin(test_id):
+def test_review_alert_email_admin(test_id, positive, inconclusive):
     logger = logging.getLogger(__name__)
     try:
+        current_site = Site.objects.get_current()
+        user = {"first_name":"Admin"}
+        html_body = render_to_string(
+            'registration/admin_results_email.html',
+            {
+                'user': user,
+                "testID" : test_id,
+                'positive': positive,
+                "inconclusive": inconclusive,
+                "domain": current_site.domain,
+                "protocol": "https"
+            }
+        )
         send_mail(
-            'Test Completion Review',
-            'Please review the test with ID: %d' % test_id ,
-            settings.DEFAULT_FROM_EMAIL,
-            settings.NEW_LAB_ALERT_EMAIL_TO.split(','),
-            fail_silently=False
+            subject='Results of the test with id {} are Ready!'.format(test_id),
+            message="",
+            html_message=html_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=settings.NEW_LAB_ALERT_EMAIL_TO.split(','),
+            fail_silently=False,
         )
     except Exception as exp:
-        logger.error('Error sending test review alert to admin',exp)
+        logger.error('Error sending test result alert to admin',exp)
 
 def file_error_alert_email_admin(filename, error_status):
     logger = logging.getLogger(__name__)
