@@ -13,6 +13,7 @@ class TestWebhookSerializer(serializers.Serializer):
     status = serializers.JSONField()
     message = serializers.CharField(max_length=255)
 
+
     def __init__(self, *args, **kwargs):
         super(TestWebhookSerializer, self).__init__(*args, **kwargs)
 
@@ -28,6 +29,7 @@ class TestWebhookSerializer(serializers.Serializer):
                 self.test.npositive = len(attrs.get('positive'))
                 self.test.nnegative = len(attrs.get('negative'))
                 self.test.ninconclusive = len(attrs.get('inconclusive'))
+                self.test.genes = attrs.get('genes')
                 self.test.positive = attrs.get('positive')
                 self.test.negative = attrs.get('negative')
                 self.test.inconclusive = attrs.get('inconclusive')
@@ -43,6 +45,10 @@ class TestWebhookSerializer(serializers.Serializer):
                 #     request,
                 #     "Test {} status set to COMPLETED".format(id)
                 # )
+                if (len(self.test.positive[0][list(positive[0].keys())[0]])!=len(self.test.genes)):
+                    self.test.err_msg = "Number of genes does not match"
+                    self.test.status = Status.objects.get(pk=3)
+
             else:
                 self.test.err_msg = attrs.get('message')
                 self.test.status = Status.objects.get(pk=3)

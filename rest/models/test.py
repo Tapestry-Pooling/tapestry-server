@@ -6,8 +6,11 @@ from .test_kit import TestKit
 from .lab_configuration import LabConfiguration
 from .machine_type import MachineType
 from rest.util.gc_util import get_pooling_matrix_download_url, get_report_download_url, get_result_download_url
+from django.contrib.postgres.fields import ArrayField
 import json
 
+def get_genes_default():
+    return list(["ct"])
 
 class Test(models.Model):
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -30,6 +33,9 @@ class Test(models.Model):
     npositive = models.SmallIntegerField(blank=True, null=True)
     ninconclusive = models.SmallIntegerField(blank=True, null=True)
     nnegative = models.SmallIntegerField(blank=True, null=True)
+
+    genes = ArrayField(base_field=models.CharField(max_length=10), size=6, blank=False, default=get_genes_default)
+
     positive = fields.JSONField(blank=True, null=True)
     negative = fields.JSONField(blank=True, null=True)
     inconclusive = fields.JSONField(blank=True, null=True)
