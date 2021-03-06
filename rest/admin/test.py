@@ -14,7 +14,7 @@ class TestAdmin(admin.ModelAdmin):
     add_form = TestForm
     form = TestForm
     model = Test
-    list_display = ('id', 'status', 'assigned_to','nsamples', 'npositive', 'ninconclusive', 'prevalence', 'report_filename', 'err_msg', 'download_report',)
+    list_display = ('id', 'status', 'assigned_to','nsamples', 'npositive', 'ninconclusive', 'prevalence', 'report_filename', 'err_msg', 'download_report','create_time',)
 
     def download_report(self, obj):
         if obj.report_filename:

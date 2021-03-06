@@ -35,7 +35,7 @@ class Test(models.Model):
     inconclusive = fields.JSONField(blank=True, null=True)
     report_filename = models.CharField(max_length=255, blank=True)
     err_msg = models.CharField(max_length=255, blank=True, default="none")
-
+    create_time = models.DateTimeField(auto_now_add=True)
     def get_pooling_matrix_url(self):
         payload = {
             "nsamples": self.nsamples,
