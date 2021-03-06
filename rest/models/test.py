@@ -34,7 +34,7 @@ class Test(models.Model):
     ninconclusive = models.SmallIntegerField(blank=True, null=True)
     nnegative = models.SmallIntegerField(blank=True, null=True)
 
-    genes = ArrayField(base_field=models.CharField(max_length=10), size=6, blank=False, default=get_genes_default)
+    genes = ArrayField(base_field=models.CharField(max_length=10), size=6, blank=True, null=True, default=get_genes_default)
 
     positive = fields.JSONField(blank=True, null=True)
     negative = fields.JSONField(blank=True, null=True)
