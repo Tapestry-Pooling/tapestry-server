@@ -45,7 +45,7 @@ class TestWebhookSerializer(serializers.Serializer):
                 #     request,
                 #     "Test {} status set to COMPLETED".format(id)
                 # )
-                if (len(self.test.positive[0][list(positive[0].keys())[0]])!=len(self.test.genes)):
+                if (len(self.test.positive[0][list(self.test.positive[0].keys())[0]])!=len(self.test.genes)):
                     self.test.err_msg = "Number of genes does not match"
                     self.test.status = Status.objects.get(pk=3)
 
