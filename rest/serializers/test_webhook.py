@@ -12,7 +12,7 @@ class TestWebhookSerializer(serializers.Serializer):
     report_filename = serializers.CharField(max_length=255)
     status = serializers.JSONField()
     message = serializers.CharField(max_length=255)
-
+    genes = serializers.ListField(child=serializers.CharField(max_length=10))
 
     def __init__(self, *args, **kwargs):
         super(TestWebhookSerializer, self).__init__(*args, **kwargs)
