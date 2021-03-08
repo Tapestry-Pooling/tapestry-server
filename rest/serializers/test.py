@@ -9,4 +9,4 @@ class TestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
         exclude = ['poolingscheme_filename', 'testctresults_filename', 'report_filename']
-        read_only_fields = ['err_msg', 'status', 'npositive', 'ninconclusive', 'nnegative', 'positive', 'negative', 'inconclusive', 'poolingmatrix_filename']
+        read_only_fields = ['err_msg', 'status', 'npositive', 'ninconclusive', 'nnegative', 'genes', 'positive', 'negative', 'inconclusive', 'poolingmatrix_filename']
